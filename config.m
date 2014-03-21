@@ -14,7 +14,7 @@ add_algorithm('RN', 'RegularizationNetwork', @RegularizationNetwork);
 
 %% DATASETS
 
-add_dataset('I', 'Iono', 'uci_ionosphere ');
+add_dataset('G', 'Glass', 'uci_glass ');
 
 %% PREPROCESSORS
 
