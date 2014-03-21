@@ -5,6 +5,13 @@
 
 addpath(genpath(pwd));
 
+directories = {'tmp/', 'results/', 'lib/'};
+for i=1:length(directories)
+    if(~exist(directories{i}, 'dir'))
+        mkdir(directories{i});
+    end
+end
+
 % We check for existence of libraries, and eventually install them
 check_and_install_library('Deep Learn Toolbox', 'saetrain', ...
     'https://github.com/rasmusbergpalm/DeepLearnToolbox/archive/master.zip', ...

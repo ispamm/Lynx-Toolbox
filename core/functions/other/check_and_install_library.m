@@ -19,11 +19,11 @@ fprintf('Checking for presence of %s...\n', lib_name);
 res = exist(lib_function, 'file');
 if(res ~= 2 && res ~= 3)
     result = '';
-    while(~strcmp(result, 'Y') && ~strcmp(result, 'N'))
+    while(~strcmpi(result, 'Y') && ~strcmpi(result, 'N'))
         inputString = sprintf('%s not found. Do you want to install it? (Y/N) ', lib_name);
         result = input(inputString, 's');
     end
-    if(strcmp(result, 'Y'))
+    if(strcmpi(result, 'Y'))
         fprintf('Downloading toolbox... (may take some minutes)\n');
         [~, status] = urlwrite(lib_url, ...
             './tmp/tmp.zip');
