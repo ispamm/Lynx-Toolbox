@@ -44,8 +44,13 @@ fclose(fID);
 
 fprintf('Compiling Latex...\n');
 comm = sprintf('pdflatex %s', name);
-[~,~] = system(comm);
-[~,~] = system(comm);
+[res1,~] = system(comm);
+[res2,~] = system(comm);
+
+if(res1 ~= 0 && res2 ~= 0)
+    warning('LearnToolbox:ErrorStatus:ErrorOnSystemCommand', 'There was an error compiling the pdf. Is pdflatex installed on the system?');
+end
+
 delete('*.aux');
 delete('*.log');
 movefile(strcat(resultsFile, '.pdf'), resultFolder);

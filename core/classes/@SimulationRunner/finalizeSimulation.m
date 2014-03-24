@@ -24,5 +24,8 @@ warning('off', 'MATLAB:DELETE:Permission')
 delete('./tmp/*');
 warning('on', 'MATLAB:DELETE:Permission')
 
+delete('*.aux');
+delete('*.log');
+
 end
 
