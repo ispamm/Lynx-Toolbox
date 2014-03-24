@@ -37,6 +37,11 @@ classdef HoldoutPartition < PartitionStrategy
         function testIndexes = getTestIndexes(obj)
             testIndexes = obj.partition_struct.test(1);
         end
+        
+        function s = getFoldInformation(obj)
+           s = sprintf('Training on random %i%% (%i samples) and testing on the remaining %i%% (%i samples)\n', (1-obj.holdout_fraction)*100, sum(obj.getTrainingIndexes()), ...
+               obj.holdout_fraction*100, sum(obj.getTestIndexes())); 
+        end
     end
     
 end

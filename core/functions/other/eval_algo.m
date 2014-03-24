@@ -66,7 +66,7 @@ for ii = 1:folds
     end
     
     if(verbose)
-        fprintf('\tFold %i... \n', ii);
+        fprintf('\t%s', dataset.getFoldInformation(ii));
     end
     
     algo = algo.setTask(dataset.task);

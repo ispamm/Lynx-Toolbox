@@ -39,6 +39,8 @@ add_dataset('G', 'Glass', 'uci_glass');
 
 % Changes the current partitioning strategy
 % set_partition_strategy(HoldoutPartition(0.2));
+% set_partition_strategy(NoPartition());
+% set_partition_strategy(LeaveOneOutPartition());
 
 % This command can be used to transfer the configuration from one algorithm
 % to another.

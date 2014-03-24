@@ -31,6 +31,7 @@ classdef PartitionStrategy
         obj = partition(obj, Y);
         trainIndexes = getTrainingIndexes(obj);
         trainIndexes = getTestIndexes(obj);
+        s = getFoldInformation(obj);
     end
     
     methods

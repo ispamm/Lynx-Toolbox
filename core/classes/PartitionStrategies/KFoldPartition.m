@@ -35,6 +35,10 @@ classdef KFoldPartition < PartitionStrategy
         function testIndexes = getTestIndexes(obj)
             testIndexes = obj.partition_struct.test(obj.current_fold);
         end
+        
+        function s = getFoldInformation(obj)
+           s = sprintf('Using k-fold partition %i of %i...\n', obj.current_fold, obj.num_folds); 
+        end
     end
     
 end

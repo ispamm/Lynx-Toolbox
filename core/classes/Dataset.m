@@ -135,6 +135,12 @@ classdef Dataset
             obj.X = obj.X(shuff, :);
             obj.Y = obj.Y(shuff);
         end
+        
+        function s = getFoldInformation(obj, ii)
+            obj.partitions{obj.currentPartition} = obj.partitions{obj.currentPartition}.setCurrentFold(ii);
+            s = obj.partitions{obj.currentPartition}.getFoldInformation();
+        end
+            
     end
     
     methods(Static)

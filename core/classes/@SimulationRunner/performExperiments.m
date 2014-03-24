@@ -60,9 +60,9 @@ parfor i=1:N_experiments
     % Printing information on screen
     if(log.flags.parallelized)
         t = getCurrentTask();
-        fprintf('Testing %s on %s (run %d/%d) [Worker %i]\n', currentAlgo.name, currentDataset.name, obj.nRuns + 1 - r_id, obj.nRuns, t.ID);
+        fprintf('Evaluating %s on %s (run %d/%d) [Worker %i]\n', currentAlgo.name, currentDataset.name, obj.nRuns + 1 - r_id, obj.nRuns, t.ID);
     else
-        fprintf('Testing %s on %s (run %d/%d)\n', currentAlgo.name, currentDataset.name,  obj.nRuns + 1 - r_id, obj.nRuns);
+        fprintf('Evaluating %s on %s (run %d/%d)\n', currentAlgo.name, currentDataset.name,  obj.nRuns + 1 - r_id, obj.nRuns);
     end
     
     % Train and test

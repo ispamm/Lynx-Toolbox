@@ -18,6 +18,8 @@ if(obj.fullCompatibility)
     
     obj.statistical_test.perform_test(obj.getDatasetsNames(), obj.getAlgorithmsNames(), mean(obj.computedError, 3));
 
+    fprintf('\n');
+    
 end
 
 end
