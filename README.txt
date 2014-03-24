@@ -14,7 +14,15 @@
   The Latest Version
   ------------------
 
-  TODO
+  The latest version of the toolbox can be downloaded on GitHub at the
+  following link:
+
+  	https://github.com/ispamm/Lynx-Toolbox
+
+  Additional datasets converted according to the toolbox's conventions can
+  be downloaded from the author's website:
+
+	http://ispac.ing.uniroma1.it/scardapane/software/lynx
 
   Documentation
   -------------
