@@ -6,19 +6,19 @@
 %% ALGORITHMS
 
 add_algorithm('B', 'Baseline', @Baseline);
-add_algorithm('RN', 'RegularizationNetwork', @RegularizationNetwork);
+add_algorithm('ELM', 'ExtremeLearningMachine', @ExtremeLearningMachine);
 
 %% WRAPPERS
 
-% add_wrapper('RN', @ParameterSweep, 2, {'C'}, {'exp'}, [-10 5], [1]);
+%add_wrapper('ELM', @ParameterSweep, KFoldPartition(3), {'C'}, {'exp'}, [-10 5], [1]);
 
 %% DATASETS
 
-add_dataset('G', 'Glass', 'uci_glass ');
+add_dataset('G', 'Glass', 'uci_glass');
 
 %% PREPROCESSORS
 
-% add_preprocessor('I', @ApplyPca);
+% add_preprocessor('G', @ApplyPca);
 
 %% ADVANCED FEATURES
 
@@ -33,6 +33,12 @@ add_dataset('G', 'Glass', 'uci_glass ');
 % set_flag('semisupervised');   % Enable semi-supervised testing.
 
 %% OTHER CONFIGURATIONS
+
+% Set a statistical test
+% set_statistical_test(@WilcoxonTest);
+
+% Changes the current partitioning strategy
+% set_partition_strategy(HoldoutPartition(0.2));
 
 % This command can be used to transfer the configuration from one algorithm
 % to another.

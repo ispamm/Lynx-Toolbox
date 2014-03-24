@@ -14,6 +14,7 @@ classdef SimulationRunner
         datasets;           % A cell array with all the datasets
         nRuns;              % Number of executions of each test
         partition_strategy; % Partitioning strategy to be used
+        statistical_test;   % Object for performing the statistical testing
         seed_prng;          % Seed of the PRNG
         fullCompatibility;  % A boolean indicating if there are inconsistencies
         computedError;      % Final errors
@@ -45,6 +46,7 @@ classdef SimulationRunner
            obj.seed_prng = seed_prng;
            obj.algorithms = SimulationLogger.getInstance().algorithms;
            obj.datasets = SimulationLogger.getInstance().datasets;
+           obj.statistical_test = SimulationLogger.getInstance().statistical_test();
            obj.outputScripts = output_scripts;
         end
         

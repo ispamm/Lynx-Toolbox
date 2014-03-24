@@ -1,12 +1,25 @@
 classdef (Sealed) SimulationLogger < handle
-    % Logger A class implementing the Singleton pattern for storing and
-    % retrieving data from any point of the program execution. Note that
-    % stored values in separate threads are not accessible whenever the
-    % thread is closed.
+    % SimulationLogger A class implementing the Singleton pattern for 
+    % storing and retrieving data from any point of the program execution. 
+    % Note that stored values in separate threads are not accessible 
+    % whenever the thread is closed. This is also used to collect all the
+    % setup information for the current run.
     %
     %   SimulationLogger Methods:
     %
     %   getInstance - Returns the only allowed instance of the class
+    %
+    %   setAdditionalParameter/addAdditionalParameter - Insert a parameter
+    %   in the logger, and retrieve it successively.
+    %
+    %   findDatasetById - Searches for the presence of a dataset with given
+    %   id.
+    %
+    %   findDatasetByIdWithRegexp - Searches for all the datasets whose id
+    %   match a given regular expression.
+    %
+    %   findAlgorithmById - Searches for the presence of an algorithm with
+    %   given id.
     %
     
     % License to use and modify this code is granted freely without warranty to all, as long as the original author is
@@ -16,12 +29,13 @@ classdef (Sealed) SimulationLogger < handle
     % simone.scardapane@uniroma1.it
    
     properties
-       algorithms; 
-       datasets;
-       performanceMeasures;
-       additionalParameters;
-       flags;
-       partition_strategy;
+       algorithms;              % Cell array of learning algorithms
+       datasets;                % Cell array of datasets
+       performanceMeasures;     % Struct of performance measures
+       additionalParameters;    % Data structure containing the additional parameters
+       flags;                   % Flags for the current simulation
+       partition_strategy;      % Partition strategy
+       statistical_test;        % Object for performing the statistical testing
     end
     
     methods (Access = private)
@@ -35,6 +49,7 @@ classdef (Sealed) SimulationLogger < handle
           obj.performanceMeasures(char(Tasks.MC)) = @PerfMisclassification;
           obj.performanceMeasures(char(Tasks.R)) = @PerfNrmse;
           obj.partition_strategy = KFoldPartition(3);
+          obj.statistical_test = NoStatisticalTest();
       end
     end
     

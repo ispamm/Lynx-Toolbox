@@ -79,6 +79,13 @@ function obj = init(obj)
         cprintf('err', 'Statistical testing will not be executed.\n');
     end
     
+    % Check for the consistency of the statistical testing with the rest of
+    % the simulation
+    [b, res] = obj.statistical_test.check_compatibility(obj.algorithms, obj.datasets);
+    if(~b)
+        error('LearnToolbox:InconsistentSimulation:InvalidStatisticalTest', res);
+    end
+    
     % Compute partitions for each run
     for j=1:length(obj.datasets)
         if(log.flags.semisupervised)
