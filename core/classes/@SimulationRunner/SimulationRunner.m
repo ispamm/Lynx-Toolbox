@@ -13,7 +13,7 @@ classdef SimulationRunner
         algorithms;         % A cell array with all the algorithms
         datasets;           % A cell array with all the datasets
         nRuns;              % Number of executions of each test
-        testParameter;      % Testing parameter
+        partition_strategy; % Partitioning strategy to be used
         seed_prng;          % Seed of the PRNG
         fullCompatibility;  % A boolean indicating if there are inconsistencies
         computedError;      % Final errors
@@ -38,10 +38,10 @@ classdef SimulationRunner
         obj = executeOutputScripts(obj);
         
         % Load the configuration from the SimulationLogger
-        function obj = saveConfiguration(obj, simulationName, nRuns, testParameter, seed_prng, output_scripts)
+        function obj = saveConfiguration(obj, simulationName, nRuns, strategy, seed_prng, output_scripts)
            obj.simulationName = simulationName;
            obj.nRuns = nRuns;
-           obj.testParameter = testParameter;
+           obj.partition_strategy = strategy;
            obj.seed_prng = seed_prng;
            obj.algorithms = SimulationLogger.getInstance().algorithms;
            obj.datasets = SimulationLogger.getInstance().datasets;

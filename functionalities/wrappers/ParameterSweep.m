@@ -2,7 +2,7 @@ classdef ParameterSweep < Wrapper
     % PARAMETERSWEEP This allows to search the parameters of a model by
     % running a grid search procedure. A typical call is as follows:
     %
-    %   add_wrapper('MLP', @ParameterSweep, 3, {'hiddenNodes'}, {'lin'}, [1
+    %   add_wrapper('MLP', @ParameterSweep, KFoldPartition(3), {'hiddenNodes'}, {'lin'}, [1
     %   10], [1]);
     %
     %   This searches the optimal number of hidden nodes of a
@@ -26,7 +26,7 @@ classdef ParameterSweep < Wrapper
         end
         
         function initParameters(~, p)
-            p.addRequired('valParam');
+            p.addRequired('partition_strategy');
             p.addRequired('parameterNames');
             p.addRequired('sweep_type');
             p.addRequired('bounds');
@@ -45,10 +45,8 @@ classdef ParameterSweep < Wrapper
             params_tosearch{i} = values;
             end
 
-            log = SimulationLogger.getInstance();
-            
-            dataset = Dataset('ttt', 'ttt', obj.getTask(), Xtr, Ytr);
-            dataset = dataset.generateNPartitions(1, obj.trainingParams.valParam);
+            dataset = Dataset.generateAnonymousDataset(obj.getTask(), Xtr, Ytr);
+            dataset = dataset.generateNPartitions(1, obj.trainingParams.partition_strategy);
             
             [ obj.bestParams, bestError ] = grid_search( obj.wrappedAlgo, dataset, obj.trainingParams.parameterNames, params_tosearch );
 
@@ -88,16 +86,16 @@ classdef ParameterSweep < Wrapper
         end
         
         function pNames = getParametersNames()
-            pNames = {'valFolds', 'parameterNames', 'sweep_type', 'bounds', 'steps'}; 
+            pNames = {'partition_strategy', 'parameterNames', 'sweep_type', 'bounds', 'steps'}; 
         end
         
         function pInfo = getParametersInfo()
-            pInfo = {'Control the validation parameter', 'Name of the parameters to be searched', 'Type of interval', ...
+            pInfo = {'Partition strategy for validation', 'Name of the parameters to be searched', 'Type of interval', ...
                 'Lower and upper bounds', 'Steps for constructing the intervals'};
         end
         
         function pRange = getParametersRange()
-            pRange = {'[0,1] or positive integer, default 3', 'Cell array of M strings', ...
+            pRange = {'An object of class PartitionStrategy', 'Cell array of M strings', ...
                 'Cell array of M strings in {lin, exp}', '2xM vector of numbers', 'Mx1 vector of real numbers'};
         end 
     end

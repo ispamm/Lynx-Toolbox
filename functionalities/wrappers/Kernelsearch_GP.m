@@ -21,7 +21,7 @@ classdef Kernelsearch_GP < Wrapper
         end
         
         function initParameters(~, p)
-            p.addParamValue('valParam', 3);
+            p.addParamValue('partition_strategy', KFoldPartition(3));
             p.addParamValue('pop_size', 70);
             p.addParamValue('gen', 50);
             p.addParamValue('reproduction_rate', 0.9);
@@ -57,7 +57,7 @@ classdef Kernelsearch_GP < Wrapper
             Omega_train = obj.optimalKernel.evaluate(Xtr, []);
             
             % Find the optimal regularization parameter
-            obj.wrappedAlgo = ParameterSweep(obj.wrappedAlgo, obj.trainingParams.valParam, {'C'}, {'exp'}, [-5 10], [1]);
+            obj.wrappedAlgo = ParameterSweep(obj.wrappedAlgo, obj.trainingParams.partition_strategy, {'C'}, {'exp'}, [-5 10], [1]);
             
             obj.wrappedAlgo.verbose = obj.verbose;
             obj.wrappedAlgo = obj.wrappedAlgo.setTask(obj.getTask());
@@ -78,8 +78,8 @@ classdef Kernelsearch_GP < Wrapper
         function fit  = computeFitnessIndividual(obj, k, X, Y )
 
             Omega = k.evaluate(X, []);
-            data = Dataset('a', 'a', obj.getTask(), Omega, Y, true);
-            data = data.generateNPartitions(1, obj.trainingParams.valParam);
+            data = Dataset.generateAnonymousDataset(obj.getTask(), Omega, Y, true);
+            data = data.generateNPartitions(1, obj.trainingParams.partition_strategy);
             fit = mean(eval_algo(obj.wrappedAlgo, data));
         
         end
@@ -93,20 +93,20 @@ classdef Kernelsearch_GP < Wrapper
         end
         
         function pNames = getParametersNames()
-            pNames = {'valParam', 'pop_size', 'gen', 'reproduction_rate', ...
+            pNames = {'partition_strategy', 'pop_size', 'gen', 'reproduction_rate', ...
                 'mutation_rate', 'elitism', 't_size', 'k_depth', 'k_depth_init', ...
                 'tol', 'fitness_sharing', 'final_tuning'}; 
         end
         
         function pInfo = getParametersInfo()
-            pInfo = {'Validation type', 'Size of the population', 'Number of generations', ...
+            pInfo = {'Partitioning strategy for validation', 'Size of the population', 'Number of generations', ...
                 'Reproduction rate', 'Mutation rate', 'Degree of elitism', 'Tournament size', ...
                 'Maximum kernel depth', 'Maximum kernel depth in initialization' ,...
                 'Tolerance of the fitness function', 'Enables fitness sharing', 'Enables final tuning'};
         end
         
         function pRange = getParametersRange()
-            pRange = {'[0, 1] or positive integer, default 3', 'Positive integer, default 70', 'Positive integer, default 50', ...
+            pRange = {'An object of class PartitionStrategy', 'Positive integer, default 70', 'Positive integer, default 50', ...
                 '[0,1], default 0.9', '[0,1], default 0.2', 'Positive integer, default 2', ...
                 'Positive integer, default 6', 'Positive integer, default 6', 'Positive integer, default 3', ...
                 'Positive integer, default 3', 'Boolean, default false', 'Boolean, default false'};

@@ -15,7 +15,7 @@ classdef DatasetTest < matlab.unittest.TestCase
         function testFoldRetrievalHoldout(testCase)
             d = Dataset('a', 'a', Tasks.R, [1 1; 2 2; 4 4], [0; 0; 0]);
             testCase.verifyError(@()d.getFold(1), 'LearnToolbox:Logic:PartitionsNotInitialized');
-            d = d.generateNPartitions(1, 0.5);
+            d = d.generateNPartitions(1, HoldoutPartition(0.5));
             [X, Y, X2, Y2] = d.getFold(1);
             testCase.verifySize(X, [2, 2]);
             testCase.verifySize(X2, [1, 2]);
@@ -26,7 +26,7 @@ classdef DatasetTest < matlab.unittest.TestCase
         % Test that a single k-fold partition is correctly generated
         function testFoldRetrievalKFold(testCase)
             d = Dataset('a', 'a', Tasks.R, [1 1; 2 2; 4 4], [0; 0; 0]);
-            d = d.generateNPartitions(1, 3);
+            d = d.generateNPartitions(1, KFoldPartition(3));
             [X, Y, X2, Y2] = d.getFold(1);
             testCase.verifySize(X, [2, 2]);
             testCase.verifySize(X2, [1, 2]);
@@ -43,14 +43,14 @@ classdef DatasetTest < matlab.unittest.TestCase
         % Test that multiple partitions are correctly generated
         function testFoldGeneration(testCase)
             d = Dataset('a', 'a', Tasks.R, [1 1; 2 2; 4 4], [0; 0; 0]);
-            d = d.generateNPartitions(5, 3);
+            d = d.generateNPartitions(5, KFoldPartition(3));
             testCase.verifyError(@()d.setCurrentPartition(6), 'LearnToolbox:Validation:WrongInput');
         end
         
         % Test a single holdout partition in the semi-supervised case
         function testFoldRetrievalSemiSupervised(testCase)
             d = Dataset('a', 'a', Tasks.R, [1 1; 2 2; 4 4; 12 12], [0; 0; 0; 1]);
-            d = d.generateNPartitions(1, 0.5, 0.5);
+            d = d.generateNPartitions(1, HoldoutPartition(0.5), 0.5);
             [X, Y, X2, Y2, Xu] = d.getFold(1);
             testCase.verifySize(X, [1, 2]);
             testCase.verifySize(X2, [1, 2]);

@@ -21,7 +21,7 @@ classdef Featuresearch_GA < Wrapper
         function initParameters(~, p)
             p.addParamValue('popSize', 50);
             p.addParamValue('gen', 10);
-            p.addParamValue('valParam', 3);
+            p.addParamValue('partition_strategy', KFoldPartition(3));
         end
         
         function obj = train(obj, Xtr, Ytr)
@@ -60,8 +60,8 @@ classdef Featuresearch_GA < Wrapper
         end
         
         function data = constructDataset(obj, X, Y, feat)
-            data = Dataset('a', 'a', obj.getTask(), X(:,logical(feat)), Y);
-            data = data.generateNPartitions(1, obj.trainingParams.valParam);
+            data = Dataset.generateAnonymousDataset(obj.getTask(), X(:,logical(feat)), Y);
+            data = data.generateNPartitions(1, obj.trainingParams.partition_strategy);
         end
             
         function [labels, scores] = test(obj, Xts)
@@ -75,15 +75,15 @@ classdef Featuresearch_GA < Wrapper
         end
         
         function pNames = getParametersNames()
-            pNames = {'folds', 'popSize', 'gen'}; 
+            pNames = {'partition_strategy', 'popSize', 'gen'}; 
         end
         
         function pInfo = getParametersInfo()
-            pInfo = {'Validation type', 'Size of the population', 'Number of generations'};
+            pInfo = {'Partitioning strategy for validation', 'Size of the population', 'Number of generations'};
         end
         
         function pRange = getParametersRange()
-            pRange = {'[0, 1] or positive integer, default 3', 'Positive integer, default 50', 'Positive integer, default 30'};
+            pRange = {'An object of class PartitionStrategy, default is 3-fold cross-validation', 'Positive integer, default 50', 'Positive integer, default 30'};
         end
     end
     

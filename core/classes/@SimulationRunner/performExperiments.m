@@ -50,6 +50,7 @@ parfor i=1:N_experiments
     % Get the current dataset
     currentDataset = obj.datasets{d_id};
     
+    
     % Set the current partition
     currentDataset = currentDataset.setCurrentPartition(r_id);
     
@@ -66,7 +67,7 @@ parfor i=1:N_experiments
     
     % Train and test
     [tmp1, tmp2, model] ...
-        = eval_algo( currentAlgo.model, currentDataset, log.flags.debug, true );
+        = eval_algo( currentAlgo.model, currentDataset, true, true );
     
     % Save error, traning time and resulting model
     computedError(i) = mean(tmp1);

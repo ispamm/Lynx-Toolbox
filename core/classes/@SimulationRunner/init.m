@@ -30,7 +30,7 @@ function obj = init(obj)
     
     % Copy the configuration from the SimulationLogger object into the
     % current object
-    obj = obj.saveConfiguration(simulationName, nRuns, testParameter, seed_prng, output_scripts);
+    obj = obj.saveConfiguration(simulationName, nRuns, partition_strategy, seed_prng, output_scripts);
         
     log = SimulationLogger.getInstance();
     
@@ -77,9 +77,9 @@ function obj = init(obj)
     % Compute partitions for each run
     for j=1:length(obj.datasets)
         if(log.flags.semisupervised)
-            obj.datasets{j} = obj.datasets{j}.generateNPartitions(nRuns, testParameter, semisupervised_holdout);
+            obj.datasets{j} = obj.datasets{j}.generateNPartitions(obj.nRuns, obj.partition_strategy, semisupervised_holdout);
         else
-            obj.datasets{j} = obj.datasets{j}.generateNPartitions(nRuns, testParameter);
+            obj.datasets{j} = obj.datasets{j}.generateNPartitions(obj.nRuns, obj.partition_strategy);
         end
         obj.datasets{j} = obj.datasets{j}.shuffle();
     end

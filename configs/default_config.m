@@ -20,10 +20,9 @@ seed_prng = 'shuffle';
 % Number of times each experiment is performed. Default is 1.
 nRuns = 1;
 
-% Parameter for selecting the subdivision of data. Set to [0,1] for
-% holdout, or to a natural number for k-fold cross-validation. Default is a
-% 3-fold cross validation.
-testParameter = 3;
+% Parameter for selecting the subdivision of data. Can be any
+% PartitionStrategy object. Default is a 3-fold cross validation.
+partition_strategy = KFoldPartition(3);
 
 % If semi-supervised testing is enabled, training data is divided using
 % this percentage into a labeled dataset and an additional unlabeled

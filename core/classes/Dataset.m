@@ -19,6 +19,9 @@ classdef Dataset
     %   [XTRN, YTRN, XTST, YTST] = OBJ.GETFOLD(I) returns the training and
     %   testing data subdivided on the base of the current partition.
     %
+    %   D = DATASET.CREATEANONYMOUSDATASET(TASK, X, Y) creates a Dataset
+    %   object, without information on the name and the id associated to it
+    %   (useful inside wrappers).
     
     % License to use and modify this code is granted freely without warranty to all, as long as the original author is
     % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
@@ -64,50 +67,29 @@ classdef Dataset
             obj.partitions = [];
         end
         
-        function obj = generateNPartitions(obj, N, partitionParameter, ss_fraction)
+        function obj = generateNPartitions(obj, N, partitionStrategy, ss_fraction)
             if(nargin < 4)
                 ss_fraction = 0;
             end
             
+            ss_strategy = HoldoutPartition(ss_fraction);
+            
             obj.partitions = cell(N, 1);
             obj.currentPartition = 1;
-            if(isnatural(partitionParameter, true))
-                obj.kfold = true;
-                p = 'kfold';
-            else
-               obj.kfold = false;
-               p = 'holdout';
-               %partitionParameter = 1 - partitionParameter;
-            end
-            
-            warning('off', 'stats:cvpartition:KFoldMissingGrp');
-            warning('off', 'stats:cvpartition:HOTrainingZero');
-            warning('off', 'stats:cvpartition:HOTestZero');
+           
             for ii=1:N
                 if(ss_fraction > 0)
-                    if(obj.task == Tasks.R)
-                        obj.ss_partitions{ii} = cvpartition(length(obj.Y), 'holdout', ss_fraction);
-                        obj.partitions{ii} = cvpartition(length(obj.Y(training(obj.ss_partitions{ii}))), p, partitionParameter);
-                    else
-                        obj.ss_partitions{ii} = cvpartition(obj.Y, 'holdout', ss_fraction);
-                        obj.partitions{ii} = cvpartition(obj.Y(training(obj.ss_partitions{ii})), p, partitionParameter);
-                    end
+                    obj.ss_partitions{ii} = ss_strategy.partition(obj.Y);
+                    obj.partitions{ii} = partitionStrategy.partition(obj.Y(obj.ss_partitions{ii}.getTrainingIndexes));
                 else
-                    if(obj.task == Tasks.R)
-                        obj.partitions{ii} = cvpartition(length(obj.Y), p, partitionParameter);
-                    else
-                        obj.partitions{ii} = cvpartition(obj.Y, p, partitionParameter);
-                    end
+                    obj.partitions{ii} = partitionStrategy.partition(obj.Y);
                 end
             end
-            warning('on', 'stats:cvpartition:KFoldMissingGrp');
-            warning('on', 'stats:cvpartition:HOTrainingZero');
-            warning('on', 'stats:cvpartition:HOTestZero');
             obj.ss_fraction = ss_fraction;
         end
         
         function f = folds(obj)
-            f = obj.partitions{1}.NumTestSets;
+            f = obj.partitions{1}.getNumFolds();
         end
         
         function obj = setCurrentPartition(obj, ii)
@@ -119,36 +101,32 @@ classdef Dataset
         function [Xtrn, Ytrn, Xtst, Ytst, Xu] = getFold(obj, ii)
             
             assert(~isempty(obj.partitions), 'LearnToolbox:Logic:PartitionsNotInitialized', 'Partitions of dataset %s have not been initialized', obj.name);
-            if(obj.kfold)
-                assert(isnatural(ii,true) && ii <= obj.partitions{obj.currentPartition}.NumTestSets, 'LearnToolbox:Validation:WrongInput', 'Cannot fetch fold %i for dataset %s', ii, obj.name);
-            else
-                assert(~obj.kfold && (ii == 1), 'LearnToolbox:Validation:WrongInput', 'In holdout mode, one can fetch a single fold');
-            end
             
             X = obj.X;
             Y = obj.Y;
             
             if(obj.ss_fraction > 0)
                 ss_p = obj.ss_partitions{obj.currentPartition};
-                Xu = X(test(ss_p), :);
-                X = X(training(ss_p), :);
-                Y = Y(training(ss_p));
+                Xu = X(ss_p.getTestIndexes(), :);
+                X = X(ss_p.getTrainingIndexes(), :);
+                Y = Y(ss_p.getTrainingIndexes());
             else
                 Xu = [];
             end
             
             p = obj.partitions{obj.currentPartition};
+            p.setCurrentFold(ii);
             
             if(obj.isKernelMatrix)
-                Xtrn = X(p.training(ii), p.training(ii));
-                Xtst = X(p.test(ii), p.training(ii));
+                Xtrn = X(p.getTrainingIndexes(), p.getTrainingIndexes());
+                Xtst = X(p.getTestIndexes(), p.getTrainingIndexes());
             else
-                Xtrn = X(p.training(ii), :);
-                Xtst = X(p.test(ii), :);
+                Xtrn = X(p.getTrainingIndexes(), :);
+                Xtst = X(p.getTestIndexes(), :);
             end
         
-            Ytrn = Y(p.training(ii));
-            Ytst = Y(p.test(ii));
+            Ytrn = Y(p.getTrainingIndexes());
+            Ytst = Y(p.getTestIndexes());
             
         end
         
@@ -156,6 +134,15 @@ classdef Dataset
             shuff = randperm(length(obj.Y));
             obj.X = obj.X(shuff, :);
             obj.Y = obj.Y(shuff);
+        end
+    end
+    
+    methods(Static)
+        function d = generateAnonymousDataset(task, X, Y, isKernelMatrix)
+            if(nargin < 4)
+                isKernelMatrix = false;
+            end
+            d = Dataset('', '', task, X, Y, isKernelMatrix);
         end
     end
     
