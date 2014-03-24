@@ -67,7 +67,7 @@ parfor i=1:N_experiments
     
     % Train and test
     [tmp1, tmp2, model] ...
-        = eval_algo( currentAlgo.model, currentDataset, true, true );
+        = eval_algo( currentAlgo.model, currentDataset, ~log.flags.parallelized, true );
     
     % Save error, traning time and resulting model
     computedError(i) = mean(tmp1);

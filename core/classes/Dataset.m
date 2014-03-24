@@ -70,10 +70,10 @@ classdef Dataset
         function obj = generateNPartitions(obj, N, partitionStrategy, ss_fraction)
             if(nargin < 4)
                 ss_fraction = 0;
+            else
+                ss_strategy = HoldoutPartition(ss_fraction);
             end
-            
-            ss_strategy = HoldoutPartition(ss_fraction);
-            
+
             obj.partitions = cell(N, 1);
             obj.currentPartition = 1;
            

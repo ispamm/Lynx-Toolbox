@@ -21,6 +21,7 @@ classdef (Sealed) SimulationLogger < handle
        performanceMeasures;
        additionalParameters;
        flags;
+       partition_strategy;
     end
     
     methods (Access = private)
@@ -33,6 +34,7 @@ classdef (Sealed) SimulationLogger < handle
           obj.performanceMeasures(char(Tasks.BC)) = @PerfMisclassification;
           obj.performanceMeasures(char(Tasks.MC)) = @PerfMisclassification;
           obj.performanceMeasures(char(Tasks.R)) = @PerfNrmse;
+          obj.partition_strategy = KFoldPartition(3);
       end
     end
     

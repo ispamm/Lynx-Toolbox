@@ -16,6 +16,7 @@ classdef HoldoutPartition < PartitionStrategy
     
     methods
         function obj = HoldoutPartition(holdout_fraction)
+            assert(holdout_fraction > 0 && holdout_fraction < 1, 'LearnToolbox:ValError:HoldoutFractionInvalid', 'The specificied holdout fraction is invalid');
             obj.holdout_fraction = holdout_fraction;
             obj.num_folds = 1;
         end

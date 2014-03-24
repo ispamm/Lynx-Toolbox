@@ -28,6 +28,11 @@ function obj = init(obj)
     default_config;
     config;
     
+    % Eventually update the partitioning strategy
+    if(~isempty(SimulationLogger.getInstance().getAdditionalParameter('partition_strategy')))
+        partition_strategy = SimulationLogger.getInstance().getAdditionalParameter('partition_strategy');
+    end
+    
     % Copy the configuration from the SimulationLogger object into the
     % current object
     obj = obj.saveConfiguration(simulationName, nRuns, partition_strategy, seed_prng, output_scripts);
