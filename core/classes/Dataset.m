@@ -115,7 +115,7 @@ classdef Dataset
             end
             
             p = obj.partitions{obj.currentPartition};
-            p.setCurrentFold(ii);
+            p = p.setCurrentFold(ii);
             
             if(obj.isKernelMatrix)
                 Xtrn = X(p.getTrainingIndexes(), p.getTrainingIndexes());

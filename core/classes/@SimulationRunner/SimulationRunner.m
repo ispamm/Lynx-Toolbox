@@ -17,8 +17,10 @@ classdef SimulationRunner
         statistical_test;   % Object for performing the statistical testing
         seed_prng;          % Seed of the PRNG
         fullCompatibility;  % A boolean indicating if there are inconsistencies
-        computedError;      % Final errors
-        trainingTime;       % Final training times
+        computedError;      % Final errors (averages)
+        computedError_std;  % Final errors (standard deviations)
+        trainingTime;       % Final training times (averages)
+        trainingTime_std;   % Final training times (standard deviations)
         trainedAlgo;        % Final models
         verbatimFile;       % The file with the log of the simulation
         simulationName;     % Name of the simulation

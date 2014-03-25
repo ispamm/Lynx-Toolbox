@@ -16,10 +16,12 @@ N_datasets = length(obj.datasets);
 experiments = combvec(1:obj.nRuns, 1:N_datasets, 1:N_algo);
 N_experiments = size(experiments, 2);
 
-% The resulting vectors are linear because of the necessity of indexing
+% The resulting structures are linear because of the necessity of indexing
 % inside the parfor
 computedError = zeros(N_experiments,1);
 trainingTime = zeros(N_experiments,1);
+computedError_std = zeros(N_experiments,1);
+trainingTime_std = zeros(N_experiments,1);
 trainedAlgo = cell(1, N_experiments);
 
 fprintf('\n');
@@ -72,6 +74,8 @@ parfor i=1:N_experiments
     % Save error, traning time and resulting model
     computedError(i) = mean(tmp1);
     trainingTime(i) = mean(tmp2);
+    computedError_std(i) = std(tmp1);
+    trainingTime_std(i) = std(tmp2);
     trainedAlgo{i} = model;
     
     if(computedError(i) == Inf)
@@ -83,14 +87,20 @@ end
 % Now we need to reconstruct the reshaped matrices
 computedError_new = zeros(N_algo, N_datasets, obj.nRuns);
 trainingTime_new = zeros(N_algo, N_datasets, obj.nRuns);
+computedError_std_new = zeros(N_algo, N_datasets, obj.nRuns);
+trainingTime_std_new = zeros(N_algo, N_datasets, obj.nRuns);
 trainedAlgo_new = cell(N_algo, N_datasets, obj.nRuns);
 for i=1:N_experiments
     computedError_new(experiments(3,i), experiments(2,i), experiments(1,i)) = computedError(i);
     trainingTime_new(experiments(3,i), experiments(2,i), experiments(1,i)) = trainingTime(i);
+    computedError_std_new(experiments(3,i), experiments(2,i), experiments(1,i)) = computedError_std(i);
+    trainingTime_std_new(experiments(3,i), experiments(2,i), experiments(1,i)) = trainingTime_std(i);
     trainedAlgo_new{experiments(3,i), experiments(2,i), experiments(1,i)} = trainedAlgo(i);
 end
 obj.computedError = computedError_new;
 obj.trainingTime = trainingTime_new;
+obj.computedError_std = computedError_std_new;
+obj.trainingTime_std = trainingTime_std_new;
 obj.trainedAlgo = trainedAlgo_new;
 
 fprintf('\n');

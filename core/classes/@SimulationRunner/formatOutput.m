@@ -20,14 +20,14 @@ function obj = formatOutput( obj )
     disp('Average error:');
     disptable(mean(obj.computedError,3)', algorithms_names, datasets_names);
 
-    disp('Std error:');
-    disptable(std(obj.computedError,0, 3)', algorithms_names, datasets_names);
+    disp('Std error (averaged over the runs):');
+    disptable(mean(obj.computedError_std, 3)', algorithms_names, datasets_names);
 
     disp('Average training time:');
     disptable(mean(obj.trainingTime,3)', algorithms_names, datasets_names);
 
-    disp('Std training time:');
-    disptable(std(obj.trainingTime,0, 3)', algorithms_names, datasets_names);
+    disp('Std training time (averaged over the runs):');
+    disptable(mean(obj.trainingTime_std, 3)', algorithms_names, datasets_names);
 
 
 end

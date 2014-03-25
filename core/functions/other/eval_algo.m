@@ -97,9 +97,6 @@ for ii = 1:folds
     
 end
 
-trainingTime = mean(trainingTime);
-err = mean(err);
-
 % The overall trainingParams and statistics are averaged over the folds
 algo.trainingParams = sum_structs(t_params);
 algo.statistics = sum_structs(s_params);
