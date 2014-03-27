@@ -50,6 +50,8 @@ classdef ParameterSweep < Wrapper
             
             [ obj.bestParams, bestError ] = grid_search( obj.wrappedAlgo, dataset, obj.trainingParams.parameterNames, params_tosearch );
 
+            bestError = mean(bestError);
+            
             if(SimulationLogger.getInstance().flags.debug)
                 bestParamsCell = num2cell(obj.bestParams);
                 fprintf('\t\t Validated parameters: [ ');
