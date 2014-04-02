@@ -17,6 +17,7 @@ classdef KFoldPartition < PartitionStrategy
     
     methods
         function obj = KFoldPartition(k)
+            assert(isnatural(k, true), 'LearnToolbox:ValError:InvalidK', 'The number of partitions in k-fold must be a natural number');
             obj.k = k;
             obj.num_folds = k;
         end

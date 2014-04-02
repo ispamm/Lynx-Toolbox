@@ -4,6 +4,8 @@ classdef PerfNrmse < PerformanceMeasure
     %
     %   The NRMSE is defined as err = sqrt(normalizedSumOfErrors/N), where
     %   normalizedSumOfErrors = sum(errors^2/varianceOfTrueValues).
+    %
+    %If the variance is 0, it is set to 1 in the denominator.
     
     % License to use and modify this code is granted freely without warranty to all, as long as the original author is
     % referenced and attributed as such. The original author maintains the right to be solely associated with this work.

@@ -1,7 +1,7 @@
 classdef PerfMse < PerformanceMeasure
     %PerfMse Compute performance using the standard mean-squared error.
     %
-    %   The MSE is defined as err = sqrt(errors/N).
+    %   The MSE is defined as err = sum_of_squared_errors/N.
     
     % License to use and modify this code is granted freely without warranty to all, as long as the original author is
     % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
