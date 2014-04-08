@@ -7,6 +7,10 @@
 % Programmed and Copyright by Simone Scardapane:
 % simone.scardapane@uniroma1.it
 
+if verLessThan('matlab', '8.1')
+    error('This Matlab version does not support unitary testing. To run the test suite, please upgrade to version 8.1 or higher.');
+end
+
 clc;
 p = 0; f = 0;
 
