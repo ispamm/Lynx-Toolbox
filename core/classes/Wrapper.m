@@ -37,7 +37,6 @@ classdef Wrapper < LearningAlgorithm
         function obj = Wrapper(wrappedAlgo, varargin)
            obj = obj@LearningAlgorithm(varargin);
            obj.wrappedAlgo = wrappedAlgo; 
-           obj.verbose = true;
         end
         
         function res = isTaskAllowed(obj, task)

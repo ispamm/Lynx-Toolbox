@@ -21,6 +21,9 @@ classdef (Sealed) SimulationLogger < handle
     %   findAlgorithmById - Searches for the presence of an algorithm with
     %   given id.
     %
+    %   getAlgorithm - Returns the algorithm with a given id.
+    %
+    %   removeAlgorithm - Removes the algorithm with a given id.
     
     % License to use and modify this code is granted freely without warranty to all, as long as the original author is
     % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
@@ -56,12 +59,15 @@ classdef (Sealed) SimulationLogger < handle
     methods
         
       function copyConfiguration(obj, currentLogger)
+          % Copy the configuration from another logger
          obj.performanceMeasures = currentLogger.performanceMeasures;
          obj.additionalParameters = currentLogger.additionalParameters;
          obj.flags = currentLogger.flags;
       end
         
       function value = getAdditionalParameter(obj, key)
+          % Get a parameter stored in the logger. If the parameter does not
+          % exist, returns an empty array.
           if(obj.additionalParameters.isKey(key))
             value = obj.additionalParameters(key);
           else
@@ -71,6 +77,7 @@ classdef (Sealed) SimulationLogger < handle
       end
       
       function obj = setAdditionalParameter(obj, key, value)
+          % Set an additional key/value pair
           obj.additionalParameters(key) = value;
       end
       
@@ -124,6 +131,18 @@ classdef (Sealed) SimulationLogger < handle
              end
          end
          error('LearnTool:Validation:AlgorithmNotDeclared', 'Algorithm %s not declared', id);
+      end
+      
+      function algo = getAlgorithm(obj, id)
+          algo = obj.algorithms(obj.findAlgorithmById(id));
+      end
+      
+      function removeAlgorithm(obj, algoId)
+          try
+              id = obj.findAlgorithmById(algoId);
+              obj.algorithms(id) = [];
+          catch
+          end
       end
       
     end

@@ -13,6 +13,7 @@ p = 0; f = 0;
 [p, f] = runTestFolder('core/classes/', p, f);
 [p, f] = runTestFolder('core/classes/DatasetFactories/', p, f);
 [p, f] = runTestFolder('core/classes/PartitionStrategies/', p, f);
+[p, f] = runTestFolder('core/classes/Aggregators/', p, f);
 [p, f] = runTestFolder('core/functions/geneticprogramming', p, f);
 [p, f] = runTestFolder('core/functions/utilities', p, f);
 [p, f] = runTestFolder('core/functions/performance', p, f);

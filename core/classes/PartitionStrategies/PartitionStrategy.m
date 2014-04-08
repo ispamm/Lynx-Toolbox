@@ -30,7 +30,7 @@ classdef PartitionStrategy
     methods (Abstract)
         obj = partition(obj, Y);
         trainIndexes = getTrainingIndexes(obj);
-        trainIndexes = getTestIndexes(obj);
+        testIndexes = getTestIndexes(obj);
         s = getFoldInformation(obj);
     end
     
