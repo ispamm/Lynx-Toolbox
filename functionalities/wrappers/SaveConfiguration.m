@@ -28,9 +28,15 @@ classdef SaveConfiguration < Wrapper
             obj.wrappedAlgo = obj.wrappedAlgo.setTask(obj.getTask());
             obj.wrappedAlgo = obj.wrappedAlgo.train(Xtr, Ytr);
             model = obj.wrappedAlgo;
+            
+            if(~exist(obj.trainingParams.dest_folder, 'dir'))
+                mkdir(obj.trainingParams.dest_folder);
+                warning('LearnToolbox:FileSystem:FolderNotExisting', 'The folder %s does not exists, it will be created', obj.trainingParams.dest_folder);
+            end
+            
             save(sprintf('%s/%s_%s_%d.mat',obj.trainingParams.dest_folder, obj.trainingParams.source_id, ... 
-                SimulationLogger.getInstance().getOptionalParameter('dataset_name'), ...
-                SimulationLogger.getInstance().getOptionalParameter('fold')), 'model');
+                SimulationLogger.getInstance().getAdditionalParameter('dataset_name'), ...
+                SimulationLogger.getInstance().getAdditionalParameter('fold')), 'model');
             
         end
     

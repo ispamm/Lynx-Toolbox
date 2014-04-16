@@ -3,6 +3,8 @@
 % external libray. If a library is not present, it allows to automatically
 % download it from the web and install it.
 
+clc;
+
 if verLessThan('matlab', '7.12')
     error('This Matlab version is not supported. Please upgrade to version 7.12 or higher.');
 end

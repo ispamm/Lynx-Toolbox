@@ -22,8 +22,8 @@ classdef Kernelsearch_GP < Wrapper
         
         function initParameters(~, p)
             p.addParamValue('partition_strategy', KFoldPartition(3));
-            p.addParamValue('pop_size', 70);
-            p.addParamValue('gen', 50);
+            p.addParamValue('pop_size', 50);
+            p.addParamValue('gen', 20);
             p.addParamValue('reproduction_rate', 0.9);
             p.addParamValue('mutation_rate', 0.2);
             p.addParamValue('elitism', 2);
@@ -59,12 +59,11 @@ classdef Kernelsearch_GP < Wrapper
             % Find the optimal regularization parameter
             obj.wrappedAlgo = ParameterSweep(obj.wrappedAlgo, obj.trainingParams.partition_strategy, {'C'}, {'exp'}, [-5 10], [1]);
             
-            obj.wrappedAlgo.verbose = obj.verbose;
             obj.wrappedAlgo = obj.wrappedAlgo.setTask(obj.getTask());
             obj.wrappedAlgo = obj.wrappedAlgo.train(Omega_train, Ytr);
             
             obj.wrappedAlgo = obj.wrappedAlgo.wrappedAlgo;
-            obj.wrappedAlgo = obj.wrappedAlgo.setTrainingParam( 'C', origC);
+            obj.wrappedAlgo = obj.wrappedAlgo.setTrainingParam('C', origC);
             
             obj.statistics = statistics;
             
@@ -106,7 +105,7 @@ classdef Kernelsearch_GP < Wrapper
         end
         
         function pRange = getParametersRange()
-            pRange = {'An object of class PartitionStrategy', 'Positive integer, default 70', 'Positive integer, default 50', ...
+            pRange = {'An object of class PartitionStrategy', 'Positive integer, default 50', 'Positive integer, default 20', ...
                 '[0,1], default 0.9', '[0,1], default 0.2', 'Positive integer, default 2', ...
                 'Positive integer, default 6', 'Positive integer, default 6', 'Positive integer, default 3', ...
                 'Positive integer, default 3', 'Boolean, default false', 'Boolean, default false'};

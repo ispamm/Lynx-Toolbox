@@ -16,7 +16,7 @@
 
 function check_and_install_library( lib_name, lib_function, lib_url, stringRequired )
 
-fprintf('Checking for presence of %s...\n', lib_name);
+cprintf('text', 'Checking for presence of %s...\n', lib_name);
 res = exist(lib_function, 'file');
 if(res ~= 2 && res ~= 3)
     result = '';
@@ -25,18 +25,20 @@ if(res ~= 2 && res ~= 3)
         result = input('', 's');
     end
     if(strcmpi(result, 'Y'))
-        fprintf('Downloading toolbox... (may take some minutes)\n');
+        cprintf('text', 'Downloading toolbox... (may take some minutes)');
+        fprintf('\n');
         [~, status] = urlwrite(lib_url, ...
             './tmp/tmp.zip');
         if(status)
            unzip('./tmp/tmp.zip', './lib/'); 
            delete('./tmp/tmp.zip');
-           fprintf('Installation of %s succesfull\n', lib_name);
+           cprintf('*Comments', 'Installation of %s succesfull\n', lib_name);
         else
            error('LearnToolbox:FatalError:ToolboxDownloadError', 'There was an error in downloading the toolbox'); 
         end
     else
         warning('LearnToolbox:Warning:ToolboxNotInstalled', 'You will not be able to use the following: %s', stringRequired);
+        cprintf('text', '\n');
     end
 end
 
