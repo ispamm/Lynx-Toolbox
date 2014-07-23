@@ -33,7 +33,7 @@ log = SimulationLogger.getInstance();
 
 % Initialize progress bars (only in the non-parallelized case)
 if(~(log.flags.parallelized))
-    statusbar(0, 'Processing %d of %d (%.1f%%)...',0, 0, 0);
+    statusbar(0, 'Processing %d of %d (%.1f%%)...', 0, 0, 0);
 end
 
 parfor i=1:N_experiments
@@ -62,9 +62,17 @@ parfor i=1:N_experiments
     % Printing information on screen
     if(log.flags.parallelized)
         t = getCurrentTask();
-        fprintf('Evaluating %s on %s (run %d/%d) [Worker %i]\n', currentAlgo.name, currentDataset.name, obj.nRuns + 1 - r_id, obj.nRuns, t.ID);
+        fprintf('Evaluating %s on %s (run %d/%d) [Worker %i] ', currentAlgo.name, currentDataset.name, obj.nRuns + 1 - r_id, obj.nRuns, t.ID);
     else
-        fprintf('Evaluating %s on %s (run %d/%d)\n', currentAlgo.name, currentDataset.name,  obj.nRuns + 1 - r_id, obj.nRuns);
+        fprintf('Evaluating %s on %s (run %d/%d) ', currentAlgo.name, currentDataset.name,  obj.nRuns + 1 - r_id, obj.nRuns);
+    end
+    
+    % Printing semi-supervised information
+    if(log.flags.semisupervised && currentAlgo.model.isOfClass('SemiSupervisedLearningAlgorithm'))
+        [~, ~, ~, ~, Xu, ~] = currentDataset.getFold(1);
+    	cprintf('comment', '[Semi-supervised mode, %d unlabeled samples]\n', size(Xu, 1));
+    else
+        fprintf('\n');
     end
     
     % Train and test

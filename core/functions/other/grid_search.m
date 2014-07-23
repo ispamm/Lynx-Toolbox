@@ -14,7 +14,7 @@
 % Programmed and Copyright by Simone Scardapane:
 % simone.scardapane@uniroma1.it
 
-function [ bestParam, bestError ] = grid_search( algo, dataset, parameterNames, params_tosearch )
+function [ bestParam, bestError, valErrorGrid ] = grid_search( algo, dataset, parameterNames, params_tosearch )
 
 bestError = Inf;
 
@@ -27,6 +27,10 @@ end
 call = strcat(call, ');'); 
 combinations = eval(call);
 
+if(size(combinations, 1) <= 2)
+	valErrorGrid = zeros(size(combinations, 2), 1);
+end
+
 for zz=1:size(combinations, 2)
 
     paramsToTest = combinations(:,zz);
@@ -37,11 +41,19 @@ for zz=1:size(combinations, 2)
     
     [currentError, ~] = eval_algo( algo, dataset );
     
-    if(currentError < bestError)
+    if(mean(currentError) < bestError)
         bestParam = combinations(:, zz);
-        bestError = currentError;
+        bestError = mean(currentError);
     end
     
+    if(size(combinations, 1) <= 2)
+        valErrorGrid(zz) = currentError;
+    end
+    
+end
+
+if(size(combinations, 1) == 2)
+	valErrorGrid = reshape(valErrorGrid, length(params_tosearch{1}), length(params_tosearch{2}));
 end
 
 end

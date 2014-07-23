@@ -24,7 +24,7 @@ classdef LaplacianRLS < SemiSupervisedLearningAlgorithm
         
         function initParameters(~, p)
             p.addParamValue('C', 1, @(x) assert(x > 0, 'Regularization parameters of LapRLS must be > 0'));
-            p.addParamValue('C_lap', 1, @(x) assert(x > 0, 'Regularization parameters of LapRLS must be > 0'));
+            p.addParamValue('C_lap', 1, @(x) assert(x >= 0, 'Regularization parameters of LapRLS must be >= 0'));
             p.addParamValue('kernel_para', 1);
             p.addParamValue('n_neighbours', 7);
             p.addParamValue('normalize_laplacian', true);
@@ -57,7 +57,7 @@ classdef LaplacianRLS < SemiSupervisedLearningAlgorithm
             J = diag([ones(N, 1); zeros(Nu,1)]);
             
             % Computes the output weights
-            obj.outputWeights = (J*K + obj.trainingParams.C*N*eye(N+Nu) + ((obj.trainingParams.C_lap*Nu)/(N+Nu)^2)*L*K)\[Ytr; zeros(Nu, size(Ytr, 2))];
+            obj.outputWeights = (J*K + eye(N+Nu)./obj.trainingParams.C* + (obj.trainingParams.C_lap/obj.trainingParams.C)*L*K)\[Ytr; zeros(Nu, size(Ytr, 2))];
             
         end
         

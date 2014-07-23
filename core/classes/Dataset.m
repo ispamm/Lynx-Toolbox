@@ -36,6 +36,7 @@ classdef Dataset
         X;    % Nxd input matrix
         Y;    % Nx1 output matrix
         isKernelMatrix; % Whether this stores a kernel matrix
+        shuffles;
     end
     
     properties(Hidden)
@@ -68,21 +69,26 @@ classdef Dataset
         end
         
         function obj = generateNPartitions(obj, N, partitionStrategy, ss_fraction)
+
             if(nargin < 4)
                 ss_fraction = 0;
             else
                 ss_strategy = HoldoutPartition(ss_fraction);
             end
-
+            
             obj.partitions = cell(N, 1);
+            obj.shuffles = cell(N, 1);
             obj.currentPartition = 1;
-           
+            
             for ii=1:N
+                obj.shuffles{ii} = randperm(length(obj.Y));
+                currentY = obj.Y(obj.shuffles{ii});
+                
                 if(ss_fraction > 0)
-                    obj.ss_partitions{ii} = ss_strategy.partition(obj.Y);
-                    obj.partitions{ii} = partitionStrategy.partition(obj.Y(obj.ss_partitions{ii}.getTrainingIndexes));
+                    obj.ss_partitions{ii} = ss_strategy.partition(currentY);
+                    obj.partitions{ii} = partitionStrategy.partition(currentY(obj.ss_partitions{ii}.getTrainingIndexes));
                 else
-                    obj.partitions{ii} = partitionStrategy.partition(obj.Y);
+                    obj.partitions{ii} = partitionStrategy.partition(currentY);
                 end
             end
             obj.ss_fraction = ss_fraction;
@@ -98,20 +104,29 @@ classdef Dataset
             obj.currentPartition = ii;
         end
         
-        function [Xtrn, Ytrn, Xtst, Ytst, Xu] = getFold(obj, ii)
+        function [Xtrn, Ytrn, Xtst, Ytst, Xu, Yu] = getFold(obj, ii)
             
             assert(~isempty(obj.partitions), 'LearnToolbox:Logic:PartitionsNotInitialized', 'Partitions of dataset %s have not been initialized', obj.name);
             
-            X = obj.X;
-            Y = obj.Y;
+            shuff = obj.shuffles{obj.currentPartition};
+            
+            if(obj.isKernelMatrix)
+                X = obj.X(shuff, shuff);
+            else
+                X = obj.X(shuff, :);
+            end
+            
+            Y = obj.Y(shuff);
             
             if(obj.ss_fraction > 0)
                 ss_p = obj.ss_partitions{obj.currentPartition};
                 Xu = X(ss_p.getTestIndexes(), :);
+                Yu = Y(ss_p.getTestIndexes());
                 X = X(ss_p.getTrainingIndexes(), :);
                 Y = Y(ss_p.getTrainingIndexes());
             else
                 Xu = [];
+                Yu = [];
             end
             
             p = obj.partitions{obj.currentPartition};

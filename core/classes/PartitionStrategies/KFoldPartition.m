@@ -38,7 +38,7 @@ classdef KFoldPartition < PartitionStrategy
         end
         
         function s = getFoldInformation(obj)
-           s = sprintf('Using k-fold partition %i of %i...\n', obj.current_fold, obj.num_folds); 
+           s = sprintf('Using k-fold partition %i of %i... (%i training samples, %i testing samples)\n', obj.current_fold, obj.num_folds, sum(obj.partition_struct.training(obj.current_fold)), sum(obj.partition_struct.test(obj.current_fold))); 
         end
     end
     

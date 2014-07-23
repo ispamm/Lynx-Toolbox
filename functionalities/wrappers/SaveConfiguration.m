@@ -1,8 +1,7 @@
 classdef SaveConfiguration < Wrapper
     % SAVECONFIGURATION Save the configurations of an algorithm after
     % training in a specified folder. One file is created for each
-    % combination dataset/fold. In case of multiple runs, only the last run
-    % is saved.
+    % combination dataset/fold/run.
     
     % License to use and modify this code is granted freely without warranty to all, as long as the original author is
     % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
@@ -34,8 +33,12 @@ classdef SaveConfiguration < Wrapper
                 warning('LearnToolbox:FileSystem:FolderNotExisting', 'The folder %s does not exists, it will be created', obj.trainingParams.dest_folder);
             end
             
-            save(sprintf('%s/%s_%s_%d.mat',obj.trainingParams.dest_folder, obj.trainingParams.source_id, ... 
+            if(SimulationLogger.getInstance().flags.debug)
+                fprintf('\t\t Saving configuration...\n');
+            end
+            save(sprintf('%s/%s_%s_r%df%d.mat',obj.trainingParams.dest_folder, obj.trainingParams.source_id, ... 
                 SimulationLogger.getInstance().getAdditionalParameter('dataset_name'), ...
+                SimulationLogger.getInstance().getAdditionalParameter('run'), ...
                 SimulationLogger.getInstance().getAdditionalParameter('fold')), 'model');
             
         end

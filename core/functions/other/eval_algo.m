@@ -55,6 +55,8 @@ for ii = 1:folds
     if(saveFold)
         log.setAdditionalParameter('fold', ii);
         log.setAdditionalParameter('dataset_id', dataset.id);
+        log.setAdditionalParameter('dataset_name', dataset.name);
+        log.setAdditionalParameter('run', dataset.currentPartition);
     else
         try
             kernelType = algo.getTrainingParam('kernel_type');
@@ -65,14 +67,14 @@ for ii = 1:folds
         end
     end
     
-    if(verbose)
-        fprintf('\t%s', dataset.getFoldInformation(ii));
-    end
-    
     algo = algo.setTask(dataset.task);
     t = clock;
 
-    [Xtrn, Ytr, Xtst, Ytst, Xu] = dataset.getFold(ii);
+    [Xtrn, Ytr, Xtst, Ytst, Xu, Yu] = dataset.getFold(ii);
+    
+    if(verbose)
+        fprintf('\t%s', dataset.getFoldInformation(ii));
+    end
     
     if(saveFold)
         log.setAdditionalParameter('Xu', Xu);
@@ -87,6 +89,10 @@ for ii = 1:folds
         err(ii) = p.compute(Ytst, labels);
     else
         err(ii) = NaN;
+    end
+    
+    if(~isempty(Xu) && saveFold)
+        algo.statistics.unlabeled_accuracy = p.compute(Yu, algo.test(Xu));
     end
     
     algo.trainingParams = algo.getTrainingParams();

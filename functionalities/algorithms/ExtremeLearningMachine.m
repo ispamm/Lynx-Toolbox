@@ -48,7 +48,7 @@ classdef ExtremeLearningMachine < LearningAlgorithm
         
         function obj = train(obj, Xtr, Ytr)
 
-            [~, d] = size(Xtr);
+            [N, d] = size(Xtr);
             N_hidden = obj.trainingParams.hiddenNodes;
             
             if(obj.getTask() == Tasks.MC)
@@ -59,12 +59,12 @@ classdef ExtremeLearningMachine < LearningAlgorithm
             
             if(log.flags.gpu_enabled)
                 weightsl1 = gpuArray.rand(N_hidden, d)*2-1;
-                biasl1 = gpuArray.rand(N_hidden,1);
+                biasl1 = gpuArray.rand(N_hidden,1)*2-1;
                 Xtr = gpuArray(Xtr);
                 Ytr = gpuArray(Ytr);
             else
                 weightsl1 = rand(N_hidden, d)*2-1;
-                biasl1 = rand(N_hidden,1);
+                biasl1 = rand(N_hidden,1)*2-1;
             end
             
             H = weightsl1*Xtr';
@@ -74,9 +74,15 @@ classdef ExtremeLearningMachine < LearningAlgorithm
 
             if(strcmp(obj.trainingParams.type, 'rbf'))
                 H = 1 ./ (1 + exp(-H));
+                H = H';
             end
             
-            outputWeightsCopy = (eye(size(H, 1))./obj.trainingParams.C + H * H') \ ( H * Ytr );
+            if(N >= N_hidden)
+                outputWeightsCopy = (eye(N_hidden)./obj.trainingParams.C + H' * H) \ ( H' * Ytr );
+            else
+                outputWeightsCopy = H'*inv(eye(size(H, 1))./obj.trainingParams.C + H * H') *  Ytr ;
+            end
+            
             clear H
              
             if(log.flags.gpu_enabled)

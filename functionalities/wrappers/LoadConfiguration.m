@@ -40,15 +40,27 @@ classdef LoadConfiguration < Wrapper
             if(isempty(obj.trainingParams.params_dest))
                 obj.trainingParams.params_dest = obj.trainingParams.params_source;
             end
-            log = Logger.getInstance();
-            fileName = sprintf('%s/%s_%s_%d.mat',obj.trainingParams.source_folder, obj.trainingParams.source_id, ... 
-                SimulationLogger.getInstance().getOptionalParameter('dataset_name'), ...
-                SimulationLogger.getInstance().getOptionalParameter('fold'));
-            sprintf(obj.trainingParams.source_file, log.getParameter('fold'));
+            log = SimulationLogger.getInstance();
+            fileName = sprintf('%s/%s_%s_r%df%d.mat',obj.trainingParams.source_folder, obj.trainingParams.source_id, ... 
+                log.getAdditionalParameter('dataset_name'), ...
+                log.getAdditionalParameter('run'), ...
+                log.getAdditionalParameter('fold'));
+            if(log.flags.debug)
+                fprintf('\t\t Loading parameters: ');
+            end
             if(exist(fileName, 'file'))
                 model = load(fileName);
-                for i=1:length(obj.trainingParams.params)
-                   obj.wrappedAlgo = obj.wrappedAlgo.setTrainingParam(obj.trainingParams.params_dest{i}, model.model.getTrainingParam(obj.trainingParams.params{i}));
+                for i=1:length(obj.trainingParams.params_source)
+                   obj.wrappedAlgo = obj.wrappedAlgo.setTrainingParam(obj.trainingParams.params_dest{i}, model.model.getTrainingParam(obj.trainingParams.params_source{i}));
+                   if(log.flags.debug)
+                      fprintf('%s = %f', obj.trainingParams.params_dest{i}, model.model.getTrainingParam(obj.trainingParams.params_source{i}));
+                      if(~ (i==length(obj.trainingParams.params_source)))
+                          fprintf(', ');
+                      end
+                   end
+                end
+                if(log.flags.debug)
+                    fprintf('\n');
                 end
             end
             obj.wrappedAlgo = obj.wrappedAlgo.setTask(obj.getTask());

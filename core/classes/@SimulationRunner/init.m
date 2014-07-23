@@ -88,12 +88,12 @@ function obj = init(obj)
     
     % Compute partitions for each run
     for j=1:length(obj.datasets)
+        obj.datasets{j} = obj.datasets{j}.shuffle();
         if(log.flags.semisupervised)
             obj.datasets{j} = obj.datasets{j}.generateNPartitions(obj.nRuns, obj.partition_strategy, semisupervised_holdout);
         else
             obj.datasets{j} = obj.datasets{j}.generateNPartitions(obj.nRuns, obj.partition_strategy);
         end
-        obj.datasets{j} = obj.datasets{j}.shuffle();
     end
 
     fprintf('End of initialization, will test %i algorithm(s) on %i dataset(s) for %i time(s)\n', length(obj.algorithms), ...

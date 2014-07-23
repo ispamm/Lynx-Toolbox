@@ -4,7 +4,11 @@ classdef DummyAlgorithm < Baseline
     
     methods
         function obj = DummyAlgorithm(varargin)
-                obj = obj@Baseline({});
+                obj = obj@Baseline(varargin{:});
+        end
+        
+        function p = initParameters(~, p)
+            p.addParamValue('dummyParameter', 1);
         end
     end
     

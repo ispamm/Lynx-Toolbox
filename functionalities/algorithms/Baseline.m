@@ -20,7 +20,7 @@ classdef Baseline < LearningAlgorithm
     methods
         
         function obj = Baseline(varargin)
-            obj = obj@LearningAlgorithm({});
+            obj = obj@LearningAlgorithm(varargin);
         end
         
         function p = initParameters(~, p)

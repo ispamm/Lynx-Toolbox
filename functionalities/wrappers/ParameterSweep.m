@@ -31,6 +31,7 @@ classdef ParameterSweep < Wrapper
             p.addRequired('sweep_type');
             p.addRequired('bounds');
             p.addRequired('steps'); 
+            p.addParamValue('finalTraining', true);
         end
         
         function obj = train(obj, Xtr, Ytr)
@@ -48,15 +49,13 @@ classdef ParameterSweep < Wrapper
             dataset = Dataset.generateAnonymousDataset(obj.getTask(), Xtr, Ytr);
             dataset = dataset.generateNPartitions(1, obj.trainingParams.partition_strategy);
             
-            [ obj.bestParams, bestError ] = grid_search( obj.wrappedAlgo, dataset, obj.trainingParams.parameterNames, params_tosearch );
-
-            bestError = mean(bestError);
+            [ obj.bestParams, bestError, obj.statistics.valErrorGrid ] = grid_search( obj.wrappedAlgo, dataset, obj.trainingParams.parameterNames, params_tosearch );
             
             if(SimulationLogger.getInstance().flags.debug)
                 bestParamsCell = num2cell(obj.bestParams);
                 fprintf('\t\t Validated parameters: [ ');
                 for i=1:length(bestParamsCell)
-                    fprintf('%f ', bestParamsCell{i});
+                    fprintf('%s = %f ', obj.trainingParams.parameterNames{i}, bestParamsCell{i});
                 end
                 fprintf('], with error: %f\n', bestError);
             end
@@ -67,7 +66,14 @@ classdef ParameterSweep < Wrapper
             
             obj.wrappedAlgo = obj.wrappedAlgo.setTask(obj.getTask());
             t = clock;
-            obj.wrappedAlgo = obj.wrappedAlgo.train(Xtr, Ytr);
+            
+            if(obj.trainingParams.finalTraining)
+                obj.wrappedAlgo = obj.wrappedAlgo.train(Xtr, Ytr);
+            else
+                [Xtr, Ytr, ~, ~, ~, ~] = dataset.getFold(1);
+                obj.wrappedAlgo = obj.wrappedAlgo.train(Xtr, Ytr);
+            end
+            
             trainingTime = etime(clock, t);
             if(SimulationLogger.getInstance().flags.debug)
                 fprintf('\t\t Final training time is: %f\n', trainingTime);
