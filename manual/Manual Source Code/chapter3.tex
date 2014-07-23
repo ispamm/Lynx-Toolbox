@@ -1,0 +1,193 @@
+\chapter{Additional Features}
+\label{chap:additionalfeatures}
+
+\section{Parallelizing the Experiments}
+
+We refer to the test of an algorithm on a dataset as an \textit{experiment}. The simulation can be easily parallelized due to the fact that each experiment is independent of all the others. Hence, in the general case where you are testing $N$ algorithms on $M$ datasets for $R$ times, you have $N \times M \times R$ independent experiments to be performed. These can be parallelized over multiple threads and multiple machines by enabling the \textit{parallelized} flag in the configuration file:
+
+\begin{lstlisting}
+set_flag('parallelized');
+\end{lstlisting}
+
+\noindent This functionality requires the Parallel Computing Toolbox of Matlab. It uses the pool of workers defined as \textit{default} in the configuration of Matlab itself. When this is enabled, the order in which the experiments are performed cannot be defined \textit{a-priori}. For this reason, learning algorithms are not allowed to print additional information on the screen. The pool of workers is started in the initialization phase:
+
+\begin{console}
+Starting matlabpool using the 'local' profile ... 
+	connected to 2 workers.
+Synchronizing files on cluster...
+\end{console}
+
+\noindent If the workers are subdivided on multiple machines, the necessary files are synchronized in this phase. During the training phase, printing is disabled but we are shown the worker in which each experiment is performed between square brackets:
+
+\begin{console}
+Testing Baseline on Glass (run 1/1) [Worker 1]
+Testing ExtremeLearningMachine on Glass (run 1/1) [Worker 2]
+\end{console}
+
+\noindent In the output phase, the pool is closed:
+
+\begin{console}
+Sending a stop signal to all the workers ... stopped.
+\end{console}
+
+\subsection{Configuring a Cluster}
+
+Describing how to setup a cluster goes beyond the scope of this manual. To this end, we refer to the Mathworks documentation:
+
+\url{http://www.mathworks.it/support/product/DM/installation/ver_current/}
+
+\section{Enabling the GPU}
+
+An additional form of parallelization is given by the use of the GPU. This is enabled with the \textit{gpu\_enabled} flag in the configuration file:
+
+\begin{lstlisting}
+set_flag('gpu_enabled');
+\end{lstlisting}
+
+\noindent This functionality requires the Parallel Computing Toolbox of Matlab and a supported NVIDIA GPU device. Additionally, the latest version of the CUDA drivers has to be installed. The GPU compatibility is tested in the initialization phase:
+
+\begin{console}
+Initializing GPU device...
+\end{console}
+
+\noindent The rest of the simulation does not change. Note that only a subset of the implemented algorithms actually use GPU acceleration. To see if a particular algorithm can benefit from this functionality, refer to the respective help of the class.
+
+\section{Saving the Results}
+
+The results of the simulation can be saved by enabling the \textit{save\_results} flag:
+
+\begin{lstlisting}
+set_flag('save_results');
+\end{lstlisting}
+
+\noindent They are saved inside a subfolder of the \textit{results} folder. The default name for the subfolder is ``\textit{test}'', but this can be changed by redefining the \verb|simulationName| parameter. Two files are saved:
+
+\begin{itemize}
+\item A .mat file with the workspace at the end of the simulation.
+\item A .txt file with the full transcript of the simulation (the same which is shown in the console).
+\end{itemize}
+
+Additionally, a pdf file with the results can be saved by enabling the \textit{generate\_pdf} flag in the configuration file:
+
+\begin{lstlisting}
+set_flag('generate_pdf');
+\end{lstlisting}
+
+\noindent This requires the \textit{pdflatex} compiler available on the system. Both the source file and the resulting pdf are saved in the same folder as the previous files. Fig. \ref{tab:results} shows an example of results as shown in the pdf file\footnote{For increased readability, results are rotated $90^\circ$ counter-clockwise in the resulting file.}.
+
+\begin{table*}[ht]
+{\footnotesize\centering\hfill{}
+\begin{tabular}{lll}
+\toprule
+Dataset & Baseline & ExtremeLearningMachine\\ 
+\midrule
+\multirow{2}{*}{Glass} & $1.02$ & $0.5476$\\ 
+ & $\pm 0.000000$ & $\pm 0.000000$\\ 
+\bottomrule
+\end{tabular}}
+\hfill{}\vspace{0.6em}
+\caption{Experimental results (Error).}
+\label{tab:results}
+\end{table*}
+
+\section{Adding Additional Output Scripts}
+\label{sec:outputscripts}
+
+Output scripts are used to analyze the simulation and print additional information on the console. They must be placed inside the \textit{scripts} folder of the toolbox. One or more of them are run after a simulation with the following syntax:
+
+\begin{console}
+output_scripts = {script1, script2, ...}
+\end{console}
+
+\noindent As an example, consider the parameter sweep detailed in Section \ref{sec:parametersweep}. This is an example of running the simulation with the additional wrapper:
+
+\begin{console}
+Testing ExtremeLearningMachine on Glass (run 1/1)
+	Fold 1... 
+		 Validated parameters: [ 1.000000 100.000000 ], 
+		 	with error: 0.558518
+		 Final training time is: 0.003000
+	Fold 2... 
+		 Validated parameters: [ 0.500000 100.000000 ], 
+		 	with error: 0.605529
+		 Final training time is: 0.004000
+	Fold 3... 
+		 Validated parameters: [ 2.000000 50.000000 ], 
+		 	with error: 0.490066
+		 Final training time is: 0.003000
+\end{console}
+
+\noindent It can be seen that the resulting parameters are printed for each fold, together with the final training time of the ELM model. This is not easily understandable. To this end, we can use the \textit{info\_gridsearch} script:
+
+\begin{lstlisting}
+output_scripts = {'info_gridsearch'};
+\end{lstlisting}
+
+\noindent In this way the average values of the training parameters, along with the average final training time, are printed at the end of the simulation on the console:
+
+\begin{console}
+--------------------------------------------------
+--- USER-DEFINED OUTPUT --------------------------
+--------------------------------------------------
+Results of grid search for algorithm ExtremeLearningMachine: 
+   Dataset Glass:
+      Average training time is 0.003333 sec
+      C = 1.166667
+      hiddenNodes = 83.333333
+\end{console}
+
+\section{Changing the Performance Measure}
+\label{sec:changingperformance}
+
+In some situations, the default performance measure is not adequate to the needs of the user. As an example, we may be interested in seeing the raw Mean-Squared Error (MSE) for our demo, instead of the more complex NRMSE. This can be changed with the following syntax:
+
+\begin{console}
+set_performance(task, new_performance);
+\end{console}
+
+\noindent where \verb|new_performance| is a pointer to the new performance measure class, and \verb|task| is the task at which we want to associate it. In our case we can add:
+
+\begin{lstlisting}
+set_performance(Tasks.R, @PerfMse);
+\end{lstlisting}
+
+\noindent The result of the simulation changes to reflect the new performance measure:
+
+\begin{verbatim}
+Average error:
+       Baseline  ExtremeLearningMachine
+Glass     4.409                   1.291
+\end{verbatim}
+
+\noindent A full list of the available performance measures is found by calling the \textit{info\_perfmeasures} script in the ``help'' folder.
+
+\section{Using Semi-Supervised Algorithms}
+
+The toolbox has an experimental support for semi-supervised learning (SSL) algorithms \cite{chapelle2006semi}. SSL algorithms differ from classical learning algorithms in that they can use an additional set of unlabeled input patterns to increase their performance. By default, this functionality is disabled. Hence, if we add an SSL algorithm to the simulation:
+
+\begin{lstlisting}
+add_algorithm('LAP-RLS', 'Laplacian RLS' @LaplacianRLS);
+\end{lstlisting}
+
+\noindent the LAP-RLS algorithms will be called with an empty additional training set. To enable it, we can set the corresponding flag:
+
+\begin{lstlisting}
+set_flag('semisupervised');
+\end{lstlisting}
+
+\noindent If this flag is enabled, the following is performed:
+
+\begin{itemize}
+	\item A given fraction of the original dataset (default is $25$ \%) is separated from the dataset. Labels for this part are discarded, and the corresponding input patterns are used as the additional training set.
+	\item The rest of the dataset is split according to the testing requirements of the user.
+\end{itemize}
+
+The default fraction of semi-supervised data can be changed by setting the \verb|semisupervised_holdout| variable:
+
+\begin{lstlisting}
+semisupervised_holdout = 0.5;
+\end{lstlisting}
+
+\section{Constructing a Hierarchical Learning Algorithm}
+
+TODO
