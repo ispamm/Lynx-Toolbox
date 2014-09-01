@@ -1,24 +1,29 @@
+% LoadConfiguration - Loads the configuration of a model
+%   This suppose that a configuration has been previously saved using
+%   the SaveConfiguration wrapper. Suppose you have saved the
+%   parameters of a MultilayerPerceptron in a previous run:
+%
+%   add_wrapper('MLP', @SaveConfiguration, 'MLP_saved');
+%
+% In a successive run, these can be loaded by calling:
+%
+%   add_wrapper('MLP', @LoadConfiguration, 'MLP_saved');
+%
+% You can specify a folder for loading:
+%
+%   add_wrapper('MLP', @SaveConfiguration, 'MLP_saved', 'folder', 'custom_folder');
+%
+% You can load only a specified subset of training parameters:
+%
+%   add_wrapper('MLP', @SaveConfiguration, 'MLP_saved', 'params_to_load', {'hiddenNodes'});
+
+% License to use and modify this code is granted freely without warranty to all, as long as the original author is
+% referenced and attributed as such. The original author maintains the right to be solely associated with this work.
+%
+% Programmed and Copyright by Simone Scardapane:
+% simone.scardapane@uniroma1.it
+
 classdef LoadConfiguration < Wrapper
-    % LOADCONFIGURATION Loads the configuration of a model, which has been
-    % previously saved using the SaveConfiguration wrapper. Suppose you
-    % have saved the parameters of a MultilayerPerceptron in a previous
-    % run:
-    %
-    %   add_wrapper('MLP', @SaveConfiguration, 'MLP_saved', './models/');
-    %
-    % In a successive run, these can be loaded by calling:
-    %
-    %   add_wrapper('MLP', @LoadConfiguration, './models/', 'MLP_saved',
-    %   {'hiddenNodes'});
-    %
-    % Note that the training parameters to load have to be explicitly
-    % stated.
-    
-    % License to use and modify this code is granted freely without warranty to all, as long as the original author is
-    % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
-    %
-    % Programmed and Copyright by Simone Scardapane:
-    % simone.scardapane@uniroma1.it
     
     properties
     end
@@ -26,73 +31,72 @@ classdef LoadConfiguration < Wrapper
     methods
         
         function obj = LoadConfiguration(wrappedAlgo, varargin)
-            obj = obj@Wrapper(wrappedAlgo, varargin);
+            obj = obj@Wrapper(wrappedAlgo, varargin{:});
+            obj.parameters.source_folder = fullfile(XmlConfiguration.readConfigValue('root_folder'), obj.parameters.source_folder);
         end
         
-        function initParameters(~, p)
-            p.addRequired('source_folder');
+        function p = initParameters(~, p)
             p.addRequired('source_id');
-            p.addRequired('params_source');
-            p.addOptional('params_dest', []);
+            p.addParamValue('source_folder', 'models/');
+            p.addParamValue('params_to_load', []);
         end
         
         function obj = train(obj, Xtr, Ytr)
-            if(isempty(obj.trainingParams.params_dest))
-                obj.trainingParams.params_dest = obj.trainingParams.params_source;
-            end
+            
             log = SimulationLogger.getInstance();
-            fileName = sprintf('%s/%s_%s_r%df%d.mat',obj.trainingParams.source_folder, obj.trainingParams.source_id, ... 
+            fileName = sprintf('%s/%s_%s_r%df%d.mat',obj.parameters.source_folder, obj.parameters.source_id, ...
                 log.getAdditionalParameter('dataset_name'), ...
                 log.getAdditionalParameter('run'), ...
                 log.getAdditionalParameter('fold'));
+            
             if(log.flags.debug)
                 fprintf('\t\t Loading parameters: ');
             end
+            
             if(exist(fileName, 'file'))
-                model = load(fileName);
-                for i=1:length(obj.trainingParams.params_source)
-                   obj.wrappedAlgo = obj.wrappedAlgo.setTrainingParam(obj.trainingParams.params_dest{i}, model.model.getTrainingParam(obj.trainingParams.params_source{i}));
-                   if(log.flags.debug)
-                      fprintf('%s = %f', obj.trainingParams.params_dest{i}, model.model.getTrainingParam(obj.trainingParams.params_source{i}));
-                      if(~ (i==length(obj.trainingParams.params_source)))
-                          fprintf(', ');
-                      end
-                   end
+                o = load(fileName);
+                
+                if(isempty(obj.parameters.params_to_load))
+                    params = fields(o.getParameters());
+                else
+                    params = obj.parameters.params_to_load;
+                end
+                
+                for i=1:length(params)
+                    obj.wrappedAlgo = obj.wrappedAlgo.setParameter(params{i}, o.model.getParameter(params{i}));
+                    if(log.flags.debug)
+                        fprintf('%s = %f', params{i}, o.model.getParameter(params{i}));
+                        if(~ (i==length(params)))
+                            fprintf(', ');
+                        end
+                    end
                 end
                 if(log.flags.debug)
                     fprintf('\n');
                 end
             end
-            obj.wrappedAlgo = obj.wrappedAlgo.setTask(obj.getTask());
+            
             obj.wrappedAlgo = obj.wrappedAlgo.train(Xtr, Ytr);
         end
-    
-        function [labels, scores] = test(obj, Xts)
-            [labels, scores] = obj.wrappedAlgo.test(Xts);
-        end
         
-        function res = isTaskAllowed(obj, task)
-           res = obj.wrappedAlgo.isTaskAllowed(task); 
-        end
     end
     
     methods(Static)
-        function info = getInfo()
+        function info = getDescription()
             info = 'Wrapper to load the configuration of an algorithm';
         end
         
         function pNames = getParametersNames()
-            pNames = {'source_folder', 'source_id', 'params_source', 'params_dest'}; 
+            pNames = {'source_id', 'source_folder', 'params_to_load'};
         end
         
-        function pInfo = getParametersInfo()
-            pInfo = {'Source folder', 'Name of the model to read from', 'Parameters to read from the model', ...
-                'Parameters to change in the internal algorithm'};
+        function pInfo = getParametersDescription()
+            pInfo = {'Name of the model to read from', 'Source folder', 'Parameters to read from the model'};
         end
         
         function pRange = getParametersRange()
-            pRange = {'String (required)', 'String (required)','Cell array of strings (required)','Cell array of strings (optional, defaults to params_source)'};
-        end 
+            pRange = {'String (required)', 'String','Cell array of strings (default to all parameters)'};
+        end
     end
     
 end

@@ -1,5 +1,5 @@
 
-% CONVERT_SCORES Convert confidence scores in labels depending on the task.
+% convert_scores - Convert confidence scores in labels depending on the task.
 % If the task if R, labels are the same as scores. If the task is binary
 % classification, the labels are given by the sign of the scores. If the
 % task if multi-class classification, the labels are the indices of the

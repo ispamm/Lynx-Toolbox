@@ -1,5 +1,5 @@
 
-% CROSSOVER Performs a crossing over on the two parents. The depth of the 
+% crossover - Performs a crossing over on the two parents. The depth of the 
 % resulting individual is limited by a parameter provided by the user
 
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is

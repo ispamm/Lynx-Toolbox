@@ -1,6 +1,18 @@
+% SubsetAggregator - Construct groups starting from subsets of the original classes
+%
+% Example:
+%
+% s = SubsetAggregator({2}, {3, 4});
+% g = s.group([4 4 2 3])
+% g = [2 2 1 2]
+
+% License to use and modify this code is granted freely without warranty to all, as long as the original author is
+% referenced and attributed as such. The original author maintains the right to be solely associated with this work.
+%
+% Programmed and Copyright by Simone Scardapane:
+% simone.scardapane@uniroma1.it
+
 classdef SubsetAggregator < Aggregator
-    %SUBSETAGGREGATOR A SubsetAggregator construct groups starting from
-    %subsets of the original classes.
     
     properties
         sets; % Cell array of groups

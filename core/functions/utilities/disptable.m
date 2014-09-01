@@ -89,7 +89,13 @@ function disptable(M, col_strings, row_strings, fmt, spaces)
 	
 	for col = 1:num_cols,
 		%convert this column of the matrix to its string representation
-		str = num2str(M(:,col), fmt);
+		column = M(:, col);
+        
+        if(iscell(column))
+            str = char(column);
+        else
+            str = num2str(M(:,col), fmt);
+        end
 		
 		%add the column header on top and automatically pad, returning a
 		%character array

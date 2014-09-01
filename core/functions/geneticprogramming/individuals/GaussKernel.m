@@ -1,25 +1,26 @@
+% GaussKernel - A Gaussian kernel k(x,y) = exp(-a*||x-y||^2)
+
+% License to use and modify this code is granted freely without warranty to all, as long as the original author is
+% referenced and attributed as such. The original author maintains the right to be solely associated with this work.
+%
+% Programmed and Copyright by Simone Scardapane:
+% simone.scardapane@uniroma1.it
+
 classdef GaussKernel < LeafNode
-    %GAUSSKERNEL A Gaussian kernel k(x,y) = exp(-a*||x-y||^2)
-    
-    % License to use and modify this code is granted freely without warranty to all, as long as the original author is
-    % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
-    %
-    % Programmed and Copyright by Simone Scardapane:
-    % simone.scardapane@uniroma1.it
     
     methods
         
         % The Gaussian kernel has only a single parameter
         function obj = GaussKernel(a)
-           obj.params.a = a;
+            obj.params.a = a;
         end
         
         function Omega = evaluateTraining(obj, X)
-           Omega = exp(-obj.params.a*pdist2(X,X,'euclidean').^2);
+            Omega = exp(-obj.params.a*pdist2(X,X,'euclidean').^2);
         end
         
         function Omega = evaluateTesting(obj, X, Xts)
-           Omega = exp(-obj.params.a*pdist2(Xts,X,'euclidean').^2);
+            Omega = exp(-obj.params.a*pdist2(Xts,X,'euclidean').^2);
         end
         
         % Return a string describing the kernel

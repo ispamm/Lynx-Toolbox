@@ -1,6 +1,6 @@
 
-%FIND_ALGORITHMS Return the IDs of the learning algorithms of a given 
-% class currently stored in the Logger.
+% find_algorithms - Return the IDs of the learning algorithms of a given 
+% class currently stored in the Simulation.
 %
 %   IDS = FIND_ALGORITHMS(S) returns a vector of integers, one for each
 %   object of class S currently stored in the Logger.
@@ -21,7 +21,7 @@ end
 N_algo = length(algorithms);
 
 for i=1:N_algo
-    if(algorithms(i).model.isOfClass(classString))
+    if(algorithms.get(i).isOfClass(classString))
         algorithmIDs = [algorithmIDs i];
     end
 end

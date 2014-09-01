@@ -1,0 +1,335 @@
+\chapter{Programming in Lynx}
+\label{chap:programminglynx}
+
+In this chapter, we show how to design new datasets, models, training algorithms, wrappers and preprocessors.
+
+\section{Storing a new dataset}
+
+A new dataset must be stored as a .mat file inside the ``\textit{datasets/xxx}'' folder, where \textit{xxx} is the id of the corresponding task. 
+For the tasks currently implemented in Lynx, each mat file must contains the following variables:
+
+\begin{enumerate}
+	\item \verb|X|: an $N \times d$ matrix of input patterns, where $N$ is the number of observations and $d$ the dimensionality of the input.
+	\item \verb|Y|: an $N$-dimensional vector of corresponding output values. For regression, each value is real. For binary classification, each element can take the values $-1$ or $+1$. Finally, for multiclass classification, each element can take a value in $\left\{1, \ldots, M\right\}$, where $M$ is the number of classes.
+	\item \verb|info|: a string describing the dataset.
+\end{enumerate}
+
+Matrices can be stored as dense matrices or as sparse matrices. The name of the file identifies the dataset in the program. For non-basic tasks, the following applies:
+
+\begin{enumerate}
+	\item For prediction tasks, \verb|X| is an $N$-dimensional column vector containing the samples of the time-series, while \verb|Y| is an empty matrix.
+	\item For multi-label tasks, \verb|Y| is a $N \times T$ matrix, where $T$ is the number of labels. Additionally, a \verb|labels_info| variable must be present, corresponding to a $T\times1$ cell array of strings with the label descriptions.
+\end{enumerate}
+
+\section{Parameterized classes}
+\label{sec:parameterizedclasses}
+
+To make uniform the way in which classes accept parameters, most functionalities in the toolbox (training algorithms, wrappers, preprocessors, etc.) derive from a common abstract class called \verb|Parameterized|. If you inspect its code, you will see that its constructor does the following:
+
+\begin{enumerate}
+\item It creates an \verb|InputParser| object\footnote{\url{http://www.mathworks.it/it/help/matlab/ref/inputparser-class.html}}.
+\item It calls the abstract method \verb|initParameters| to fill the object with the required parameters.
+\item It parses the parameters in input, and it saves them in the \verb|parameters| struct.
+\end{enumerate}
+
+\noindent Any class implementing \verb|Parameterized| must define the \verb|initParameters| method to specify its internal parameters. It can access them using the \verb|getParameter| method, and change them using the \verb|setParameter| one. Moreover, the class specifies a few static method describing the parameters: \verb|getDescription|, \verb|getParametersNames|, \verb|getParametersDescription|, \verb|getParametersRange|. In this way, all the class in the toolbox have an uniform way of describing their own parameters. Moreover, the \verb|getParameter| and \verb|setParameter| can be overridden to implement a more complex behavior. For example, any wrapper can use the methods to access any property of their internal algorithm.
+
+\section{Implementing a new model}
+
+In this section we show how to implement a new model with a step-by-step example. In particular, we implement a simple $K$-Nearest Neighbors (KNN) algorithm \cite{alpaydin2004introduction}, with the possibility of setting $K$. We need to define two classes: \verb|KNearestNeighbor|, deriving from \verb|Model|, describing the model, and \verb|SimpleKNN|, deriving from \verb|LearningAlgorithm|, for training it.
+
+Let us start from the first one. We define a skeleton code with two properties for storing the input and output patterns seen during training:
+
+\begin{lstlisting}
+classdef KNearestNeighbor < Model
+    
+    properties
+        trainingInputs;
+        trainingOutputs;
+    end
+    
+    methods
+        function obj = KNearestNeighbor(id, name, varargin)
+            obj = obj@Model(id, name, varargin{:});
+        end
+        
+        ...
+     end
+end
+\end{lstlisting}
+
+\noindent Note that the constructor of the class simply calls the \verb|Model| constructor.
+
+\subsection{Setting the Training Parameters}
+
+We need to define the abstract methods of the \verb|Parameterized| superclass described in Section \ref{sec:parameterizedclasses}. In our case we only have a single training parameter, so the \verb|initParameters| method is very simple:
+
+\begin{lstlisting}
+function p = initParameters(~, p)
+   p.addParamValue('K', 3,  @(x) assert(isnatural(x), 'Lynx:Runtime:Validation', 'K must be an integer > 0'));
+end
+\end{lstlisting}
+
+\noindent We add a single parameter to the \verb|InputParser| object \verb|p|, and we require it to be a non-negative integer. The \verb|isnatural| is a validation function provided in the toolbox. Example of usage of this class are:
+
+\begin{lstlisting}
+add_model('K', 'K-NN', @SimpleKNN);
+add_model('K', 'K-NN', @SimpleKNN, 'K', 10);
+\end{lstlisting}
+
+\noindent We also need to define a few static methods. \verb|getDescription| returns a string describing the model:
+
+\begin{lstlisting}
+function s = getDescription()
+   s = 'K-Nearest Neighbor algorithm';
+end
+\end{lstlisting}
+
+\noindent \verb|getParametersNames| returns a cell array with the names of the training parameters:
+
+\begin{lstlisting}
+function s = getParametersNames()
+   s = {'K'};
+end
+\end{lstlisting}
+
+\noindent \verb|getParametersDescription| returns a cell array with a description of the training parameters:
+
+\begin{lstlisting}
+function s = getParametersDescription()
+   s = {'Number of neighbors to consider'};
+end
+\end{lstlisting}
+
+\noindent Finally, \verb|getParametersRange| returns a cell array with the possible values for the training parameters:
+
+\begin{lstlisting}
+function s = getParametersRange()
+   s = {'Non-negative natural number, defaults to 3'};
+end
+\end{lstlisting}
+
+\subsection{Testing}
+
+The main function of a \verb|Model| class is a \verb|test| method for getting the predictions of the model on a particular set of input patterns. We are guaranteed that this is always called after training the algorithm with a suitable training method. Here is an example implementation in our case:
+
+\begin{lstlisting}
+function [labels, scores] = test(obj, Xts)
+   neighbors = knnsearch(obj.trainingData, Xts);
+   N_testing = size(Xts, 1);
+   labels = zeros(N_testing, 1);
+   scores = zeros(N_testing, 1);
+   for ii = 1:size(Xts, 1)
+      if(obj.getCurrentTask() == Tasks.R)
+         labels(ii) = mean(obj.trainingOutputs(neighbors(ii, :)));
+      else
+         labels(ii) = mode(obj.trainingOutputs(neighbours(ii, :)));
+      end
+      scores(ii) = labels(ii);
+   end
+end
+\end{lstlisting}
+
+Here, \verb|Xts| is a matrix of input test patterns. \verb|labels| is an $N \times 1$ vector of predictions, where $N$ is the number of rows in \verb|Xts|, with the format specified by the current task. \verb|scores| is a matrix of ``raw'' values of the algorithm, such as confidence values or probability estimates for each class. In our case, for simplicity, we set them equal to the labels. Note that, if the current task is regression, we use the mean values of the $K$ closest neighbors, otherwise we use the most frequent value (for classification).
+
+\subsection{Other methods}
+
+We need to define a few more methods. First, a \verb|getDefaultTrainingAlgorithm| that returns the default training algorithm (that we will implement in the next section):
+
+\begin{lstlisting}
+function a = getDefaultTrainingAlgorithm(obj)
+   a = SimpleKNN(obj);
+end
+\end{lstlisting}
+
+\noindent Then, a function returning all the possible tasks that are allowed by the model:
+
+\begin{lstlisting}
+function res = isTaskAllowed(~, t)
+   res = (t == Tasks.R || t == Tasks.BC || t == Tasks.MC);
+end
+\end{lstlisting}
+
+\section{Implementing a training algorithm}
+
+Let us now implement the training algorithm for our KNN. Training algorithms derives from \verb|LearningAlgorithm|, and they also derive from \verb|Parameterized|. In our case, we have no training parameters:
+
+\begin{lstlisting}
+classdef SimpleKNN < LearningAlgorithm
+   function obj = SimpleKNN(model, varargin)
+      obj = obj@LearningAlgorithm(model, varargin{:});
+   end
+        
+   function p = initParameters(~, p)
+   end
+   
+   ...
+end
+\end{lstlisting}
+
+\noindent Because we have no training parameters, we can define simply the \verb|getDescription| method:
+
+\begin{lstlisting}
+methods(Static)
+   function s = getDescription()
+      s = 'Simple KNN training procedure';
+   end
+end
+\end{lstlisting}
+
+\noindent Now we need to implement a training method. In this case, we simply save the input matrix \verb|Xtr| and output vector \verb|Ytr| in the corresponding properties of the model:
+
+\begin{lstlisting}
+function obj = train(obj, Xtr, Ytr)
+   obj.model.trainingInputs = Xtr;
+   obj.model.trainingOutputs = Ytr;                    
+end
+\end{lstlisting}
+
+\noindent We also need to define a \verb|checkForCompatibility| method to check that the algorithm is initialized with a \verb|KNearestNeighbor| model:
+
+\begin{lstlisting}
+function b = checkForCompatibility(obj, model)
+   b = isa(model, 'KNearestNeighbor');
+end
+\end{lstlisting}
+
+\subsection{Other methods of a training algorithm}
+
+A \verb|TrainingAlgorithm| object can have additional methods that we have not used in our example:
+
+\begin{itemize}
+\item \verb|checkForPrerequisites| is used to check if the required libraries and toolboxes are installed. The \verb|LibraryHandler| class provides two utility methods to this end.
+\item \verb|hasCustomTesting| can be used to tell Lynx that the training algorithm needs a custom testing procedure different from the one defined in the corresponding model (e.g. in the case of a wrapper to an external library). In this case, the custom testing procedure can be implemented as the \verb|test_custom| method.
+\item \verb|hasGPUSupport| is used to tell Lynx that the training algorithm supports GPU acceleration. If GPU support is enabled in a simulation, the training values will be passed to the algorithm as \verb|gpuArray|\footnote{\url{http://www.mathworks.it/it/help/distcomp/gpuarray.html}} objects.
+\end{itemize}
+
+\subsection{Implementing a Semi-Supervised Algorithm}
+
+Implementing a semi-supervised algorithm follows the same guidelines as before. The only differences are that the algorithm should derive from \verb|SemiSupervisedLearningAlgorithm| instead of \verb|LearningAlgorithm|, and that the training method has a different signature:
+
+\begin{lstlisting}
+function obj = train_semisupervised(obj, Xtr, Ytr, Xu);
+\end{lstlisting}
+
+\noindent Note that an implementation must handle the case where the additional matrix \verb|Xu| is empty.
+
+\section{Implementing a Wrapper}
+
+In this section we show how to implement a new wrapper by implementing a \verb|SubsampleTrainingData| wrapper to subsample the training data of a  user-specified factor $d$.
+
+A new wrapper should derive from the abstract class \verb|Wrapper|, which itself derives from \verb|LearningAlgorithm|. The main difference is that a wrapper has an additional property, \verb|wrappedAlgo|, corresponding to an instance of its base learning algorithm.
+
+Let us begin to write our code:
+
+
+\begin{lstlisting}
+classdef SubsampleTrainingData < Wrapper
+	methods
+		function obj = SubsampleTrainingData(wrappedAlgo, varargin)
+		   obj = obj@Wrapper(wrappedAlgo, varargin{:});
+		end
+		
+		...
+	end
+end
+\end{lstlisting}
+
+\noindent We define the training parameters:
+
+\begin{lstlisting}
+function p = initParameters(~, p)
+   p.addParamValue('d', 0.5);
+end
+...
+methods(Static)
+  function info = getDescription()
+    info = 'Subsample the training data';
+  end
+        
+  function pNames = getParametersNames()
+    pNames = {'d'}; 
+  end
+        
+  function pInfo = getParametersDescription()
+    pInfo = {'Subsampling percentage'};
+  end
+        
+  function pRange = getParametersRange()
+     pRange = {'Real number in [0, 1], default 0.5'};
+  end 
+end
+\end{lstlisting}
+
+\noindent Now we define the training method:
+
+\begin{lstlisting}
+function obj = train(obj, Xtr, Ytr)
+   p = cvpartition(Ytr, 'holdout', obj.parameters.d);
+   obj.wrappedAlgo = obj.wrappedAlgo.setCurrentTask(obj.geCurrentTask());
+   obj.wrappedAlgo = obj.wrappedAlgo.train(Xtr(training(p), :), Ytr(training(p));
+end
+\end{lstlisting}
+
+\noindent The most important part in this code is that we need to set the current task in our base algorithm, before calling its training method. In general, we may also need to access some training property of the base algorithm, or to set it to a new value (think of the \verb|ParameterSweep| wrapper). However, wrappers can nest one inside each other, and the required training parameter can in principle be at any level of the hierarchy. \verb|Wrapper| overrides \verb|getTrainingParam| and \verb|setTrainingParam| to this end. As an example, suppose we want to access property ``\verb|C|'' of our base algorithm. This is done as:
+
+\begin{lstlisting}
+C = obj.getParameter('C');
+\end{lstlisting}
+
+\noindent Then, we can increment it by one with:
+
+\begin{lstlisting}
+obj.wrappedAlgo = obj.setParameter('C', C + 1);
+\end{lstlisting}
+
+\subsubsection{Evaluating an Algorithm}
+
+A common need when designing a wrapper is that of evaluating the performance of the base algorithm using a given partition of the data. To this end, three steps are needed. First, starting from the input training matrices \verb|X| and \verb|Y| we generate a dataset:
+
+\begin{lstlisting}
+d = Dataset.generateAnonymousDataset(obj.getTask(), X, Y);
+\end{lstlisting}
+
+\noindent Successively, we generate the partitions to be used for validating. Supposing we have chosen a \verb|PartitionStrategy| ``p'', we can call:
+
+\begin{lstlisting}
+d = g.generateSinglePartition(p);
+\end{lstlisting}
+
+\noindent Finally, we call an utility function to perform the actual test:
+
+\begin{lstlisting}
+perfs = PerformanceEvaluator.computePerformance(obj.wrappedAlgo, d);
+\end{lstlisting}
+
+\noindent \verb|perfs| is a cell array containing all the performance values that were selected in the simulation for the given task. To access the primary measure, we can select the first element of the cell array. If we have two performance measures \verb|p1| and \verb|p2|, we can compare them using the \verb|isBetterThan| method of \verb|PerformanceMeasure|:
+
+\begin{lstlisting}
+b = p1.isBetterThan(p2);
+if(b)
+  // p1 is better
+else
+  // p2 is better
+end
+\end{lstlisting} 
+
+\section{Implementing a Preprocessor}
+
+The \verb|SubsampleTrainingData| can also be implemented as a preprocessor to sample the original dataset.The class must derive from \verb|Preprocessor| instead of \verb|Wrapper|, but is has the same parameter \verb|d|. Instead of the training method, however, we define a \verb|process| method, which takes a \verb|Dataset| object as single parameter, and returns the transformed dataset:
+
+\begin{lstlisting}
+function d = process(obj, d)
+   p = cvpartition(d.Y, 'holdout', obj.parameters.d);
+   d.X = d.X(training(p), :);
+   d.Y = d.Y(training(p));
+end
+\end{lstlisting}
+
+\noindent We also need to define a \verb|processAsBefore| method, which should process a dataset using the same settings resulting from a previous call to \verb|process|. This is needed for using the preprocessor as a wrapper using the \verb|ApplyPrepreprocessor| wrapper (see its help). In this case, we can simply call the \verb|process| method:
+
+\begin{lstlisting}
+function d = processAsBefore(obj, d)
+   d = obj.process(d);
+end
+\end{lstlisting}

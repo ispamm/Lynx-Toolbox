@@ -1,5 +1,5 @@
 
-% GROWKERNEL Grows a random kernel of given maximum depth
+% growKernel - Grow a random kernel of given maximum depth
 % See L. Dio?an, A. Rogozan, and J.-P. Pecuchet, “Improving classification
 % performance of Support Vector Machine by genetically optimising kernel 
 % shape and hyper-parameters,” Appl. Intell., vol. 36, no. 2, pp. 280–294, 

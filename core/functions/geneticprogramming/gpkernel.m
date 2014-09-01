@@ -1,6 +1,5 @@
 
-% Performs a search for the best kernel using a genetic programming
-% algorithm
+% gpkernel - Performs a search for the best kernel using a genetic programming algorithm
 % input: fitness is a pointer to the fitness evaluation function
 % output: the best individual, its fitness, and a struct containing some
 %         useful statistics.

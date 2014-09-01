@@ -1,62 +1,64 @@
-classdef HierarchicalLearningAlgorithm < LearningAlgorithm
-    % HIERARCHICALLEARNINGALGORITHM A class for defining hierarchical
-    % learning algorithms (HLA). A HLA is defined by a tree, where each
-    % node corresponds to a learning algorithm. Each internal node is a
-    % classifier, and the data is split along its children depending on the
-    % classification. The relation between the original data and the
-    % classes at every internal node is provided by an Aggregator object.
-    %
-    % HierarchicalLearningAlgorithm Properties:
-    %
-    %   children - A cell array of HierarchicalLearningAlgorithm objects,
-    %   corresponding to the children of the node.
-    %
-    %   aggregator - An Aggregator object, providing the relation between
-    %   the original output of the problem and the classes at the given
-    %   node. If the node is terminal, aggregator is not used.
-    %
-    %   learningAlgorithm - A LearningAlgorithm object used to train the
-    %   internal node.
-    %
-    %   name - The name of the node.
-    %
-    % LearningAlgorithm Methods:
-    %
-    %   addChild - Add a child to the node. To do this, the learning
-    %   algorithm must support multiclass classification.
-    %
-    %   getNArity - Return the number of children of the node.
-    %
-    %   size - Return the size of the tree, i.e., the number of nodes of
-    %   the tree rooted at the node.
-    %
-    %   print - Print its internal structure on the console.
-    %
-    % See also LEARNINGALGORITHM, AGGREGATOR
+% HierarchicalLearningAlgorithm - hierarchical learning algorithm (HLA)
+%   A HLA is defined by a tree, where each node corresponds to a
+%   learning algorithm. Each internal node is a classifier, and the
+%   data is split along its children depending on the classification.
+%   The relation between the original data and the classes at every
+%   internal node is provided by an Aggregator object.
+%
+% HierarchicalLearningAlgorithm Properties:
+%
+%   children - A cell array of HierarchicalLearningAlgorithm objects,
+%   corresponding to the children of the node.
+%
+%   aggregator - An Aggregator object, providing the relation between
+%   the original output of the problem and the classes at the given
+%   node. If the node is terminal, aggregator is not used.
+%
+%   learningAlgorithm - A LearningAlgorithm object used to train the
+%   internal node.
+%
+%   name - The name of the node.
+%
+% LearningAlgorithm Methods:
+%
+%   addChild - Add a child to the node. To do this, the learning
+%   algorithm must support multiclass classification.
+%
+%   getNArity - Return the number of children of the node.
+%
+%   size - Return the size of the tree, i.e., the number of nodes of
+%   the tree rooted at the node.
+%
+%   print - Print its internal structure on the console.
+%
+% See also LEARNINGALGORITHM, AGGREGATOR
 
-    
-    % License to use and modify this code is granted freely without warranty to all, as long as the original author is
-    % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
-    %
-    % Programmed and Copyright by Simone Scardapane:
-    % simone.scardapane@uniroma1.it
-    
+
+% License to use and modify this code is granted freely without warranty to all, as long as the original author is
+% referenced and attributed as such. The original author maintains the right to be solely associated with this work.
+%
+% Programmed and Copyright by Simone Scardapane:
+% simone.scardapane@uniroma1.it
+
+classdef HierarchicalLearningAlgorithm < LearningAlgorithm
     
     properties
         children;           % Cell array of children
         aggregator;         % Aggregator object to partition data
         learningAlgorithm;  % Learning algorithm to train the model
         name;               % Name of the node
+        id;
     end
     
     methods
         
-        function obj = HierarchicalLearningAlgorithm(aggregator, learningAlgorithm, name)
-            obj = obj@LearningAlgorithm({});
+        function obj = HierarchicalLearningAlgorithm(aggregator, learningAlgorithm)
+            obj = obj@LearningAlgorithm([]);
             obj.children = {};
             obj.aggregator = aggregator;
             obj.learningAlgorithm = learningAlgorithm;
-            obj.name = name;
+            obj.name = learningAlgorithm.name;
+            obj.id = learningAlgorithm.id;
         end
         
         function obj = addChild(obj, node)
@@ -67,7 +69,7 @@ classdef HierarchicalLearningAlgorithm < LearningAlgorithm
             if(obj.learningAlgorithm.isTaskAllowed(Tasks.MC))
                 obj.children{end+1} = node;
             else
-                error('LearnToolbox:TaskIncompatibility:HierarchicalLearningModelError', 'To add a children to a hierarchical learning algorithm, its base learning algorithm must support multiclass classification');
+                error('Lynx:TaskIncompatibility:HierarchicalLearningModelError', 'To add a children to a hierarchical learning algorithm, its base learning algorithm must support multiclass classification');
             end
         end
         
@@ -83,8 +85,8 @@ classdef HierarchicalLearningAlgorithm < LearningAlgorithm
                 n = n + obj.children{i}.size();
             end
         end
-
-        function initParameters(~, ~)
+        
+        function p = initParameters(~, p)
         end
         
         function obj = train(obj, Xtr, Ytr)
@@ -119,26 +121,30 @@ classdef HierarchicalLearningAlgorithm < LearningAlgorithm
             % multiclass classification task.
             if(obj.getNArity() == 0)
                 groups = Ytr;
-                obj.learningAlgorithm = obj.learningAlgorithm.setTask(obj.getTask());
+                obj.learningAlgorithm = obj.learningAlgorithm.setCurrentTask(obj.getCurrentTask());
             else
                 groups = obj.aggregator.group(Ytr);
-                obj.learningAlgorithm = obj.learningAlgorithm.setTask(Tasks.MC);
+                obj.learningAlgorithm = obj.learningAlgorithm.setCurrentTask(Tasks.MC);
             end
             
             obj.learningAlgorithm = obj.learningAlgorithm.train(Xtr, groups);
             
             % Train all the children (if there is at least one)
-            if(~isempty(obj.children))     
+            if(~isempty(obj.children))
                 for i = 1:obj.getNArity()
-                    obj.children{i} = obj.children{i}.setTask(obj.getTask());
+                    obj.children{i} = obj.children{i}.setCurrentTask(obj.getCurrentTask());
                     obj.children{i} = obj.children{i}.train(Xtr(groups == i, :), Ytr(groups == i));
                 end
             end
             
         end
         
-        function [labels, scores] = test(obj, Xts)
-  
+        function b = hasCustomTesting(~)
+            b = true;
+        end
+        
+        function [labels, scores] = test_custom(obj, Xts)
+            
             [orig_labels, scores] = obj.learningAlgorithm.test(Xts);
             labels = orig_labels;
             % If there are children, compute the final labels.
@@ -167,8 +173,20 @@ classdef HierarchicalLearningAlgorithm < LearningAlgorithm
             end
         end
         
+        function res = checkForCompatibility(obj, model)
+            % A model is compatible if it is compatible with every node
+            if (obj.getNArity() == 0)
+                res = obj.learningAlgorithm.checkForCompatibility(model);
+            else
+                res = true;
+                for i=1:obj.getNArity()
+                    res = res & obj.children{i}.checkForCompatibility(model);
+                end
+            end
+        end
+        
         function print(obj)
-           obj.print_recursively(0, ''); 
+            obj.print_recursively(0, '');
         end
         
         function print_recursively(obj, currentLevel, currentHeader)
@@ -189,7 +207,7 @@ classdef HierarchicalLearningAlgorithm < LearningAlgorithm
             %       |    |  I   _________
             %       |    |  I c(`       ')o
             %       |    l  I   \.     ,/
-            %     _/j  L l\_!  _//^---^\\_  
+            %     _/j  L l\_!  _//^---^\\_
             %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             % ASCII artist: Rowan Crawford
             
@@ -211,17 +229,24 @@ classdef HierarchicalLearningAlgorithm < LearningAlgorithm
                 end
             end
         end
-            
+        
+        function s = getInstanceDescription(obj)
+            s = sprintf('%s (hierarchical algorithm). For its structure, add output script ''info_hla''', obj.name);
+        end
+        
+        function varargout = subsref(A, S)
+            [varargout{1:nargout}] = builtin('subsref', A, S);
+        end
         
     end
     
     methods(Static)
         
-        function info = getInfo()
+        function info = getDescription()
             info = 'Core class for constructing hierarchical learning algorithms';
         end
         
-        function pNames = getParametersNames() 
+        function pNames = getParametersNames()
             pNames = {};
         end
         

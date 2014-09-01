@@ -1,5 +1,5 @@
 function b = isnatural( x, nonZero )
-%ISNATURAL Check that a number is a natural number. Return a boolean.
+% isnatural - Check that a number is a natural number. Return a boolean.
 %
 %   B = ISNATURAL(X) returns true if X is a natural number, false
 %   otherwise.

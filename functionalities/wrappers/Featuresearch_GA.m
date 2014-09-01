@@ -1,12 +1,24 @@
+% FeatureSearch_GA - Searches the optimal subset of features by using a genetic algorithm
+%   This has three possible parameters:
+%
+%   add_wrapper(id, @Featuresearch_GA, 'popSize', 100) change the
+%   population size of the GA (default 50).
+%
+%   add_wrapper(id, @Featuresearch_GA, 'gen', 10) change the number of
+%   generations (default 10).
+%
+%   add_wrapper(id, @Featuresearch_GA, 'partition_strategy', p) change the
+%   partition strategy (default KFoldPartition(3)).
+%
+%   This requires the Global Optimization toolbox.
+
+% License to use and modify this code is granted freely without warranty to all, as long as the original author is
+% referenced and attributed as such. The original author maintains the right to be solely associated with this work.
+%
+% Programmed and Copyright by Simone Scardapane:
+% simone.scardapane@uniroma1.it
+
 classdef Featuresearch_GA < Wrapper
-    % FEATURESEARCH_GA Searches the optimal subset of features by using a
-    % genetic algorithm.
-    
-    % License to use and modify this code is granted freely without warranty to all, as long as the original author is
-    % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
-    %
-    % Programmed and Copyright by Simone Scardapane:
-    % simone.scardapane@uniroma1.it
     
     properties
         bestFeatures;
@@ -15,10 +27,10 @@ classdef Featuresearch_GA < Wrapper
     methods
         
         function obj = Featuresearch_GA(wrappedAlgo, varargin)
-            obj = obj@Wrapper(wrappedAlgo, varargin);
+            obj = obj@Wrapper(wrappedAlgo, varargin{:});
         end
         
-        function initParameters(~, p)
+        function p = initParameters(~, p)
             p.addParamValue('popSize', 50);
             p.addParamValue('gen', 10);
             p.addParamValue('partition_strategy', KFoldPartition(3));
@@ -27,7 +39,7 @@ classdef Featuresearch_GA < Wrapper
         function obj = train(obj, Xtr, Ytr)
             nVars = size(Xtr, 2);
             
-            assert(obj.trainingParams.popSize > nVars, 'LearnToolbox:Validation:PopulationError', 'For Featuresearch_GA, population size should be at least as big as the number of variables');
+            assert(obj.parameters.popSize > nVars, 'Lynx:Validation:PopulationError', 'For Featuresearch_GA, population size should be at least as large as the number of variables');
             
             % Add the individual with all features to the initial population
             InitialPopulation = ones(1, nVars);
@@ -40,37 +52,58 @@ classdef Featuresearch_GA < Wrapper
                InitialPopulation = [InitialPopulation; oneValuedString];
             end
             
-            options = gaoptimset('Generations', obj.trainingParams.gen, 'PopulationType', 'bitstring', 'PopulationSize', obj.trainingParams.popSize, ...
+            options = gaoptimset('Generations', obj.parameters.gen, 'PopulationType', 'bitstring', 'PopulationSize', obj.parameters.popSize, ...
                 'Display', 'off', 'InitialPopulation', InitialPopulation);
-            
-            fit = @(feat) mean(eval_algo(obj.wrappedAlgo, obj.constructDataset(Xtr, Ytr, feat)));
-            obj.bestFeatures = ga(fit,nVars,[],[],[],[],[],[],[],options);
+
+            obj.bestFeatures = ga(@(feat) obj.computePerformanceIndividual(feat, Xtr, Ytr),nVars,[],[],[],[],[],[],[],options);
             
             if(SimulationLogger.getInstance().flags.debug)
                 fprintf('\t\t Number of chosen features: %d\n', sum(obj.bestFeatures));
             end
 
             if(sum(obj.bestFeatures) == 0)
-                error('LearnToolbox:RunTime:AllFeaturesDeleted', 'All features were deleted by Featuresearch_GA...');
+                error('Lynx:Runtime:AllFeaturesDeleted', 'All features were deleted by Featuresearch_GA...');
             end
             
-            obj.wrappedAlgo = obj.wrappedAlgo.setTask(obj.trainingParams.task);
+            obj.wrappedAlgo = obj.wrappedAlgo.setCurrentTask(obj.getCurrentTask());
             obj.wrappedAlgo = obj.wrappedAlgo.train(Xtr(:, logical(obj.bestFeatures)), Ytr);
             
         end
         
+        function perf = computePerformanceIndividual(obj, features, Xtr, Ytr)
+            p = PerformanceEvaluator.getInstance();
+            perfs = p.computePerformance(obj.wrappedAlgo,obj.constructDataset(Xtr, Ytr, features));
+            perf = perfs{1}.getFinalizedValue();
+            % Hack for positive performance measures (e.g.
+            % MatthewCorrelationCoefficient)
+            if(~isa(perfs{1}, 'LossFunction'))
+                perf = -perf;
+            end
+        end
+        
         function data = constructDataset(obj, X, Y, feat)
-            data = Dataset.generateAnonymousDataset(obj.getTask(), X(:,logical(feat)), Y);
-            data = data.generateNPartitions(1, obj.trainingParams.partition_strategy);
+            data = Dataset.generateAnonymousDataset(obj.getCurrentTask(), X(:,logical(feat)), Y);
+            data = data.generateSinglePartition(obj.parameters.partition_strategy);
         end
             
-        function [labels, scores] = test(obj, Xts)
+        function b = hasCustomTesting(obj)
+            b = true;
+        end
+        
+        function [labels, scores] = test_custom(obj, Xts)
             [labels, scores] = obj.wrappedAlgo.test(Xts(:, logical(obj.bestFeatures)));
+        end
+        
+        function b = checkForPrerequisites(obj)
+            b = obj.checkForPrerequisites@Wrapper();
+            if(~exist('ga', 'file') == 2)
+                error('Lynx:Runtime:MissingLibrary', 'The Featuresearch_GA wrapper requires the Global Optimization toolbox');
+            end
         end
     end
     
     methods(Static)
-        function info = getInfo()
+        function info = getDescription()
             info = 'Search the optimal feature subset using a Genetic Algorithm';
         end
         
@@ -78,7 +111,7 @@ classdef Featuresearch_GA < Wrapper
             pNames = {'partition_strategy', 'popSize', 'gen'}; 
         end
         
-        function pInfo = getParametersInfo()
+        function pInfo = getParametersDescription()
             pInfo = {'Partitioning strategy for validation', 'Size of the population', 'Number of generations'};
         end
         

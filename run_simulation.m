@@ -13,10 +13,20 @@ clear all; close all; clc;
 % Counter for time
 t = clock;
 
+% Check for installation
+if(~(exist('XmlConfiguration','class') == 8) || ~XmlConfiguration.checkForConfigurationFile(XmlConfiguration.getRoot()))
+    error('Lynx:Runtime:MissingInstallation', 'You must run the installation script before executing the simulation');
+end
+
 % Initialize the simulation
-s = SimulationRunner();
+s = Simulation.getInstance();
+s.clear();
+s = Simulation.getInstance();
 
 try
+    
+    % Set PRNG
+    rng(s.seed_prng);
     
     % Cleaning function
     finishup = onCleanup(@()(s.finalizeSimulation()));
@@ -30,21 +40,22 @@ try
     % Print errors and training times
     s = s.formatOutput();
     
-    % Perform the statistical test, if possible
-    s = s.statisticalTesting();
+    % Execute custom features
+    for z = 1:length(s.additionalFeatures)
+        s.additionalFeatures{z}.executeBeforeFinalization();
+    end
     
-    % Execute any additional output script
-    s = s.executeOutputScripts();
+    % Clean up the simulation
+    s = s.finalizeSimulation();
+    
+    % Execute custom features
+    for z = 1:length(s.additionalFeatures)
+        s.additionalFeatures{z}.executeAfterFinalization();
+    end
     
     % Compute elapsed time
     e = etime(clock, t);
     fprintf('Total elapsed time: %g sec.\n', e);
-    
-    % Save the results if requested
-    s = s.saveResults();
-    
-    % Clean up the simulation
-    s = s.finalizeSimulation();
     
 catch err
     
@@ -53,5 +64,10 @@ catch err
     cprintf('err', 'An error was detected: %s\n', err.message);
     fprintf('Cleaning up...\n');
     s = s.finalizeSimulation();
+    
+    % Execute custom features
+    for z = 1:length(s.additionalFeatures)
+        s.additionalFeatures{z}.executeOnError();
+    end
     
 end

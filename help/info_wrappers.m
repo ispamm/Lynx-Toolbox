@@ -7,6 +7,6 @@
 % Programmed and Copyright by Simone Scardapane:
 % simone.scardapane@uniroma1.it
 
-wrappers = classFilter('../functionalities/wrappers/', 'Wrapper');
+wrappers = class_filter(fullfile(XmlConfiguration.getRoot(), 'functionalities/Wrappers/'), 'Wrapper');
 fprintf('Generating report...\n');
 report('templates/Available Wrappers.rpt', '-quiet');

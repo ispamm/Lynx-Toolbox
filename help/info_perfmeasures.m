@@ -1,6 +1,5 @@
 
-% INFO_PERFMEASURES Generate an HTML report on the available performance
-% measures.
+% INFO_PERFMEASURES Generate a report on the available performance measures
 
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is
 % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
@@ -12,7 +11,7 @@ clc;
 fprintf('--- AVAILABLE PERFORMANCE MEASURES ---\n\n');
 
 % list of all (sub)folders and files in folder "algorithms":
-flist = getAllFiles('../functionalities/performance/');
+flist = getAllFiles(fullfile(XmlConfiguration.getRoot(), 'functionalities/PerformanceMeasures/'));
  
 % prepare the result
 filterlist = struct('Classname',{});
@@ -28,7 +27,7 @@ for i=1:numel(flist)
 end
 
 for i=1:length(filterlist)
-    info = eval(strcat(filterlist(i).Classname, '.getInfo();'));
+    info = eval(strcat(filterlist(i).Classname, '.getDescription();'));
     cprintf('*text', filterlist(i).Classname);
     fprintf(': %s\n', info);
 end

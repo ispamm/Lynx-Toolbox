@@ -1,0 +1,240 @@
+\chapter{Advanced configuration features}
+\label{chap:advancedfeatures}
+
+In this chapter, we explore all the remaining features to customize the simulation.
+
+\section{Changing partitioning and number of runs}
+
+By default, Lynx uses a $3$-fold cross-validation to partition the data. You can change this using any \verb|PartitionStrategy| object with the \verb|set_partition_strategy| function. A few examples are:
+
+\begin{itemize}
+\item Set a $10$-fold cross-validation:
+
+\begin{lstlisting}
+set_partition_strategy(KFoldPartition(10));
+\end{lstlisting}
+
+\item Set an holdout partition with $25\%$ of testing data:
+
+\begin{lstlisting}
+set_partition_strategy(HoldoutPartition(0.25));
+\end{lstlisting}
+
+\item Set the same partition for training and testing:
+
+\begin{lstlisting}
+set_partition_strategy(NoPartition());
+\end{lstlisting}
+
+You can see all available partition strategies in the ``\textit{functionalities/PartitionStrategies}'' folder.
+\end{itemize}
+
+Moreover, you can repeat the experiments more than one time by calling \verb|set_runs|:
+
+\begin{lstlisting}
+set_runs(3); % Execute 3 times the experiments
+\end{lstlisting}
+
+\section{Parallelizing the experiments}
+
+We refer to the test of an algorithm on a dataset as an \textit{experiment}. The simulation can be easily parallelized due to the fact that each experiment is independent of all the others. Hence, in the general case where you are testing $N$ algorithms on $M$ datasets for $R$ times, you have $N \times M \times R$ independent experiments to be performed. These can be parallelized over multiple threads and multiple machines by enabling the \textit{parallelized} flag in the configuration file:
+
+\begin{lstlisting}
+set_flag('parallelized');
+\end{lstlisting}
+
+\noindent This functionality requires the Parallel Computing Toolbox of MATLAB. It uses the pool of workers defined as \textit{default} in the configuration of MATLAB itself. When this is enabled, the order in which the experiments are performed cannot be defined \textit{a-priori}. Moreover, learning algorithms are not allowed to print additional information on the screen. The pool of workers is started in the initialization phase:
+
+\begin{small}
+\begin{verbatim}
+Starting matlabpool using the 'local' profile ... 
+	connected to 2 workers.
+\end{verbatim}
+\end{small}
+
+\noindent If the workers are subdivided on multiple machines, it is the user's duty to take care that Lynx is properly installed on all machines. During the training phase, printing is disabled but we are shown the worker in which each experiment is performed between square brackets:
+
+\begin{small}
+\begin{verbatim}
+Testing Baseline on Glass (run 1/1) [Worker 1]
+Testing ExtremeLearningMachine on Glass (run 1/1) [Worker 2]
+\end{verbatim}
+\end{small}
+
+\noindent In the output phase, the pool is closed:
+
+\begin{small}
+\begin{verbatim}
+Sending a stop signal to all the workers ... stopped.
+\end{verbatim}
+\end{small}
+
+\subsection{Configuring a Cluster}
+
+Describing how to setup a cluster goes beyond the scope of this manual. To this end, we refer to the Mathworks documentation:
+
+\url{http://www.mathworks.it/support/product/DM/installation/ver_current/}
+
+
+\section{Enabling semi-supervised training}
+
+The toolbox has support for semi-supervised learning (SSL) algorithms \cite{chapelle2006semi}. SSL algorithms differ from classical learning algorithms in that they can use an additional set of unlabeled input patterns to increase their performance. By default, this functionality is disabled. Hence, if we add an SSL algorithm to the simulation:
+
+\begin{lstlisting}
+add_model('ELM', 'Extreme Learning Machine', @ExtremeLearningMachine);
+set_training_algorithm('ELM', @LaplacianELM);
+\end{lstlisting}
+
+\noindent the ELM algorithms will be called with an empty additional training set. To enable it, we can set the corresponding flag:
+
+\begin{lstlisting}
+set_flag('semisupervised');
+\end{lstlisting}
+
+\noindent If this flag is enabled, the following is performed:
+
+\begin{itemize}
+	\item A given fraction of the original dataset (default is $25$ \%) is separated from the dataset. Labels for this part are discarded, and the corresponding input patterns are used as the additional training set.
+	\item The rest of the dataset is split according to the testing requirements of the user.
+\end{itemize}
+
+The default fraction of semi-supervised data can be changed by calling the \verb|set_semisupervised_partitioning| function:
+
+\begin{lstlisting}
+set_semisupervised_partitioning(HoldoutPartition(0.6));
+\end{lstlisting}
+
+\noindent If the partition strategy has more than a single fold, the fist one will be used.
+
+\section{Adding a performance measure}
+
+You can add a performance measure to be computed with the following syntax:
+
+\begin{lstlisting}
+add_performance(task, perf);
+\end{lstlisting}
+
+\noindent where \verb|task| is the id of the task and \verb|perf| the performance measure. For example, you can add the ROC curve for binary classification:
+
+\begin{lstlisting}
+add_performance(Tasks.BC, ROCCurve());
+\end{lstlisting}
+
+\noindent Every task has a \textit{primary} performance measure, which is used also to compare algorithms. If you want to change the primary performance measure of a task, you can set an additional boolean value:
+
+\begin{lstlisting}
+add_performance(Tasks.R, MeanAbsoluteError(), true);
+\end{lstlisting}
+
+\noindent Not all performance measures can be set as primary. In particular, they must be at least comparable. For example, the ROC curve cannot be set as primary.
+
+\section{Other features}
+
+Additional features can be added with the \verb|add_feature| function. We explore them in the rest of the chapter.
+
+\subsection{Enabling GPU support}
+
+An additional form of parallelization is given by the use of the GPU. This is enabled with the following call:
+
+\begin{lstlisting}
+add_feature(GPUSupport());
+\end{lstlisting}
+
+\noindent This functionality requires the Parallel Computing Toolbox of Matlab and a supported NVIDIA GPU device. Additionally, the latest version of the CUDA drivers\footnote{\url{https://developer.nvidia.com/cuda-downloads}} has to be installed. The GPU compatibility is tested in the initialization phase:
+
+\begin{small}
+\begin{verbatim}
+Initializing GPU device...
+\end{verbatim}
+\end{small}
+
+If an algorithm has GPU support, the dataset is transferred to the GPU before training. Note that only a subset of the implemented algorithms actually use GPU acceleration. To see if a particular algorithm can benefit from this functionality, refer to the respective help of the class.
+
+\subsection{Fixing the PRNG seed}
+
+To fix the seed of the PRNG (for repeatability) call:
+
+\begin{lstlisting}
+add_feature(SetSeedPRNG(seed));
+\end{lstlisting}
+
+\subsection{Adding output scripts}
+
+Output scripts are used to analyze the simulation and print additional information on the console. They must be placed inside the \textit{scripts} folder of the toolbox. One or more of them are run after a simulation with the following syntax:
+
+\begin{lstlisting}
+add_feature(ExecuteOutputScripts(scrip1, script2, ...));
+\end{lstlisting}
+
+\noindent As an example, consider the parameter sweep detailed in Section \ref{sec:parametersweep}. This is an example of running the simulation with the additional wrapper:
+
+\begin{small}
+\begin{verbatim}
+Testing ExtremeLearningMachine on Glass (run 1/1)
+	Fold 1... 
+		 Validated parameters: [ C = 1.000000, hiddenNodes = 100.000000 ], 
+		 	with error: 0.558518
+		 Final training time is: 0.003000
+	Fold 2... 
+		 Validated parameters: [ C = 0.500000, hiddenNodes = 100.000000 100.000000 ], 
+		 	with error: 0.605529
+		 Final training time is: 0.004000
+	Fold 3... 
+		 Validated parameters: [ C = 2.000000, hiddenNodes = 100.000000 50.000000 ], 
+		 	with error: 0.490066
+		 Final training time is: 0.003000
+\end{verbatim}
+\end{small}
+
+\noindent It can be seen that the resulting parameters are printed for each fold, together with the final training time of the ELM model. This is not easily understandable. To this end, we can use the \textit{info\_gridsearch} script:
+
+\begin{lstlisting}
+add_feature(ExecuteOutputScripts('info_gridsearch));
+\end{lstlisting}
+
+\noindent In this way the average values of the training parameters, along with the average final training time, are printed at the end of the simulation on the console:
+
+\begin{small}
+\begin{verbatim}
+--------------------------------------------------
+--- USER-DEFINED OUTPUT --------------------------
+--------------------------------------------------
+Results of grid search for algorithm ExtremeLearningMachine: 
+   Dataset Glass:
+      Average training time is 0.003333 sec
+      C = 1.166667
+      hiddenNodes = 83.333333
+\end{verbatim}
+\end{small}
+
+\subsection{Running a statistical test}
+
+A statistical testing is requested by calling the following method:
+
+\begin{lstlisting}
+add_feature(CheckSignificance(test));
+\end{lstlisting}
+
+\noindent where \verb|test| is a pointer to a class deriving from \verb|StatisticalTest|. Each statistical test has certain conditions that must be satisfied so that it can be called. As an example, the Wilcoxon signed-rank text requires exactly two algorithms and at least two datasets. So, if we add it to a simulation like:
+
+\begin{lstlisting}
+add_feature(CheckSignificance(WilcoxonTest()));;
+\end{lstlisting}
+
+\noindent but we do not respect the conditions, a critical error is issued during the initialization phase.
+
+\subsection{Saving the results}
+
+The results of the simulation can be saved with the following syntax:
+
+\begin{lstlisting}
+add_feature(SaveResults(folder));
+\end{lstlisting}
+
+\noindent They are saved inside a the folder ``\textit{results/folder}'. Three files are saved:
+
+\begin{itemize}
+\item A .mat file with the workspace at the end of the simulation.
+\item A .txt file with the full transcript of the simulation (the same which is shown in the console).
+\item The configuration file that has been used.
+\end{itemize}

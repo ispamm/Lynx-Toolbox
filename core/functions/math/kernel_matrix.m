@@ -1,5 +1,5 @@
 
-%KERNEL_MATRIX Compute the kernel matrix for several widely used kernels.
+% kernel_matrix - Compute the kernel matrix for several widely used kernels.
 %
 %   OMEGA = KERNEL_MATRIX(XTR, KTYPE, KPARS) takes an Nxd input matrix XTR,
 %   where N is the number of observations and d their dimensionality; a

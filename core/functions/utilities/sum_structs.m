@@ -1,6 +1,5 @@
 
-%SUM_STRUCTS average all the numerical elements contained in a cell array
-%of identical structures.
+% sum_structs - average all the numerical elements contained in a cell array of identical structures
 %
 %   RES = SUM_STRUCTS(S) takes an Nx1 array of identical structures. RES is
 %   a struct with the following characteristics: if s is a numeric field in
@@ -38,7 +37,6 @@ function res = sum_structs( s )
             fieldsNumericIndexes(i) = 0;
         end
     end
-    fields_numeric = fields(logical(fieldsNumericIndexes));
     
     % We initialize the resulting structure
     res = struct();

@@ -1,0 +1,39 @@
+\chapter{Experimental features}
+\label{chap:expfeatures}
+
+Experimental features are currently under active development. They are expected to change rapidly, and they have no full support.
+
+\section{Hierarchical learning algorithms}
+
+A hierarchical learning algorithm (HLA) can be any tree structure of models, where an input is propagated through the tree until a final decision is taken on a leaf node. At every node, a learning algorithm is employed to choose which branch to follow. To understand its utility, try to plot the output values of the \textit{uci\_yacht} dataset: you will see that there is a strong gap between positive and negative values. In this case, it may be better to envision a two-stage architecture:
+
+\begin{itemize}
+\item The first level discriminates between positive and negative output values.
+\item The second level has two learning algorithms trained only on positive and negative outputs respectively.
+\end{itemize}
+
+\noindent Currently, you can implement this with the following code:
+
+\begin{lstlisting}
+add_model('NODE', 'Internal node', @ExtremeLearningMachine);
+add_model('LEAF1', 'First leaf', @ExtremeLearningMachine);
+add_model('LEAF2', 'Second leaf', @ExtremeLearningMachine);
+
+construct_hierarchical_algorithm([2 0 0], {RangeAggregator(0)}, {'NODE', 'LEAF1', 'LEAF2'});
+
+add_dataset('Y', 'Yacht (UCI)', 'uci_yacht');
+\end{lstlisting}
+
+\noindent The parameters to the \verb|construct_hierarchical_algorithm| method are:
+
+\begin{itemize}
+\item A cell array describing the number of childs of the tree, in a depth-first fashion.
+\item A cell array of \verb|Aggregator| objects. Aggregators are used to associate to every original output a particular branch of the node. In our case, \verb|RangeAggregator| discriminates between negative and positive values, sending them to the left and right branches of the node.
+\item A cell array containing the ids of the models composing the tree.
+\end{itemize}
+
+\noindent We can also add an output script for plotting the tree structure:
+
+\begin{lstlisting}
+add_feature(ExecuteOutputScripts('info_hla'));
+\end{lstlisting}

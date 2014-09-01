@@ -1,5 +1,5 @@
 
-% ADD_PREPROCESSOR Add a preprocessor to the simulation
+% add_preprocessor - Add a preprocessor to the simulation
 
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is
 % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
@@ -9,13 +9,14 @@
 
 function add_preprocessor(data_id, preprocessor, varargin)
 
-    s = SimulationLogger.getInstance();
-    ids = s.findDatasetByIdWithRegexp(data_id);
+    s = Simulation.getInstance();
+    ids = s.datasets.findByIdWithRegexp(data_id);
     
     for i=1:length(ids)
     
-        obj = preprocessor(varargin);
-        s.datasets{ids(i)} = obj.process(s.datasets{ids(i)});
+        o = preprocessor(varargin{:});
+        s.datasets.set(ids(i), ...
+            o.process(s.datasets.get(ids(i))));
     
     end
        

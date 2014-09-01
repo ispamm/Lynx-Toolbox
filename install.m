@@ -5,34 +5,61 @@
 
 clc;
 
+% Ensure a supported Matlab version
 if verLessThan('matlab', '7.12')
     error('This Matlab version is not supported. Please upgrade to version 7.12 or higher.');
 end
 
-addpath(genpath(pwd));
+% Ensure we are in the root folder
+if(~exist(fullfile(pwd, 'install.m'), 'file') == 2)
+    error('The installation script must be run from the root folder of the toolbox');
+end
 
-directories = {'tmp/', 'results/', 'lib/'};
+% Create the required empty directories
+directoryCreated = false;
+directories = {'tmp', 'results', 'lib', 'models'};
 for i=1:length(directories)
     if(~exist(directories{i}, 'dir'))
+        if(~directoryCreated)
+            fprintf('Creating required folders...\n');
+            directoryCreated = true;
+        end
         mkdir(directories{i});
     end
 end
 
-% We check for existence of libraries, and eventually install them
-check_and_install_library('Deep Learn Toolbox', 'saetrain', ...
-    'https://github.com/rasmusbergpalm/DeepLearnToolbox/archive/master.zip', ...
-    'StackedAutoEncoder algorithm');
-check_and_install_library('LibSVM', 'svmpredict', ...
-    'http://www.csie.ntu.edu.tw/~cjlin/cgi-bin/libsvm.cgi?+http://www.csie.ntu.edu.tw/~cjlin/libsvm+zip', ...
-    'SupportVectorMachine algorithm');
-check_and_install_library('Kernel Methods Toolbox', 'km_fbkrls', ...
-    'http://downloads.sourceforge.net/project/kmbox/KMBOX-0.9.zip', ...
-    'KPCA preprocessor, KPCA wrapper, sparsification of KernelRecursiveLeastSquare algorithm');
-check_and_install_library('Primal Laplacian SVM', 'lapsvmp', ...
-    'http://www.dii.unisi.it/~melacci/lapsvmp/lapsvmp_v02.zip', ...
-    'Laplacian SVM');
-
+% Add the folders of the toolbox to the global path
 fprintf('Adding toolbox to path...\n');
-addpath(genpath('./lib/'));
+addpath(genpath(pwd));
 
-fprintf('Installation complete\n');
+% Generate XML configuration file
+if(~XmlConfiguration.checkForConfigurationFile(pwd))
+    fprintf('Generating configuration file...\n');
+    XmlConfiguration.createXmlConfiguration(pwd);
+elseif(~strcmp(pwd, fullfile(XmlConfiguration.getRoot())))
+        fprintf('Updating installation folder...\n');
+        XmlConfiguration.setConfigValue('root_folder', pwd, pwd);
+else
+    fprintf('The configuration file was not changed\n');
+end
+
+% Eventually save the path
+cprintf('*text', '--- Do you want to save the path? (Y/N) ---\n');
+result = input('', 's');
+
+if(strcmpi(result, 'Y'))
+    fprintf('Saving path...\n');
+    savepath;
+else
+    warning('You will need to run again the installation process after rebooting Matlab');
+end
+
+fprintf('Installation complete\n\n');
+
+fprintf('A few useful commands:\n\n');
+fprintf('\t--> To run a simulation: ''run_simulation''\n');
+fprintf('\t--> To generate HTML documentation: ''generate_documentation''\n');
+fprintf('\t--> To generate HTML reports: ''info_datasets'', ''info_models'', ''info_wrappers'', ''info_preprocessors''\n');
+fprintf('\t--> To run the test suite: ''run_test_suite''\n');
+fprintf('\t--> To clean the installation: ''clean_installation''\n\n');
+clear all;

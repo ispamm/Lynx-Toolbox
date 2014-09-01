@@ -1,5 +1,5 @@
 
-% INITIALIZEPOPULATION Initialize a population of a given number of
+% initializePopulation - Initialize a population of a given number of
 % elements, with a maximum individual depth provided by the user
 
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is

@@ -1,13 +1,14 @@
+% SaveConfiguration - Save the configurations of an algorithm
+%   One file is created for each combination dataset/fold/run. See the help
+%   for LoadConfiguration.
+
+% License to use and modify this code is granted freely without warranty to all, as long as the original author is
+% referenced and attributed as such. The original author maintains the right to be solely associated with this work.
+%
+% Programmed and Copyright by Simone Scardapane:
+% simone.scardapane@uniroma1.it
+
 classdef SaveConfiguration < Wrapper
-    % SAVECONFIGURATION Save the configurations of an algorithm after
-    % training in a specified folder. One file is created for each
-    % combination dataset/fold/run.
-    
-    % License to use and modify this code is granted freely without warranty to all, as long as the original author is
-    % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
-    %
-    % Programmed and Copyright by Simone Scardapane:
-    % simone.scardapane@uniroma1.it
     
     properties
     end
@@ -15,45 +16,37 @@ classdef SaveConfiguration < Wrapper
     methods
         
         function obj = SaveConfiguration(wrappedAlgo, varargin)
-            obj = obj@Wrapper(wrappedAlgo, varargin);
+            obj = obj@Wrapper(wrappedAlgo, varargin{:});
+            obj.parameters.dest_folder = fullfile(XmlConfiguration.readConfigValue('root_folder'), obj.parameters.dest_folder);
         end
         
-        function initParameters(~, p)
+        function p = initParameters(~, p)
             p.addRequired('source_id'); 
-            p.addParamValue('dest_folder', './tmp/'); 
+            p.addParamValue('dest_folder', 'models/'); 
         end
         
         function obj = train(obj, Xtr, Ytr)
-            obj.wrappedAlgo = obj.wrappedAlgo.setTask(obj.getTask());
             obj.wrappedAlgo = obj.wrappedAlgo.train(Xtr, Ytr);
             model = obj.wrappedAlgo;
             
-            if(~exist(obj.trainingParams.dest_folder, 'dir'))
-                mkdir(obj.trainingParams.dest_folder);
-                warning('LearnToolbox:FileSystem:FolderNotExisting', 'The folder %s does not exists, it will be created', obj.trainingParams.dest_folder);
+            if(~exist(obj.parameters.dest_folder, 'dir'))
+                mkdir(obj.parameters.dest_folder);
+                warning('Lynx:FileSystem:FolderNotExisting', 'The folder %s does not exists, it will be created', obj.parameters.dest_folder);
             end
             
             if(SimulationLogger.getInstance().flags.debug)
                 fprintf('\t\t Saving configuration...\n');
             end
-            save(sprintf('%s/%s_%s_r%df%d.mat',obj.trainingParams.dest_folder, obj.trainingParams.source_id, ... 
+            save(sprintf('%s/%s_%s_r%df%d.mat',obj.parameters.dest_folder, obj.parameters.source_id, ... 
                 SimulationLogger.getInstance().getAdditionalParameter('dataset_name'), ...
                 SimulationLogger.getInstance().getAdditionalParameter('run'), ...
                 SimulationLogger.getInstance().getAdditionalParameter('fold')), 'model');
-            
         end
     
-        function [labels, scores] = test(obj, Xts)
-            [labels, scores] = obj.wrappedAlgo.test(Xts);
-        end
-        
-        function res = isTaskAllowed(obj, task)
-           res = obj.wrappedAlgo.isTaskAllowed(task); 
-        end
     end
     
     methods(Static)
-        function info = getInfo()
+        function info = getDescription()
             info = 'Save the configuration of an algorithm';
         end
         
@@ -61,12 +54,12 @@ classdef SaveConfiguration < Wrapper
             pNames = {'source_id', 'dest_folder'}; 
         end
         
-        function pInfo = getParametersInfo()
+        function pInfo = getParametersDescription()
             pInfo = {'Name of the model to save', 'Destination folder'};
         end
         
         function pRange = getParametersRange()
-            pRange = {'String (required)', 'String, default to ''./tmp/'''};
+            pRange = {'String (required)', 'String, default to ''./models/'''};
         end 
     end
     

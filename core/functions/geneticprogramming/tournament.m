@@ -1,5 +1,5 @@
 
-% TOURNAMENT Perform a lexicografic tournament selection.
+% tournament - Perform a lexicografic tournament selection.
 %
 %   IND = TOURNAMENT(POP, FIT, SIZE) SIZE individuals are extracted from
 %   the population POP. Then, the fittest one between them is returned. If

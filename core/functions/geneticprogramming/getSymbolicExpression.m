@@ -1,6 +1,6 @@
 function [variables, fncPointer] = getSymbolicExpression( k )
-%GETSYMBOLICEXPRESSION Returns a pointer to a function representing the
-%kernel, defined in terms of symbolic variables.
+% getSymbolicExpression - Returns a pointer to a function representing the
+%   kernel, defined in terms of symbolic variables.
 %
 %   [VARS, FCN] = GETSYMBOLICEXPRESSION(K) return a pointer FCN and the
 %   variables VARS on which it is defined.

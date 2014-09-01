@@ -1,12 +1,13 @@
+% OneVersusAll - Perform a one-versus-all training for multi-class tasks
+%   Does nothing on other tasks. This has no parameters.
+
+% License to use and modify this code is granted freely without warranty to all, as long as the original author is
+% referenced and attributed as such. The original author maintains the right to be solely associated with this work.
+%
+% Programmed and Copyright by Simone Scardapane:
+% simone.scardapane@uniroma1.it
+
 classdef OneVersusAll < Wrapper
-    % ONEVERSUSALL Performs a one-versus-all training for multi-class
-    % tasks. Does nothing on other tasks. This has no parameters.
-    
-    % License to use and modify this code is granted freely without warranty to all, as long as the original author is
-    % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
-    %
-    % Programmed and Copyright by Simone Scardapane:
-    % simone.scardapane@uniroma1.it
     
     properties
         models;
@@ -15,20 +16,20 @@ classdef OneVersusAll < Wrapper
     methods
         
         function obj = OneVersusAll(wrappedAlgo, varargin)
-            obj = obj@Wrapper(wrappedAlgo, varargin);
+            obj = obj@Wrapper(wrappedAlgo, varargin{:});
             if(~obj.wrappedAlgo.isTaskAllowed(Tasks.BC))
-                error('LearnToolbox:Logic:UnsupportedAlgorithm', 'OneVersusAll requires a base algorithm supporting binary classification');
+                error('Lynx:Runtime:UnsupportedAlgorithm', 'OneVersusAll requires a base algorithm supporting binary classification');
             end
         end
         
-        function initParameters(~, p)
+        function p = initParameters(~, p)
         end
         
         function obj = train(obj, Xtr, Ytr)
             
-            if(~(obj.getTask() == Tasks.MC))
+            if(~(obj.getCurrentTask() == Tasks.MC))
                 
-                obj.wrappedAlgo = obj.wrappedAlgo.setTask(obj.getTask());
+                obj.wrappedAlgo = obj.wrappedAlgo.setCurrentTask(obj.getCurrentTask());
                 obj.wrappedAlgo = obj.wrappedAlgo.train(Xtr, Ytr);
                 
             else
@@ -36,7 +37,7 @@ classdef OneVersusAll < Wrapper
                 nClasses = max(Ytr);
                 obj.models = cell(1, nClasses);
             
-                obj.wrappedAlgo = obj.wrappedAlgo.setTask(Tasks.BC);
+                obj.wrappedAlgo = obj.wrappedAlgo.setCurrentTask(Tasks.BC);
                 
                 for i = 1:nClasses
                    
@@ -52,8 +53,12 @@ classdef OneVersusAll < Wrapper
             
         end
     
-        function [labels, scores] = test(obj, Xts)
-            if(obj.getTask() ~= Tasks.MC)
+        function b = hasCustomTesting(obj)
+            b = true;
+        end
+        
+        function [labels, scores] = test_custom(obj, Xts)
+            if(obj.getCurrentTask() ~= Tasks.MC)
                 [labels, scores] = obj.wrappedAlgo.test(Xts);
             else
                 scores = zeros(size(Xts,1), length(obj.models));
@@ -72,7 +77,7 @@ classdef OneVersusAll < Wrapper
     end
     
     methods(Static)
-        function info = getInfo()
+        function info = getDescription()
             info = 'Performs a One-Versus-All Strategy for MultiClass Classification';
         end
         
@@ -80,7 +85,7 @@ classdef OneVersusAll < Wrapper
             pNames = {}; 
         end
         
-        function pInfo = getParametersInfo()
+        function pInfo = getParametersDescription()
             pInfo = {};
         end
         

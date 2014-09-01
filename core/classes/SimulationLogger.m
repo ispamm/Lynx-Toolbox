@@ -1,69 +1,45 @@
-classdef (Sealed) SimulationLogger < handle
-    % SimulationLogger A class implementing the Singleton pattern for 
-    % storing and retrieving data from any point of the program execution. 
-    % Note that stored values in separate threads are not accessible 
-    % whenever the thread is closed. This is also used to collect all the
-    % setup information for the current run.
-    %
-    %   SimulationLogger Methods:
-    %
-    %   getInstance - Returns the only allowed instance of the class
-    %
-    %   setAdditionalParameter/addAdditionalParameter - Insert a parameter
-    %   in the logger, and retrieve it successively.
-    %
-    %   findDatasetById - Searches for the presence of a dataset with given
-    %   id.
-    %
-    %   findDatasetByIdWithRegexp - Searches for all the datasets whose id
-    %   match a given regular expression.
-    %
-    %   findAlgorithmById - Searches for the presence of an algorithm with
-    %   given id.
-    %
-    %   getAlgorithm - Returns the algorithm with a given id.
-    %
-    %   removeAlgorithm - Removes the algorithm with a given id.
-    
-    % License to use and modify this code is granted freely without warranty to all, as long as the original author is
-    % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
-    %
-    % Programmed and Copyright by Simone Scardapane:
-    % simone.scardapane@uniroma1.it
+% SimulationLogger - A class for storing and retrieving data from any point of the program execution 
+% Note that stored values in separate threads are not accessible
+% whenever the thread is closed.
+%
+%   SimulationLogger Methods:
+%
+%   setAdditionalParameter/addAdditionalParameter - Insert a parameter
+%   in the logger, and retrieve it successively.
+
+% License to use and modify this code is granted freely without warranty to all, as long as the original author is
+% referenced and attributed as such. The original author maintains the right to be solely associated with this work.
+%
+% Programmed and Copyright by Simone Scardapane:
+% simone.scardapane@uniroma1.it
+
+classdef (Sealed) SimulationLogger < SingletonClass
    
     properties
-       algorithms;              % Cell array of learning algorithms
-       datasets;                % Cell array of datasets
-       performanceMeasures;     % Struct of performance measures
-       additionalParameters;    % Data structure containing the additional parameters
-       flags;                   % Flags for the current simulation
-       partition_strategy;      % Partition strategy
-       statistical_test;        % Object for performing the statistical testing
+       % Data structure containing the additional parameters
+       additionalParameters;
+       % Flags for the run
+       flags;
+    end
+    
+    properties(Access=protected,Constant)
+        singleton_id = 'simlogger_singleton_id';
     end
     
     methods (Access = private)
-      function obj = SimulationLogger
+      function obj = SimulationLogger()
           obj.additionalParameters = containers.Map;
-          obj.flags = struct('debug', true, 'parallelized', false, 'gpu_enabled', false, 'save_results', false, 'generate_pdf', false, 'semisupervised', false);
-          obj.algorithms = struct('id', {}, 'name', {}, 'model', {});
-          obj.datasets = cell(0,0);
-          obj.performanceMeasures = containers.Map;
-          obj.performanceMeasures(char(Tasks.BC)) = @PerfMisclassification;
-          obj.performanceMeasures(char(Tasks.MC)) = @PerfMisclassification;
-          obj.performanceMeasures(char(Tasks.R)) = @PerfNrmse;
-          obj.partition_strategy = KFoldPartition(3);
-          obj.statistical_test = NoStatisticalTest();
+          obj.flags = struct('debug', true, 'semisupervised', false, 'parallelized', false);
+      end
+    end
+    
+    methods (Static)
+      function singleObj = getInstance()
+         singleObj = SingletonClass.getInstanceFromClass(SimulationLogger());
       end
     end
     
     methods
-        
-      function copyConfiguration(obj, currentLogger)
-          % Copy the configuration from another logger
-         obj.performanceMeasures = currentLogger.performanceMeasures;
-         obj.additionalParameters = currentLogger.additionalParameters;
-         obj.flags = currentLogger.flags;
-      end
         
       function value = getAdditionalParameter(obj, key)
           % Get a parameter stored in the logger. If the parameter does not
@@ -97,64 +73,6 @@ classdef (Sealed) SimulationLogger < handle
           obj.setAdditionalParameter(key, p);
       end
       
-      function obj = clear(~)
-          global localObj
-          localObj = [];
-      end
-      
-      function n = findDatasetById(obj, id)
-         for i = 1:length(obj.datasets)
-             if(strcmp(obj.datasets{i}.id, id))
-                 n = i;
-                 return;
-             end
-         end
-         error('LearnTool:Validation:DatasetNotDeclared', 'Dataset %s not declared', id);
-      end
-      
-      function n = findDatasetByIdWithRegexp(obj, id)
-         n = [];
-         for i = 1:length(obj.datasets)
-             a = regexp(obj.datasets{i}.id, id, 'match');
-             b = ~isempty(a) && strcmp(obj.datasets{i}.id, a);
-             if(b)
-                 n = [n; i];
-             end
-         end
-      end
-      
-      function n = findAlgorithmById(obj, id)
-         for i = 1:length(obj.algorithms)
-             if(strcmp(obj.algorithms(i).id, id))
-                 n = i;
-                 return;
-             end
-         end
-         error('LearnTool:Validation:AlgorithmNotDeclared', 'Algorithm %s not declared', id);
-      end
-      
-      function algo = getAlgorithm(obj, id)
-          algo = obj.algorithms(obj.findAlgorithmById(id));
-      end
-      
-      function removeAlgorithm(obj, algoId)
-          try
-              id = obj.findAlgorithmById(algoId);
-              obj.algorithms(id) = [];
-          catch
-          end
-      end
-      
-    end
-   
-   methods (Static)
-      function singleObj = getInstance
-         global localObj
-         if isempty(localObj) || ~isvalid(localObj)
-            localObj = SimulationLogger;
-         end
-         singleObj = localObj;
-      end
    end
    
 end

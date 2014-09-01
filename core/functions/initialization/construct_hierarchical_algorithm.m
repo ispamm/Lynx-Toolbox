@@ -1,4 +1,4 @@
-% CONSTRUCT_HIERARCHICAL_ALGORITHM Construct a hierarchical learning
+% construct_hierarchical_algorithm - Construct a hierarchical learning
 % algorithm (HLA) from previously defined algorithms. Only the resulting
 % algorithm is kept in the simulation, while the others are deleted.
 % The syntax is:
@@ -27,33 +27,30 @@
 % construct_hierarchical_algorithm('H', 'HLA', [2 0 0],
 % {RangeAggregator(0.5)}, {"A", "B", "C"});
 
-function construct_hierarchical_algorithm( id, name, nArities, aggregators, algorithms_ids )
+function construct_hierarchical_algorithm(nArities, aggregators, algorithms_ids )
 
-log = SimulationLogger.getInstance();
+assert(sum(nArities > 0) == length(aggregators), 'Lynx:Runtime:HLA', 'The number of aggregators must be equal to the number of non-terminal nodes');
+assert(length(nArities) == length(algorithms_ids), 'Lynx:Runtime:HLA',  'The number of algorithms must be equal to the number of nodes');
 
-currentAlgo.id = id;
-currentAlgo.name = name;
-
-assert(sum(nArities > 0) == length(aggregators), 'The number of aggregators must be equal to the number of non-terminal nodes');
-assert(length(nArities) == length(algorithms_ids), 'The number of algorithms must be equal to the number of nodes');
-
-currentAlgo.model = construct_recursively(nArities, aggregators, algorithms_ids);
-
-log.algorithms(end+1) = currentAlgo;
+s = Simulation.getInstance();
+currentAlgo = construct_recursively(nArities, aggregators, algorithms_ids);
 
 for i = 1:length(algorithms_ids)
-    log.removeAlgorithm(algorithms_ids{i});
+    s.algorithms = s.algorithms.remove(algorithms_ids{i});
 end
+
+s.algorithms = s.algorithms.addElement(currentAlgo);
+
 
     function [algo, nArities, aggregators, algorithms_ids] = ...
             construct_recursively(nArities, aggregators, algorithms_ids)
        
-        algoStruct = log.getAlgorithm(algorithms_ids{1});
+        algoStruct = s.algorithms.getById(algorithms_ids{1});
         if(nArities(1) > 0)
-            algo = HierarchicalLearningAlgorithm(aggregators{1}, algoStruct.model, algoStruct.name);
+            algo = HierarchicalLearningAlgorithm(aggregators{1}, algoStruct);
             aggregators = aggregators(2:end);
         else
-            algo = HierarchicalLearningAlgorithm([], algoStruct.model, algoStruct.name);
+            algo = HierarchicalLearningAlgorithm([], algoStruct);
         end
 
         algorithms_ids = algorithms_ids(2:end);
@@ -70,4 +67,3 @@ end
     end
 
 end
-

@@ -1,6 +1,5 @@
 
-% ADD_DATASET  Add a dataset to be tested, with given id, name, and 
-% filename
+% add_dataset - Add a dataset to be tested, with given id, name, and filename
 
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is
 % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
@@ -8,38 +7,30 @@
 % Programmed and Copyright by Simone Scardapane:
 % simone.scardapane@uniroma1.it
 
-function add_dataset(data_id, data_name, file, subsample, varargin)
+function add_dataset(data_id, data_name, file, varargin)
 
-    % Subsample is used to load only a given percentage of a dataset
-    if(nargin < 4)
-        subsample = 1;
-    end
-
-    s = SimulationLogger.getInstance();
+    s = Simulation.getInstance();
     
-    filename = strcat(file, '.mat');
-    [~, names] = enumeration('Tasks');
+    tasks = Tasks.getAllTasks();
     
-    i = 1;
+    ii = 1;
     found = false;
     
-    % Search the dataset in each subfolder
-    while i<=length(names) && ~found
-       fold = strcat('datasets/', names{i}, '/');
-       if(exist(strcat(fold, filename), 'file'))
-          
-          task = names{i};
-          
-          s.datasets = [s.datasets; DatasetFactory.create(task, data_id, data_name, strcat(fold, filename), subsample, varargin{:})];
-          
-          found = true;
-          
-       end
-       i = i+1;
+    % Search the dataset in each task
+    while ii <= length(tasks) && ~found
+        d = tasks{ii}.loadDataset(file, data_name);
+        if(~isempty(d))
+            found = true;
+            d = tasks{ii}.getDatasetFactory().create(tasks{ii}.getTaskId(), data_id, data_name, d);
+            for jj = 1:length(d)
+                s.datasets = s.datasets.addElement(d{jj});
+            end
+        end
+        ii = ii + 1;
     end
     
     if(~found)
-        error('LearnTool:Logic:DatasetNotFound', ['Dataset ', data_name, ' not found.']);
+        error('Lynx:Logic:DatasetNotFound', ['Dataset ', data_name, ' not found.']);
     end
 
 end

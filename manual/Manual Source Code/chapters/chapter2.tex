@@ -1,0 +1,278 @@
+\chapter{Installation and first simulations}
+\label{chap:install}
+
+In this chapter, we show how to install the toolbox and run some initial simulations.
+
+\section{Installing Lynx}
+
+After uncompressing the toolbox, run the \verb|install.m| script in the root folder. At the end of the process, you will be asked to save the current path. If you select \textit{no}, you will need to run again the installation script after rebooting MATLAB. Moreover, you will need to run again the script every time you move the toolbox to a different folder. Below is a transcript of a successful installation procedure:
+
+\begin{console}
+Creating required folders...
+Adding toolbox to path...
+Generating configuration file...
+--- Do you want to save the path? (Y/N) ---
+Y
+Saving path...
+Installation complete
+
+A few useful commands:
+
+   --> To run a simulation: 'run_simulation'
+   --> To generate HTML documentation: 'generate_documentation'
+   --> To generate HTML reports: 'info_datasets', 'info_models', 
+      'info_wrappers', 'info_preprocessors'
+   --> To run the test suite: 'run_test_suite'
+   --> To clean the installation: 'clean_installation'
+\end{console}
+
+\noindent You can also see some of the main commands of the toolbox. We explore them in the rest of the chapter.
+
+\section{Folder Structure}
+\label{sec:folders}
+
+Before continuing, let us look briefly at the folder structure of \toolboxname after the installation process. In Fig. \ref{fig:folders} we show a unix-like representation of the directories, together with a brief comment on their contents.
+
+\begin{figure}[h]
+\dirtree{%
+.1 /.
+.2 configs\DTcomment{Configuration files}. 
+.2 core. 
+.3 classes\DTcomment{Core classes of the toolbox}. 
+.3 functions\DTcomment{Core functions of the toolbox}. 
+.2 datasets\DTcomment{Available datasets}. 
+.3 R. 
+.3 BC. 
+.3 (others). 
+.2 functionalities\DTcomment{User-defined algorithms, etc.}. 
+.3 algorithms. 
+.3 performance. 
+.3 preprocessors. 
+.3 wrappers. 
+.2 help\DTcomment{Help scripts for HTML reports}. 
+.2 lib\DTcomment{External libraries}.
+.2 manual\DTcomment{This manual folder}. 
+.2 results\DTcomment{Saved results}. 
+.2 scripts\DTcomment{Output scripts}. 
+.2 tests\DTcomment{Testing suite}. 
+.2 tmp\DTcomment{Temporary folder}. 
+}
+\label{fig:folders}
+\caption{Folder Structure of the Toolbox}
+\end{figure} 
+
+\noindent Most of the directories contents will be explored in depth in the rest of this manual. For the moment, you should remember that configuration files are stored in the ''\textit{configs}'' folder.
+
+\section{Running a first simulation}
+
+To execute the first simulation, run the \verb|run_simulation.m| script. You will see a list of the available configuration files, which after installation corresponds to the two demos included with the toolbox. For the moment, select ``\textit{demo\_basic}'' (i.e., select 1):
+
+\newpage
+
+\begin{console}
+Initializing simulation...
+
+Please select a configuration file:
+ 
+	 * [1] demo_basic - Basic demo of the toolbox 
+	 * [2] demo_extended - Extended demo of the toolbox 
+
+Input your selection: 2
+\end{console}
+
+\subsection{Initialization phase}
+
+You will be prompted with a detail of the simulation. In particular:
+
+\begin{itemize}
+\item The demo has two algorithms, a simple \textit{baseline} to compare the results, and a more complex \textit{Extreme Learning Machine} (ELM) \cite{Huang2012}:
+
+\begin{console}
+Algorithms included in the simulation (2 total):
+  * Baseline 
+    --> BaselineModel, trained with BaselineTrainingAlgorithm
+  * Extreme Learning Machine 
+    --> ExtremeLearningMachine, trained with RegularizedELM
+\end{console}
+
+\item The algorithms are tested on two datasets, \textit{Gtzan}\footnote{\url{http://marsyas.info/download/data_sets/}} (a binary classification dataset for music/speech discrimination) and a regression dataset taken from the UCI repository\footnote{\url{http://archive.ics.uci.edu/ml/}}:
+
+\begin{console}
+Datasets selected for the simulation (2 total):
+  * Gtzan (Binary classification)
+  * Glass (UCI) (Regression)
+\end{console}
+
+\item Lynx will use the misclassification error for the classification tasks and the mean-squared error for the regression tasks.
+\item The simulation is run a single time, and data is partitioned using a k-fold cross-validation strategy:
+
+\begin{console}
+Will repeat experiments 1 time(s) with partitioning KFoldPartition
+\end{console}
+
+\end{itemize}
+
+\noindent If you wish, you can compare this detail with the commands contained in the configuration file. This, however, will be explored in full depth in the next chapter. When you want to start the simulation, select \textit{yes}.
+
+\subsection{Training phase}
+
+In this phase, the algorithms are compared in turn on each dataset. In this case, both datasets are rather small, so the simulation will take a very short time. Below is an excerpt from this phase:
+
+\begin{console}
+Evaluating Extreme Learning Machine on Glass (UCI) (run 1/1) 
+   Using k-fold partition 1 of 3... (143 training samples, 
+      71 testing samples)
+   Using k-fold partition 2 of 3... (142 training samples, 
+      72 testing samples)
+   Using k-fold partition 3 of 3... (143 training samples, 
+      71 testing samples)
+\end{console}
+
+\noindent For slower simulations, the percentage of completed experiments is shown in the bottom left of the MATLAB interface.
+
+\subsection{Output phase}
+
+At the end, the results are shown on screen. You can see, for example, that ELM has a misclassification error on Gtzan of $22.67\%$, against the baseline error of $48.52\%$. As expected, training times are all very small:
+
+\begin{console}
+Primary performances:
+                       Baseline  Extreme Learning Machine
+Gtzan        48.52% (+/- 7.84%)        22.67% (+/- 2.96%)
+Glass (UCI)     4.41 (+/- 0.08)           1.28 (+/- 0.31)
+ 
+Training times:
+                              Baseline   Extreme Learning Machine
+Gtzan        0.02 secs (+/- 0.01 secs)  0.01 secs (+/- 0.00 secs)
+Glass (UCI)  0.01 secs (+/- 0.00 secs)  0.03 secs (+/- 0.03 secs)
+\end{console}
+
+\section{Running a second simulation}
+
+Let us run a more complex simulation. To this end, execute once again \verb|run_simulation.m|, but this time select the ``\textit{demo\_extended}'' configuration. You can see the following:
+
+\begin{itemize}
+\item We have added an additional algorithm to the simulation, a Support Vector Machine (SVM), trained with MATLAB own algorithm. Moreover, you can see that we added a wrapper to the ELM (\textit{ParameterSweep}). This will fine-tune a parameter with a grid search procedure.
+\item We have also added a third and fourth datasets.
+\item This time, Lynx will compute also the ROC curve for classification tasks, and the mean-absolute error for regression tasks:
+
+\begin{console}
+The following performance measures have been selected:
+	 * Binary classification: Misclassification rate 
+	 	(and ROC curve)
+	 * Regression: Mean squared error 
+	 	(and Mean absolute error)
+\end{console}
+
+\item We have added two additional features: we execute a custom output script (in this case, for printing information on the grid search), and we save the results in a folder:
+
+\begin{console}
+* The following features are active: 
+  --> SetSeedPRNG (Fix the seed of the PRNG) 
+  --> ExecuteOutputScripts (Execute 1 custom output scripts) 
+  --> SaveResults (Save results of the simulation in folder demo_results) 
+\end{console}
+
+\end{itemize}
+
+Moreover, you can see before the detail of the simulation the following warning:
+
+\begin{console}
+The following tests are not possible:
+   SVM on Glass (UCI).
+   SVM on Yacht (UCI).
+\end{console}
+
+MATLAB SVM algorithm does not support regression, but only classification. Hence, Lynx warns the user that it cannot be executed on the two regression datasets. 
+
+After running the simulation, you will see (as expected) the ROC curve for the Gtzan and double moons datasets, and the mean-absolute error for the other two. Moreover, you will see some information about the grid search procedure. Finally, if you go in the \textit{results/demo\_results} folder, you will find a transcript of the simulation, a .mat file with the results, and the corresponding configuration file.
+
+Let us analyze briefly the results. You can see that two of the three algorithms are shown in the plots with a single point: this is due to the fact that they do not output confidence scores in their classification. On the double moons dataset, the SVM has a perfect result, while it is worse on the Gtzan dataset. Finally, the optimal regularization parameter for ELM is around $1$ and $3$ on the different datasets:
+
+\begin{console}
+Results of grid search for algorithm ELM: 
+  Dataset Gtzan:
+    Average training time is 0.00 sec
+    C = 3.000977
+  Dataset Double moons:
+    Average training time is 0.00 sec
+    C = 2.667643
+  Dataset Glass (UCI):
+    Average training time is 0.00 sec
+    C = 1.667643
+  Dataset Yacht (UCI):
+    Average training time is 0.00 sec
+    C = 3.334310
+\end{console}
+
+\subsection{Making the simulation more complex}
+
+We saw that the internal SVM of MATLAB does not support regression. Moreover, it does not return confidence scores in its classifications, so it is represented by a single dot in the ROC curve. To change this, open the configuration file, and uncomment line 11:
+
+\begin{lstlisting}
+% Uncomment for LibSVM
+set_training_algorithm('SVM', @LibSVM); 
+\end{lstlisting}
+
+\noindent In this way, we will use the LibSVM library\footnote{\url{http://www.csie.ntu.edu.tw/~cjlin/libsvm/}} to train the SVM. If you run the simulation again, Lynx will warn you that LibSVM is not currently installed, and (after confirmation) proceeds to the installation:
+
+\begin{console}
+Checking prerequisites...
+Checking for presence of LibSVM...
+--- LibSVM not found. Do you want to install it? (Y/N) ---
+(Required for: LibSVM training algorithm)
+Y
+Downloading toolbox... (may take some minutes)
+Installation of LibSVM succesfull
+\end{console}
+
+\noindent After installing it, the simulation will run as before, but with the different training algorithm the SVM will be tested on all datasets. A warning will tell you that the results are being saved in a non-empty folder, and they are effectively overriding the previously saved results.
+
+If you want, you can also uncomment line 30 to enable a statistical test of the results:
+
+\begin{lstlisting}
+% Uncomment for statistical test (requires LibSVM training algorithm)
+add_feature(CheckSignificance(FriedmanTest()));
+\end{lstlisting}
+
+\noindent You will see the statistical test just before the output script on the grid search:
+
+\newpage
+
+\begin{console}
+--------------------------------------------------
+--- STATISTICAL ANALYSIS -------------------------
+--------------------------------------------------
+
+Table of ranks:
+              Baseline  ELM  SVM
+Gtzan                3    2    1
+Double moons         3    2    1
+Glass (UCI)          3    2    1
+Yacht (UCI)          3    2    1
+ 
+
+Mean ranks:
+  Baseline  ELM  SVM
+         3    2    1
+ 
+There is significant difference at alpha = 0.05 using the corrected 
+   Friedman test (Ff = Inf > 5.143253)
+
+The following pairs have significant differences according to the 
+  Nemenyi test at alpha = 0.05 (CD = 1.656751):
+	Baseline and SVM [rank difference = -2.000000]
+\end{console}
+
+\section{Additional scripts}
+
+\subsection{Generating the documentation}
+
+If you want, you can generate a full HTML documentation for the files in the toolbox by running the \verb|generate_documentation.m| script. The first time you run it, it will download the M2HTML toolbox, and it will create the documentation in the ``\textit{doc}'' folder.
+
+\subsection{Running the test suite}
+
+Lynx comes with a suite of approximately $150$ unitary tests. To execute the suite, run the \verb|run_test_suite.m| command. Be careful to run this command again after every change to its internal code.
+
+\subsection{Cleaning the installation}
+
+Finally, you may want to clean the installation, i.e. remove everything from the path, deleting the external libraries etc. To this end, run the \verb|clean_installation.m| script.

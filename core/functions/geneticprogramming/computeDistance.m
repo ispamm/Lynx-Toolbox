@@ -1,9 +1,10 @@
 
-% COMPUTEDISTANCE Compute an edit-2 similarity between two kernels, see: 
-% Burke, Edmund K., Steven Gustafson, and Graham Kendall. "Diversity in
-% genetic programming: An analysis of measures and correlation with  
-% fitness." Evolutionary  Computation, IEEE Transactions on 8.1 (2004): 
-% 47-62.
+% computeDistance - Compute an edit-2 similarity between two kernels
+%   For more information, refer to: 
+%   Burke, Edmund K., Steven Gustafson, and Graham Kendall. "Diversity in
+%   genetic programming: An analysis of measures and correlation with  
+%   fitness." Evolutionary  Computation, IEEE Transactions on 8.1 (2004): 
+%   47-62.
 %
 %   D = COMPUTEDISTANCE(K1, K2) returns the distance D between the kernels
 %   K1 and K2. The distance between two nodes is 0 if they are of the same

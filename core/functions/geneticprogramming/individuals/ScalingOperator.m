@@ -1,12 +1,13 @@
-classdef ScalingOperator < InternalNode
-    %SCALINGOPERATOR Scale a given kernel by a constant factor.
+% ScalingOperator - Scale a given kernel by a constant factor
     
-    % License to use and modify this code is granted freely without warranty to all, as long as the original author is
-    % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
-    %
-    % Programmed and Copyright by Simone Scardapane:
-    % simone.scardapane@uniroma1.it
-   
+% License to use and modify this code is granted freely without warranty to all, as long as the original author is
+% referenced and attributed as such. The original author maintains the right to be solely associated with this work.
+%
+% Programmed and Copyright by Simone Scardapane:
+% simone.scardapane@uniroma1.it
+
+classdef ScalingOperator < InternalNode
+
     methods
         
         function obj = ScalingOperator(leftNode, ~, scaleFactor)
