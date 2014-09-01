@@ -7,6 +7,12 @@ classdef RegressionTaskTest < matlab.unittest.TestCase
         end
         
     end
+       
+    methods(TestMethodTeardown)
+        function teardown(testCase)
+            RegressionTask.getInstance().clear();
+        end
+    end
     
     methods (Test)
         

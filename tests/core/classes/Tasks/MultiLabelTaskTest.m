@@ -8,6 +8,12 @@ classdef MultiLabelTaskTest < matlab.unittest.TestCase
         
     end
     
+    methods(TestMethodTeardown)
+        function teardown(testCase)
+            MultiLabelTask.getInstance().clear();
+        end
+    end
+    
     methods (Test)
         
         function testForSingleton(testCase)

@@ -8,6 +8,12 @@ classdef MulticlassClassificationTaskTest < matlab.unittest.TestCase
         
     end
     
+    methods(TestMethodTeardown)
+        function teardown(testCase)
+            MulticlassClassificationTask.getInstance().clear();
+        end
+    end
+    
     methods (Test)
         
         function testForSingleton(testCase)

@@ -8,6 +8,12 @@ classdef BinaryClassificationTaskTest < matlab.unittest.TestCase
         
     end
     
+    methods(TestMethodTeardown)
+        function teardown(testCase)
+            BinaryClassificationTask.getInstance().clear();
+        end
+    end
+    
     methods (Test)
         
         function testForSingleton(testCase)
