@@ -39,7 +39,14 @@ if(~(log.flags.parallelized))
     statusbar(0, 'Processing %d of %d (%.1f%%)...', 0, 0, 0);
 end
 
-parfor i=1:N_experiments
+% Required for MATLAB newer or equal than R2013b
+if(~(log.flags.parallelized))
+    M = 0;
+else
+    M = Inf;
+end
+
+parfor (i=1:N_experiments, M)
 
     % Get current configuration
     currentConfiguration = experiments(:, i);
