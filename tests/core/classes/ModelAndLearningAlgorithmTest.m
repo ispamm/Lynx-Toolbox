@@ -19,7 +19,7 @@ classdef ModelAndLearningAlgorithmTest < matlab.unittest.TestCase
         end
 
         function testInvalidModelInitialization(testCase)
-            testCase.verifyError(@()DummyModel('a', 'b'), 'MATLAB:minrhs');
+            testCase.verifyError(@()DummyModel('a', 'b'), 'Lynx:Initialization:Parameters');
         end
         
         function testDefaultAlgorithm(testCase)

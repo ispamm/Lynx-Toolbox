@@ -67,11 +67,7 @@ classdef Parameterized
             try
                 p.parse(varargin{:});
             catch err
-                if(strcmp(err.identifier, 'MATLAB:InputParser:MustBeChar'))
-                    error('Lynx:Initialization:Parameters', 'Please ensure that the initialization parameters for object of type %s are valid', class(obj));
-                else
-                    throw(err);
-                end
+                error('Lynx:Initialization:Parameters', 'Please ensure that the initialization parameters for object of type %s are valid', class(obj));
             end
             obj.parameters = p.Results;
             
