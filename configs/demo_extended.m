@@ -10,7 +10,7 @@ add_model('SVM', 'SVM', @SupportVectorMachine);
 % Uncomment for LibSVM
 % set_training_algorithm('SVM', @LibSVM); 
 
-add_wrapper('ELM', @ParameterSweep, {'C'}, {2^-10:5});
+add_wrapper('ELM', @ParameterSweep, {'C'}, {2.^(-10:5)});
 
 
 %% DATASETS

@@ -44,13 +44,13 @@ for i = algos
        
        if(PRINT_GRAPHS)
            valErrorGrid = algo_stats.valErrorGrid;
+           b = s.trainedAlgo{j, i, 1}{1}.getParameter('ranges');
            if(isvector(valErrorGrid))
-               figure(); hold on; figshift;
-               b = s.trainedAlgo{j, i, 1}{1}.getParameter('ranges');
-               plot( b{1}{1}, valErrorGrid);
-               xlabel(params_gs{1});
-               ylabel('Validation error');
-               title(sprintf('Algorithm %s on dataset %s', s.algorithms.get(i).name, s.datasets.get(j).name));
+               c = XYPlotContainer();
+               c = c.store(XYPlot(b{1}{1}, valErrorGrid, params_gs{1}, 'Validation error')); 
+               p = FormatAsMultiplePlots();
+               fprintf('\t\tValidation performance: ');
+               p.displayOnConsole({c}, {sprintf('Algorithm %s on dataset %s', s.algorithms.get(i).name, s.datasets.get(j).name)}, {'Performance'});
            elseif(ismatrix(valErrorGrid))
                figure(); hold on; figshift;
                b = s.trainedAlgo{j, i, 1}{1}.getParameter('ranges');

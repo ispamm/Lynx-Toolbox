@@ -32,7 +32,7 @@ classdef FormatAsMultiplePlots < OutputFormatter
                 figshift;
                 
                 % Set title and labels
-                title(sprintf('Dataset %s', row_labels{ii}), 'FontSize', 24);
+                title(sprintf('%s', row_labels{ii}), 'FontSize', 24);
                 v = valuesCellArray{ii, 1}.getFinalizedValue();
                 xlabel(v.x_label, 'FontSize', 24);
                 ylabel(v.y_label, 'FontSize', 24);
@@ -51,6 +51,9 @@ classdef FormatAsMultiplePlots < OutputFormatter
                         plot(o.X, o.Y, 'LineWidth', 3, 'Color', colorMap(jj,:));
                     end
                 end
+                
+                % Set axis scaling
+                axis tight;
                 
                 % Set legend
                 legend(column_labels);
