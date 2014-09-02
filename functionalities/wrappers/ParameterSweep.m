@@ -45,6 +45,10 @@ classdef ParameterSweep < Wrapper
             
             combinations = combvec(obj.parameters.ranges{:});
             
+            if(size(combinations, 1) <= 2)
+                obj.statistics.valErrorGrid = zeros(size(combinations, 2), 1);
+            end
+            
             for zz=1:size(combinations, 2)
                 
                 paramsToTest = combinations(:,zz);
@@ -65,6 +69,14 @@ classdef ParameterSweep < Wrapper
                     obj.bestParams = combinations(:, zz);
                 end
                 
+                if(size(combinations, 1) <= 2)
+                    obj.statistics.valErrorGrid(zz) = currentPerf{1}.getFinalizedValue();
+                end
+                
+            end
+            
+            if(size(combinations, 1) == 2)
+                obj.statistics.valErrorGrid = reshape(obj.statistics.valErrorGrid, length(obj.parameters.ranges{1}), length(obj.parameters.ranges{2}));
             end
             
             if(SimulationLogger.getInstance().flags.debug)
@@ -93,6 +105,7 @@ classdef ParameterSweep < Wrapper
             if(SimulationLogger.getInstance().flags.debug)
                 fprintf('\t\t Final training time is: %.2f secs\n', trainingTime);
             end
+            
             
             obj.statistics.bestPerf = bestPerf;
             obj.statistics.finalTrainingTime = trainingTime;

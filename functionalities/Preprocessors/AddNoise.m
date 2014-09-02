@@ -23,10 +23,11 @@ classdef AddNoise < Preprocessor
         end
         
         function p = initParameters(obj, p)
-            p.addParamValue('variance', 0.01);
+            p.addParamValue('variance', 0.001);
         end
         
         function [dataset, obj] = process( obj, dataset )
+            fprintf('Adding noise to %s...\n', dataset.name);
             [N, d] = size(dataset.X);
             noise = randn(N, d).*sqrt(obj.parameters.variance);
             dataset.X = dataset.X + noise;
@@ -53,7 +54,7 @@ classdef AddNoise < Preprocessor
         end
         
         function pRange = getParametersRange()
-            pRange = {'Positive real number, default to 0.01'};
+            pRange = {'Positive real number, default to 0.001'};
         end
         
     end

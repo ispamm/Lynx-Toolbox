@@ -8,6 +8,7 @@
 % Programmed and Copyright by Simone Scardapane:
 % simone.scardapane@uniroma1.it
 
+PRINT_GRAPHS = true;
 
 s = Simulation.getInstance();
 algos = find_algorithms('ParameterSweep', s.algorithms);
@@ -39,6 +40,26 @@ for i = algos
            
            fprintf('\t\t%s = %f\n', params_gs{1}{z}, tmp);
            
+       end
+       
+       if(PRINT_GRAPHS)
+           valErrorGrid = algo_stats.valErrorGrid;
+           if(isvector(valErrorGrid))
+               figure(); hold on; figshift;
+               b = s.trainedAlgo{j, i, 1}{1}.getParameter('ranges');
+               plot( b{1}{1}, valErrorGrid);
+               xlabel(params_gs{1});
+               ylabel('Validation error');
+               title(sprintf('Algorithm %s on dataset %s', s.algorithms.get(i).name, s.datasets.get(j).name));
+           elseif(ismatrix(valErrorGrid))
+               figure(); hold on; figshift;
+               b = s.trainedAlgo{j, i, 1}{1}.getParameter('ranges');
+               surf( b{1}{1}, b{1}{2}, valErrorGrid');
+               xlabel(params_gs{1}{1});
+               ylabel(params_gs{1}{2});
+               zlabel('Validation error');
+               title(sprintf('Algorithm %s on dataset %s', s.algorithms.get(i).name, s.datasets.get(j).name));
+           end
        end
        
    end

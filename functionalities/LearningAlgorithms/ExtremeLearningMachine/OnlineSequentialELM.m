@@ -25,7 +25,6 @@ classdef OnlineSequentialELM < LearningAlgorithm
         end
         
         function p = initParameters(obj, p)
-            p.addParamValue('C', 1, @(x) assert(x > 0, 'Regularization parameter of OS-ELM must be > 0'));
             p.addParamValue('N0', 15, @(x) assert(isnatural(x, false), 'Initial block size of OS-ELM must be a non-zero natural number'));
             p.addParamValue('blockSize', 15, @(x) assert(isnatural(x, false), 'Block size of OS-ELM must be a non-zero natural number'));
         end
@@ -83,15 +82,15 @@ classdef OnlineSequentialELM < LearningAlgorithm
         end
         
         function pNames = getParametersNames()
-            pNames = {'C', 'N0', 'blockSize'};
+            pNames = {'N0', 'blockSize'};
         end
         
         function pInfo = getParametersDescription()
-            pInfo = {'Regularization factor', 'Size of initial block', 'Size of batches'};
+            pInfo = {'Size of initial block', 'Size of batches'};
         end
         
         function pRange = getParametersRange()
-            pRange = {'Positive real number, default is 1', 'Positive integer, default is 15', 'Positive integer, default is 15'};
+            pRange = {'Positive integer, default is 15', 'Positive integer, default is 15'};
         end
     end
     
