@@ -15,7 +15,7 @@ function add_preprocessor(data_id, preprocessor, varargin)
     for i=1:length(ids)
     
         o = preprocessor(varargin{:});
-        s.datasets.set(ids(i), ...
+        s.datasets = s.datasets.set(ids(i), ...
             o.process(s.datasets.get(ids(i))));
     
     end

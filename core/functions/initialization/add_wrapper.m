@@ -10,16 +10,21 @@
 function add_wrapper(algo_id, wrapper, varargin)
 
     s = Simulation.getInstance();
-    algo = s.algorithms.getById(algo_id);
+    
+    ids = s.algorithms.findByIdWithRegexp(algo_id);
+    
+    for i=1:length(ids)
+        algo = s.algorithms.get(ids(i));
 
-    algoWrapped = ...
-        wrapper(algo, varargin{:});
+        algoWrapped = ...
+            wrapper(algo, varargin{:});
     
-    if(~algoWrapped.checkForCompatibility(algo))
-        error('Lynx:Runtime:Wrapper', 'The wrapper %s cannot be applied to model %s', class(algoWrapped), algo_id);
+        if(~algoWrapped.checkForCompatibility(algo))
+            error('Lynx:Runtime:Wrapper', 'The wrapper %s cannot be applied to model %s', class(algoWrapped), algo_id);
+        end
+
+        s.algorithms = s.algorithms.set(ids(i), algoWrapped);
     end
-    
-    s.algorithms = s.algorithms.set(s.algorithms.findById(algo_id), algoWrapped);
 
 end
 

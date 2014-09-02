@@ -2,11 +2,16 @@
 %   Using this wrapper, you can fine-tune the parameters of a preprocessor.
 %   For example, you can apply a PCA to the data:
 %
-%   add_wrapper(id, @ApplyPreprocessor, @PrincipalComponentAnalysis);
+%   add_wrapper(id, @ApplyPreprocessor, PrincipalComponentAnalysis());
 %
 %   Then you can optimize the number of principal components to keep:
 %
 %   add_wrapper(id, @ParameterSweep, {'varianceToPreserve'}, {0.1:0.9});
+%
+%   If you want to apply the preprocessor only during training:
+%
+%   add_wrapper(id, @ApplyPreprocessor, PrincipalComponentAnalysis(),
+%   'training_only', true);
 %
 % See also Wrapper, Preprocessor
 
@@ -24,15 +29,15 @@ classdef ApplyPreprocessor <  Wrapper
     methods
         
         function obj = ApplyPreprocessor(wrappedAlgo, varargin)
-            obj = obj@Wrapper(wrappedAlgo, varargin{1});
-            if(~isa(obj.parameters.preprocessor(), 'Preprocessor'))
+            obj = obj@Wrapper(wrappedAlgo, varargin{:});
+            if(~isa(obj.parameters.preprocessor, 'Preprocessor'))
                 error('Lynx:Runtime:InvalidParameter', 'The first parameter of ApplyPreprocessor must be a valid preprocessor');
             end
-            obj.parameters.preprocessor = obj.parameters.preprocessor(varargin{2:end});
         end
         
         function p = initParameters(~, p)
             p.addRequired('preprocessor');
+            p.addParamValue('training_only', false);
         end
 
         function obj = train(obj, Xtr, Ytr)
@@ -43,7 +48,9 @@ classdef ApplyPreprocessor <  Wrapper
         
         function [labels, scores] = test_custom(obj, Xts)
             d = Dataset.generateAnonymousDataset(obj.getCurrentTask(), Xts, ones(size(Xts, 1), 1));
-            [~, d] = evalc('obj.parameters.preprocessor.processAsBefore(d)'); % Silence the preprocessor
+            if(~obj.parameters.training_only)
+                [~, d] = evalc('obj.parameters.preprocessor.processAsBefore(d)'); % Silence the preprocessor
+            end
             [labels, scores] = obj.wrappedAlgo.test(d.X);
         end
         
@@ -80,15 +87,15 @@ classdef ApplyPreprocessor <  Wrapper
         end
         
         function pNames = getParametersNames()
-            pNames = {'preprocessor', 'varargin'}; 
+            pNames = {'preprocessor', 'training_only'}; 
         end
         
         function pInfo = getParametersDescription()
-            pInfo = {'Preprocessor to apply', 'Parameters for the preprocessor'};
+            pInfo = {'Preprocessor to apply', 'Apply it only during training'};
         end
         
         function pRange = getParametersRange()
-            pRange = {'An object of class Preprocessor', 'Variable, depends on the Preprocessor'};
+            pRange = {'An object of class Preprocessor', 'Boolean, default to true'};
         end
     end
     
