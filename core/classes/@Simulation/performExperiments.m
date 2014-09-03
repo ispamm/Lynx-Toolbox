@@ -46,7 +46,8 @@ else
     M = Inf;
 end
 
-parfor (i=1:N_experiments, M)
+%parfor (i=1:N_experiments, M)
+for i = 1:N_experiments
 
     % Get current configuration
     currentConfiguration = experiments(:, i);

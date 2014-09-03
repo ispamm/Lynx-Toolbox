@@ -16,7 +16,6 @@ classdef DistributeData < AdditionalFeature
         
         function obj = DistributeData(topology)
             obj.topology = topology;
-            obj.distributors = containers.Map;
         end
         
         function executeAfterInitialization(obj)
@@ -34,18 +33,21 @@ classdef DistributeData < AdditionalFeature
         end
         
         function [a, d] = executeBeforeEachExperiment(obj, a, d)
-            if(~ obj.distributors.iskey(d.id))
-                obj.distributors(d.id) = codistributor1d(1, codistributor1d.unsetPartition, size(Xtr, 1));
+            if(a.isOfClass('DataDistributedLearningAlgorithm'))
+                spmd(obj.topology.N)
+                    d.X = codistributed(d.X, codistributor1d(1));
+                    d.Y = codistributed(d.Y, codistributor1d(1));
+                end
+                d = d{1};
+                a.topology = obj.topology;
             end
-            dist = distributors(d.id);
-            d.X = distribute(d.X, dist);
-            d.Y = distribute(d.Y, dist);
-            a.topology = obj.topology;
         end
         
         function [a, d] = executeAfterEachExperiment(obj, a, d)
-            d.X = gather(d.X);
-            d.Y = gather(d.Y);
+            if(a.isOfClass('DataDistributedLearningAlgorithm'))
+                d.X = gather(d.X);
+                d.Y = gather(d.Y);
+            end
         end
         
         function executeAfterFinalization(obj)
@@ -53,13 +55,9 @@ classdef DistributeData < AdditionalFeature
             obj.topology.visualize();
             matlabpool('close');
         end
-        
-        function executeOnError(obj)
-            matlabpool('close');
-        end
-        
-        function s = getDescription(~)
-            s = strcat('Distribute data according to topology: ', obj.topology.getDescription());
+
+        function s = getDescription(obj)
+            s = sprintf('Distribute data according to topology: %s', obj.topology.getDescription());
         end
     end
     
