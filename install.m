@@ -58,6 +58,7 @@ fprintf('Installation complete\n\n');
 
 fprintf('A few useful commands:\n\n');
 fprintf('\t--> To run a simulation: ''run_simulation''\n');
+fprintf('\t--> To download other datasets: ''download_datasets''\n');
 fprintf('\t--> To generate HTML documentation: ''generate_documentation''\n');
 fprintf('\t--> To generate HTML reports: ''info_datasets'', ''info_models'', ''info_wrappers'', ''info_preprocessors''\n');
 fprintf('\t--> To run the test suite: ''run_test_suite''\n');
