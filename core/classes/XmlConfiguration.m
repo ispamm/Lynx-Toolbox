@@ -24,7 +24,7 @@ classdef XmlConfiguration
         function createXmlConfiguration(root_folder)
             % Create the Xml configuration file
             docNode = com.mathworks.xml.XMLUtils.createDocument('config');
-            XmlConfiguration.addChild(docNode, docNode.getDocumentElement, 'version', '1.0');
+            XmlConfiguration.addChild(docNode, docNode.getDocumentElement, 'version', '0.7');
             XmlConfiguration.addChild(docNode, docNode.getDocumentElement, 'root_folder', root_folder);
             XmlConfiguration.addChild(docNode, docNode.getDocumentElement, 'libraries', '');
             xmlwrite(fullfile(root_folder, 'config.xml'), docNode);
