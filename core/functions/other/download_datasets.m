@@ -16,8 +16,8 @@ if(strcmpi(result, 'y'))
     datasetsFile = urlread(strcat(url, 'Datasets.txt'));
     D = textscan(datasetsFile, '%s%s%s%s');
     
-    datasetsDownloaded = 0;
-    datasetsFailures = 0;
+    % SUCCESS - PRESENT - FAILURES
+    downloadResults = zeros(3, 1);
     
     for ii = 1:length(D{1})
        
@@ -25,20 +25,26 @@ if(strcmpi(result, 'y'))
         fprintf('Downloading dataset %s (%s), %s %s... ', D{2}{ii}, currentTask.getDescription(), D{3}{ii}, D{4}{ii});
         
         try
-            remoteFile = strcat(url, D{1}{ii}, '/', D{2}{ii}, '.zip');
-            localDir = fullfile(XmlConfiguration.getRoot(), 'datasets', D{1}{ii});
-            unzip(remoteFile, localDir);
-            cprintf('comment', 'SUCCESS\n');
-            datasetsDownloaded = datasetsDownloaded + 1;
+            if(exist(strcat(D{2}{ii}, '.mat'), 'file') == 2)
+                cprintf([1,0.5,0], 'ALREADY PRESENT\n');
+                res = 2;
+            else
+                remoteFile = strcat(url, D{1}{ii}, '/', D{2}{ii}, '.zip');
+                localDir = fullfile(XmlConfiguration.getRoot(), 'datasets', D{1}{ii});
+                unzip(remoteFile, localDir);
+                cprintf('comment', 'SUCCESS\n');
+                res = 1;
+            end
         catch
             cprintf('err', 'FAILURE\n');
-            datasetsFailures = datasetsFailures + 1;
+            res = 3;
         end
+        downloadResults(res) = downloadResults(res) + 1;
         
     end
     
-    fprintf('Complete, %i downloaded, %i failures.\n', datasetsDownloaded, datasetsFailures);
-    if(datasetsFailures > 0)
+    fprintf('Complete, %i downloaded, %i already present, %i failures.\n', downloadResults);
+    if(downloadResults(3) > 0)
         fprintf('Please contact the author for information on the failed datasets\n');
     end
 
