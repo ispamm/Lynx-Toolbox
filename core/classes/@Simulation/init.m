@@ -72,7 +72,9 @@ function obj = init(obj)
     if matlabpool('size') > 0 && ~log.flags.parallelized % checking to see if pool is already open
         matlabpool('close');
     elseif(matlabpool('size') == 0 && log.flags.parallelized)
-        matlabpool('open');
+        matlabpool('open', 'AttachedFiles', {});
+        % Check for installation of Lynx
+        check_install_on_cluster();
     end
 
     % In the parallelized mode, output on the console is forbidden
