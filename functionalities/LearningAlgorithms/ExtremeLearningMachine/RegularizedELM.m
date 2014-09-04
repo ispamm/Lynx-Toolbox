@@ -36,16 +36,15 @@ classdef RegularizedELM < LearningAlgorithm
         end
         
         function obj = train(obj, Xtr, Ytr)
-
+            
             [N, d] = size(Xtr);
+            
             N_hidden = obj.getParameter('hiddenNodes');
             
             if(obj.getCurrentTask() == Tasks.MC)
                 Ytr  = dummyvar(Ytr);
             end
 
-            log = SimulationLogger.getInstance();
-            
             if(isa(Xtr, 'gpuArray'))
                 obj.model.weightsl1 = gpuArray.rand(N_hidden, d)*2-1;
                 obj.model.biasl1 = gpuArray.rand(N_hidden,1)*2-1;

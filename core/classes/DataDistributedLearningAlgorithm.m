@@ -30,7 +30,6 @@ classdef DataDistributedLearningAlgorithm < LearningAlgorithm
     methods(Abstract=true)
         % Train the model
         obj = train_locally(obj, Xtr, Ytr);
-        obj = finalizeTraining(obj);
     end
     
     methods
@@ -40,10 +39,13 @@ classdef DataDistributedLearningAlgorithm < LearningAlgorithm
        end
        
        function obj = train(obj, Xtr, Ytr)
+           fprintf('\t\tDistributing data (%i examples each approximately)...\n', floor(size(Xtr, 1)/obj.topology.N));
            spmd(obj.topology.N)
-                obj = obj.train_locally(getLocalPart(Xtr), getLocalPart(Ytr));
+                Xtr = codistributed(Xtr, codistributor1d(1));
+                Ytr = codistributed(Ytr, codistributor1d(1));
+                obj_local = obj.train_locally(getLocalPart(Xtr), getLocalPart(Ytr));
            end
-           obj = obj.finalizeTraining();
+           obj = obj_local{1};
        end
        
        function idx = getNeighbors(obj, i)

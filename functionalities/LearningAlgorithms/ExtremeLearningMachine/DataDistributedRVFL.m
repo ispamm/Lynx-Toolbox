@@ -22,11 +22,11 @@ classdef DataDistributedRVFL < DataDistributedLearningAlgorithm
         end
         
         function obj = train_locally(obj, Xtr, Ytr)
-            r = RegularizedELM(obj.model, 'C', obj.parameteters.C);
+            r = RegularizedELM(obj.model, 'C', obj.parameters.C);
             r = r.train(Xtr, Ytr);
             obj.model = r.model;
         end
-
+        
         function b = checkForCompatibility(~, model)
             b = model.isOfClass('ExtremeLearningMachine');
         end
@@ -35,7 +35,7 @@ classdef DataDistributedRVFL < DataDistributedLearningAlgorithm
     methods(Static)
 
         function info = getDescription()
-            info = [''];
+            info = ['Data-distributed RVFL'];
         end
         
         function pNames = getParametersNames()

@@ -56,7 +56,13 @@ classdef NetworkTopology
         function visualize(obj)
             % Plot the graph (need the Bioinformatics toolbox)
             if(exist('biograph', 'file') == 2)
-                view(biograph(triu(obj.W), [], 'ShowArrows', 'off'));
+                % Do not call view(biograph(...)) because you cannot
+                % control directly the figure
+                b = biograph(triu(obj.W));
+                b.ShowArrows = 'off';
+                g = biograph.bggui(b);
+                handler = get(g.biograph.hgAxes,'parent');
+                set(handler,'Name','Network topology')
             end
         end
         

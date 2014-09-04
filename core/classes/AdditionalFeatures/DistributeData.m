@@ -28,32 +28,29 @@ classdef DistributeData < AdditionalFeature
             
             % Open the pool of workers
             matlabpool('open');
+            
+            % Check that there are enough labs
+            if(matlabpool('size') < obj.topology.N)
+                error('Lynx:Runtime:SmallCluster', 'Maximum number of nodes in this cluster is %i', matlabpool('size'));
+            end
+            
             check_install_on_cluster();
             
         end
         
         function [a, d] = executeBeforeEachExperiment(obj, a, d)
             if(a.isOfClass('DataDistributedLearningAlgorithm'))
-                spmd(obj.topology.N)
-                    d.X = codistributed(d.X, codistributor1d(1));
-                    d.Y = codistributed(d.Y, codistributor1d(1));
-                end
-                d = d{1};
                 a.topology = obj.topology;
             end
         end
         
         function [a, d] = executeAfterEachExperiment(obj, a, d)
-            if(a.isOfClass('DataDistributedLearningAlgorithm'))
-                d.X = gather(d.X);
-                d.Y = gather(d.Y);
-            end
+
         end
         
         function executeAfterFinalization(obj)
             fprintf('Network topology: see plot.\n');
             obj.topology.visualize();
-            matlabpool('close');
         end
 
         function s = getDescription(obj)

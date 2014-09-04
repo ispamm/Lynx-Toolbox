@@ -66,6 +66,9 @@ classdef Simulation < SingletonClass
         % Perform all the experiments
         obj = performExperiments(obj);
         
+        % Perform a single experiment
+        [p, t, a] = performSingleExperiment(obj, currentConfiguration);
+        
         % Display the results
         obj = formatOutput(obj);
         
