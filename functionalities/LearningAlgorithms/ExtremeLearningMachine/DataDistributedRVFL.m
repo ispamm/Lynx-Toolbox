@@ -29,19 +29,21 @@ classdef DataDistributedRVFL < DataDistributedLearningAlgorithm
             obj.model = r.model;
 
             % Execute consensus algorithm
-            consensus_error = zeros(obj.getParameter('consensus_steps'), 1);
-            for ii = 1:obj.getParameter('consensus_steps')
-               labBarrier;
-               idx = obj.getNeighbors(labindex);
-               for jj = 1:length(idx)
-                   w = labSendReceive(idx(jj), idx(jj), obj.model.outputWeights);
-                   consensus_error(ii) = consensus_error(ii) + norm(obj.model.outputWeights - w);
-                   obj.model.outputWeights = obj.model.outputWeights + w;
-               end
-               obj.model.outputWeights = obj.model.outputWeights./(length(idx) + 1);
-               consensus_error(ii) = consensus_error(ii) / length(idx);
+            if(obj.getParameter('consensus_steps') > 0)
+                consensus_error = zeros(obj.getParameter('consensus_steps'), 1);
+                for ii = 1:obj.getParameter('consensus_steps')
+                   labBarrier;
+                   idx = obj.getNeighbors(labindex);
+                   for jj = 1:length(idx)
+                       w = labSendReceive(idx(jj), idx(jj), obj.model.outputWeights);
+                       consensus_error(ii) = consensus_error(ii) + norm(obj.model.outputWeights - w);
+                       obj.model.outputWeights = obj.model.outputWeights + w;
+                   end
+                   obj.model.outputWeights = obj.model.outputWeights./(length(idx) + 1);
+                   consensus_error(ii) = consensus_error(ii) / length(idx);
+                end
+                obj.statistics.consensus_error = consensus_error;
             end
-            obj.statistics.consensus_error = consensus_error;
             
         end
         

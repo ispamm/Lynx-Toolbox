@@ -56,7 +56,7 @@ classdef DataDistributedLearningAlgorithm < LearningAlgorithm
        function obj = executeBeforeTraining(obj, ~)
        end
        
-       function obj = executeAfterTraining(obj_local)
+       function obj = executeAfterTraining(obj, obj_local)
            obj = obj_local{1};
        end
              
