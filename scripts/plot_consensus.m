@@ -32,7 +32,7 @@ for i = algos
 
            algo_stats = sum_structs(algo_stats);
            c = XYPlotContainer();
-           cons_error{j, w} = c.store(XYPlot(algo_stats.consensus_error, 1:length(algo_stats.consensus_error), ...
+           cons_error{j, w} = c.store(XYPlot(1:length(algo_stats.consensus_error), algo_stats.consensus_error, ...
                'Iteration', 'Disagreement'));
 
        end

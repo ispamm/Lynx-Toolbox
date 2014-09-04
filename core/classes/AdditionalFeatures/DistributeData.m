@@ -10,6 +10,7 @@ classdef DistributeData < AdditionalFeature
     
     properties
         topology;
+        topologies;
     end
     
     methods
@@ -19,6 +20,13 @@ classdef DistributeData < AdditionalFeature
         end
         
         function executeAfterInitialization(obj)
+            
+            % Initialize the topologies
+            s = Simulation.getInstance();
+            obj.topologies = cell(s.nRuns, 1);
+            for i = 1:s.nRuns
+                obj.topologies{i} = obj.topology.initialize();
+            end
             
             % Check if we are in parallel mode
             log = SimulationLogger.getInstance();
@@ -40,7 +48,8 @@ classdef DistributeData < AdditionalFeature
         
         function [a, d] = executeBeforeEachExperiment(obj, a, d)
             if(a.isOfClass('DataDistributedLearningAlgorithm'))
-                a.topology = obj.topology;
+                log = SimulationLogger.getInstance();
+                a.topology = obj.topologies{log.getAdditionalParameter('run')};
             end
         end
         
@@ -48,9 +57,11 @@ classdef DistributeData < AdditionalFeature
 
         end
         
-        function executeAfterFinalization(obj)
+        function executeBeforeFinalization(obj)
             fprintf('Network topology: see plot.\n');
-            obj.topology.visualize();
+            for i = 1:length(obj.topologies)
+                obj.topologies{i}.visualize(sprintf('Network topology for run %i', i));
+            end
         end
 
         function s = getDescription(obj)

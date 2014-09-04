@@ -57,7 +57,13 @@ classdef DataDistributedLearningAlgorithm < LearningAlgorithm
        end
        
        function obj = executeAfterTraining(obj, obj_local)
+           stats = cell(length(obj_local), 1);
+           for i = 1:length(obj_local)
+               o = obj_local{i};
+               stats{i} = o.statistics;
+           end
            obj = obj_local{1};
+           obj.statistics = sum_structs(stats);
        end
              
     end

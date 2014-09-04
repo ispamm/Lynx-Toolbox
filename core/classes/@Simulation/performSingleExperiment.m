@@ -23,13 +23,18 @@ currentDataset = currentDataset.setCurrentPartition(r_id);
 % Get the current algorithm
 currentAlgo = obj.algorithms.get(a_id);
 
+log = SimulationLogger.getInstance();
+log.setAdditionalParameter('dataset_id', currentDataset.id);
+log.setAdditionalParameter('dataset_name', currentDataset.name);
+log.setAdditionalParameter('run', r_id);
+
 % Printing information on screen
 log = SimulationLogger.getInstance();
 if(log.flags.parallelized)
     t = getCurrentTask();
     fprintf('Evaluating %s on %s (run %d/%d) [Worker %i] ', currentAlgo.name, currentDataset.name, obj.nRuns + 1 - r_id, obj.nRuns, t.ID);
 else
-    fprintf('Evaluating %s on %s (run %d/%d) ', currentAlgo.name, currentDataset.name,  obj.nRuns + 1 - r_id, obj.nRuns);
+    fprintf('Evaluating %s on %s (run %d/%d) ', currentAlgo.name, currentDataset.name,  r_id, obj.nRuns);
 end
 
 % Printing semi-supervised information

@@ -84,13 +84,10 @@ classdef PerformanceEvaluator < SingletonClass
             folds = dataset.folds();
             trainingTime = TimeContainer();
             
-            % Eventually save some details in the SimulationLogger
             log = SimulationLogger.getInstance();
-            if(saveFold)
-                log.setAdditionalParameter('dataset_id', dataset.id);
-                log.setAdditionalParameter('dataset_name', dataset.name);
-                log.setAdditionalParameter('run', dataset.currentPartition);
-            else
+            
+            % Eventually save some details in the SimulationLogger
+            if(~saveFold)
                 try
                     kernelType = algo.getParameter('kernel_type');
                     if(strcmp(kernelType, 'custom'))

@@ -37,32 +37,25 @@ classdef NetworkTopology
     end
     
     methods
-        function obj = NetworkTopology(N, varargin)
+        function obj = NetworkTopology(N)
             % Construct the NetworkTopology object
             obj.N = N;
-            obj.W = sparse(zeros(N, N));
-            % We try 10 times to initialize it
-            obj = obj.initialize(varargin{:});
-            counter = 1;
-            while(~(obj.isConnected()))
-                if(counter > 10)
-                    error('Lynx:Initialization:Stochastic', 'Failed to initialize a connected network topology');
-                end
-                obj = obj.initialize(varargin{:});
-                counter = counter + 1;
-            end
+            obj.W = zeros(N, N);
         end
         
-        function visualize(obj)
+        function visualize(obj, title)
+            if(nargin < 2)
+                title = 'Graph viewer';
+            end
             % Plot the graph (need the Bioinformatics toolbox)
             if(exist('biograph', 'file') == 2)
                 % Do not call view(biograph(...)) because you cannot
                 % control directly the figure
-                b = biograph(triu(obj.W));
+                b = biograph(sparse(triu(obj.W)));
                 b.ShowArrows = 'off';
                 g = biograph.bggui(b);
                 handler = get(g.biograph.hgAxes,'parent');
-                set(handler,'Name','Network topology')
+                set(handler,'Name', title);
             end
         end
         
@@ -76,16 +69,28 @@ classdef NetworkTopology
             v = full(obj.W(i, j));
         end
         
+        function obj = initialize(obj)
+            obj = obj.construct();
+            counter = 1;
+            while(~(obj.isConnected()))
+                if(counter > 10)
+                    error('Lynx:Initialization:Stochastic', 'Failed to initialize a connected network topology');
+                end
+                obj = obj.construct();
+                counter = counter + 1;
+            end
+        end
+        
         function b = isConnected(obj)
             % Check if the graph is connected
-            S = graphconncomp(obj.W, 'Weak', true, 'Directed', false);
+            S = graphconncomp(sparse(obj.W), 'Weak', true, 'Directed', false);
             b = S == 1;
         end
     end
     
     methods(Abstract)
         % Initialize the topology
-        obj = initialize(obj, varargin);
+        obj = construct(obj);
         
         % Get description
         s = getDescription(obj);

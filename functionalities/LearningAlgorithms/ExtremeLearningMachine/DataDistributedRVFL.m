@@ -45,7 +45,6 @@ classdef DataDistributedRVFL < DataDistributedLearningAlgorithm
                 end
                 obj.statistics.consensus_error = consensus_error;
             end
-            
         end
         
         function obj = executeBeforeTraining(obj, d)

@@ -16,12 +16,12 @@ classdef RandomTopology < NetworkTopology
     
     methods
         function obj = RandomTopology(N, p)
-            obj = obj@NetworkTopology(N, p);
+            obj = obj@NetworkTopology(N);
+            assert(isinrange(p), 'Lynx:Runtime:Validation', 'Probability for RandomTopology must be in [0, 1]');
+            obj.p = p;
         end
         
-        function obj = initialize(obj, p)
-            obj.p = p;
-            assert(isinrange(p), 'Lynx:Runtime:Validation', 'Probability for RandomTopology must be in [0, 1]');
+        function obj = construct(obj)
             dice = triu(rand(obj.N, obj.N));
             dice = dice + triu(dice, 1)';
             obj.W(dice < obj.p) = 1;
