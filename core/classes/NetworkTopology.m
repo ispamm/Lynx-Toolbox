@@ -1,10 +1,13 @@
 % NetworkTopology - Abstract class for creating network topologies
 %   A network topology is a graph detailing how a set of nodes is
 %   interconnected. Given an implementation T, we can use it as follows.
-%   First, initialize it with the number of nodes and any additional
-%   parameter:
+%   First, construct the topology:
 %
 %   o = T(N, varargin);
+%
+%   Secondly, you need to initialize it:
+%
+%   o = o.initialize();
 %
 %   Then, access the list of neighbors of node i as:
 %
@@ -19,10 +22,11 @@
 %   T.visualize();
 %
 %   Any class implementing NetworkTopology must implement the internal
-%   method initialize(varargin) to create the topology.
+%   method construct() to create the topology.
 %
-%   We assume that the topology is undirected.
-    
+%   Note that network topologies are required to be undirected and
+%   connected.
+
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is
 % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
 %
@@ -44,6 +48,9 @@ classdef NetworkTopology
         end
         
         function visualize(obj, t)
+            % Plot the graph
+            % The optional value is the title of the plot
+            
             if(nargin < 2)
                 t = 'Graph viewer';
             end
@@ -75,6 +82,7 @@ classdef NetworkTopology
         end
         
         function obj = initialize(obj)
+            % Initialize the topology
             obj = obj.construct();
             counter = 1;
             while(~(obj.isConnected()))
@@ -94,7 +102,7 @@ classdef NetworkTopology
     end
     
     methods(Abstract)
-        % Initialize the topology
+        % Construct a possible topology
         obj = construct(obj);
         
         % Get description

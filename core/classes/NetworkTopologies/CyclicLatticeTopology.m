@@ -1,4 +1,6 @@
-% CyclicLatticeTopology
+% CyclicLatticeTopology - Graph with a cyclic lattice topology
+%   This is a graph of N ordered nodes, where each node i is connected with
+%   K/2 neighbors to its left and K/2 neighbors to it right.
     
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is
 % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
