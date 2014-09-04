@@ -43,19 +43,24 @@ classdef NetworkTopology
             obj.W = zeros(N, N);
         end
         
-        function visualize(obj, title)
+        function visualize(obj, t)
             if(nargin < 2)
-                title = 'Graph viewer';
+                t = 'Graph viewer';
             end
             % Plot the graph (need the Bioinformatics toolbox)
             if(exist('biograph', 'file') == 2)
-                % Do not call view(biograph(...)) because you cannot
-                % control directly the figure
+                % Very complicated hack to set the title and shift the
+                % figures
                 b = biograph(sparse(triu(obj.W)));
-                b.ShowArrows = 'off';
-                g = biograph.bggui(b);
-                handler = get(g.biograph.hgAxes,'parent');
-                set(handler,'Name', title);
+                b.showArrows = 'off';
+                view(b);
+                set(0, 'ShowHiddenHandles', 'on');
+                bgfig = gcf;
+                c = get(bgfig, 'Children');
+                copyobj(c(1), figure);
+                figshift;
+                set(gcf, 'Name', t);
+                close(bgfig);
             end
         end
         
