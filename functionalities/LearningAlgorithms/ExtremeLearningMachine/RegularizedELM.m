@@ -46,8 +46,8 @@ classdef RegularizedELM < LearningAlgorithm
             end
 
             if(isa(Xtr, 'gpuArray'))
-                obj.model.weightsl1 = gpuArray.rand(N_hidden, d)*2-1;
-                obj.model.biasl1 = gpuArray.rand(N_hidden,1)*2-1;
+                obj.model.weights_l1 = gpuArray.rand(N_hidden, d)*2-1;
+                obj.model.bias_l1 = gpuArray.rand(N_hidden,1)*2-1;
             else
                 obj.model = obj.model.generateWeights(d);
             end
@@ -64,8 +64,8 @@ classdef RegularizedELM < LearningAlgorithm
              
             if(isa(outputWeightsCopy, 'gpuArray'))
                 outputWeightsCopy = gather(outputWeightsCopy);
-                obj.model.biasl1 = gather(obj.model.biasl1);
-                obj.model.weightsl1 = gather(obj.model.weightsl1);
+                obj.model.bias_l1 = gather(obj.model.bias_l1);
+                obj.model.weights_l1 = gather(obj.model.weights_l1);
             end
             
             obj.model.outputWeights = outputWeightsCopy;

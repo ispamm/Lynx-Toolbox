@@ -19,12 +19,30 @@ classdef DataDistributedRVFL < DataDistributedLearningAlgorithm
         
         function p = initParameters(~, p)
             p.addParamValue('C', 1, @(x) assert(x > 0, 'Regularization parameter of DataDistributedRVFL must be > 0'));
+            p.addParamValue('consensus_steps', 10);
         end
         
         function obj = train_locally(obj, Xtr, Ytr)
+            % Train on the nodes
             r = RegularizedELM(obj.model, 'C', obj.parameters.C);
             r = r.train(Xtr, Ytr);
             obj.model = r.model;
+
+            % Execute consensus algorithm
+            for ii = 1:obj.getParameter('consensus_steps')
+               labBarrier;
+               idx = obj.getNeighbors(labindex);
+               for jj = 1:length(idx)
+                   w = labSendReceive(idx(jj), idx(jj), obj.model.outputWeights);
+                   obj.model.outputWeights = obj.model.outputWeights + w;
+               end
+               obj.model.outputWeights = obj.model.outputWeights./(length(idx) + 1);
+            end
+            
+        end
+        
+        function obj = executeBeforeTraining(obj, Xtr, ~)
+            obj.model = obj.model.generateWeights(size(Xtr, 2));
         end
         
         function b = checkForCompatibility(~, model)
