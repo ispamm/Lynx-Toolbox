@@ -21,10 +21,9 @@
 % Programmed and Copyright by Simone Scardapane:
 % simone.scardapane@uniroma1.it
 
-classdef DataDistributedLearningAlgorithm < LearningAlgorithm
+classdef DataDistributedLearningAlgorithm < LearningAlgorithm & NetworkNode
     
     properties
-        topology;
     end
     
     methods(Abstract=true)
@@ -47,10 +46,6 @@ classdef DataDistributedLearningAlgorithm < LearningAlgorithm
                 obj_local = obj.train_locally(getLocalPart(Xtr), getLocalPart(Ytr));
            end
            obj = obj.executeAfterTraining(obj_local);
-       end
-       
-       function idx = getNeighbors(obj, i)
-           idx = obj.topology.getNeighbors(i);
        end
        
        function obj = executeBeforeTraining(obj, ~)

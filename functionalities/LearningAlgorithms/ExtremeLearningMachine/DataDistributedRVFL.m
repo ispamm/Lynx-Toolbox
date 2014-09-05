@@ -30,20 +30,8 @@ classdef DataDistributedRVFL < DataDistributedLearningAlgorithm
 
             % Execute consensus algorithm
             if(obj.getParameter('consensus_steps') > 0)
-                consensus_error = zeros(obj.getParameter('consensus_steps'), 1);
-                for ii = 1:obj.getParameter('consensus_steps')
-                   labBarrier;
-                   idx = obj.getNeighbors(labindex);
-                   newOutputWeights = obj.model.outputWeights;
-                   for jj = 1:length(idx)
-                       w = labSendReceive(idx(jj), idx(jj), obj.model.outputWeights);
-                       consensus_error(ii) = consensus_error(ii) + norm(obj.model.outputWeights - w);
-                       newOutputWeights = newOutputWeights + w;
-                   end
-                   obj.model.outputWeights = newOutputWeights./(length(idx) + 1);
-                   consensus_error(ii) = consensus_error(ii) / length(idx);
-                end
-                obj.statistics.consensus_error = consensus_error;
+                [obj.model.outputWeights, obj.statistics.consensus_error] = ...
+                    obj.run_consensus(@() obj.model.outputWeights, obj.getParameter('consensus_steps'));
             end
         end
         
