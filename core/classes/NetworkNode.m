@@ -23,10 +23,6 @@ classdef NetworkNode
             current_value = property_func();
             consensus_error = zeros(steps, 1);
             for ii = 1:steps
-                labBarrier;
-                if(ii > 1 && consensus_error(ii - 1) < threshold)
-                    continue;
-                end
                 idx = obj.getNeighbors(labindex);
                 new_value = current_value;
                 for jj = 1:length(idx)
