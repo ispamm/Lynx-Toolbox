@@ -60,19 +60,19 @@ classdef DataDistributedRVFL < DataDistributedLearningAlgorithm
                 rho = obj.getParameter('admm_rho');
                 N_nodes = matlabpool('size');
                 
-                if(N >= N_hidden)
+                %if(N >= N_hidden)
                     Hinv = inv(eye(N_hidden)*rho + H' * H);
-                else
-                    Hinv = inv(eye(size(H, 1))*rho + H * H');
-                end
+                %else
+                %    Hinv = inv(eye(size(H, 1))*rho + H * H');
+                %end
                 
                 for jj = 1:obj.getParameter('admm_max_steps')
                     
-                    if(N >= N_hidden)
+                    %if(N >= N_hidden)
                         obj.model.outputWeights = Hinv*(H'*Ytr + rho*(z - u));
-                    else
-                        obj.model.outputWeights = H'*Hinv*(Ytr + rho*(z - u));
-                    end
+                    %else
+                    %    obj.model.outputWeights = H'*Hinv*(Ytr + rho*(z - u));
+                    %end
                     
                     beta_avg = ...
                         obj.run_consensus(@() obj.model.outputWeights, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'));
