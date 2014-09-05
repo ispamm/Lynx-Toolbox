@@ -50,7 +50,7 @@ classdef ExtremeLearningMachine < Model
         end
         
         function p = initParameters(obj, p)
-            p.addParamValue('hiddenNodes', 50, @(x) assert(isnatural(x, false), 'Hidden nodes of ExtremeLearningMachine must be an integer > 0'));
+            p.addParamValue('hiddenNodes', 100, @(x) assert(isnatural(x, false), 'Hidden nodes of ExtremeLearningMachine must be an integer > 0'));
             p.addParamValue('type', 'sigmoid', @(x) assert(isingroup(x, {'sigmoid', 'sinusoid', 'hardlimit'}), 'Hidden nodes type of ExtremeLearningMachine is invalid'));
         end
         
