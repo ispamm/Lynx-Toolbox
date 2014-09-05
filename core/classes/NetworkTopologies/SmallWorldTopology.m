@@ -16,12 +16,12 @@ classdef SmallWorldTopology < CyclicLatticeTopology
     methods
         function obj = SmallWorldTopology(N, K, beta)
             obj = obj@CyclicLatticeTopology(N, K);
-            assert(isinrange(beta), 'Lynx:Runtime:Validation', 'The beta parameter of SmallWorldNetwork must be in [0, 1]');
+            assert(isinrange(beta), 'Lynx:Runtime:Validation', 'The beta parameter of SmallWorldTopology must be in [0, 1]');
             obj.beta = beta;
         end
         
         function obj = construct(obj)
-            obj = obj.construct@CyclicLatticeNetwork();
+            obj = obj.construct@CyclicLatticeTopology();
             for i = 1:obj.N
                 neighbors = obj.getNeighbors(i);
                 dice = rand(length(neighbors), 1) < obj.beta;
