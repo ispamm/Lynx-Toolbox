@@ -20,7 +20,7 @@ for i=1:length(obj.algorithms)
        
         % tmp is a boolean indicating if the j-th dataset is compatible
         % with the i-th algorithm
-        tmp = obj.algorithms.get(i).isTaskAllowed(obj.datasets.get(j).task);
+        tmp = obj.algorithms.get(i).isDatasetAllowed(obj.datasets.get(j));
         if(~tmp)
            
             % If res is true, this is the first inconsistency which has

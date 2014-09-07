@@ -38,7 +38,7 @@ classdef ParameterSweep < Wrapper
         end
         
         function obj = train(obj, Xtr, Ytr)
-            dataset = Dataset.generateAnonymousDataset(obj.getCurrentTask(), Xtr, Ytr);
+            dataset = obj.generateDataset(RealMatrix(Xtr), Ytr);
             dataset = dataset.generateSinglePartition(obj.parameters.partition_strategy);
             
             bestPerf = [];

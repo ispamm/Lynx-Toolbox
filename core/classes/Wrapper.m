@@ -40,11 +40,11 @@ classdef Wrapper <  LearningAlgorithm
             obj.wrappedAlgo = wrappedAlgo;
         end
         
-        function [labels, scores] = test(obj, Xts)
+        function [labels, scores] = test(obj, d)
             if(obj.hasCustomTesting())
-                [labels, scores] = obj.test_custom(Xts);
+                [labels, scores] = obj.test_custom(d);
             else
-                [labels, scores] = obj.wrappedAlgo.test(Xts);
+                [labels, scores] = obj.wrappedAlgo.test(d);
             end
         end
         
@@ -111,6 +111,12 @@ classdef Wrapper <  LearningAlgorithm
             else
                 s = sprintf('%s, %s', s, class(obj));
             end
+        end
+        
+        function d = generateDataset(obj, X, Y)
+            % Utility function for constructing datasets
+            t = Tasks.getById(obj.getCurrentTask());
+            d = Dataset(X, t.getDataType(Y), obj.getCurrentTask());
         end
         
     end

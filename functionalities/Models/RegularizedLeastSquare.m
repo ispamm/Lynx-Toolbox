@@ -59,7 +59,7 @@ classdef RegularizedLeastSquare < Model
         
         function res = isDatasetAllowed(~, d)
             res = d.task == Tasks.R || d.task == Tasks.BC || d.task == Tasks.MC;
-            res = res && d.X.id == DataTypes.REAL_MATRIX;
+            res = res && (d.X.id == DataTypes.REAL_MATRIX || d.X.id == DataTypes.KERNEL_MATRIX);
         end
         
         function a = getDefaultTrainingAlgorithm(obj)

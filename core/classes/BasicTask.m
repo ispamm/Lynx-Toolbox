@@ -54,6 +54,8 @@ classdef BasicTask < SingletonClass
         % Check for consistency
         obj = checkForConsistency(obj, d);
         
+        % Get default output type
+        datatype = getDataType(obj, y);
     end
     
     methods(Access=protected)

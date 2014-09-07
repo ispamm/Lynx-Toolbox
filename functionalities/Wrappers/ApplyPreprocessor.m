@@ -41,17 +41,17 @@ classdef ApplyPreprocessor <  Wrapper
         end
 
         function obj = train(obj, Xtr, Ytr)
-            d = Dataset.generateAnonymousDataset(obj.getCurrentTask(), Xtr, Ytr);
+            d = Dataset(RealMatrix(Xtr), Tasks.getById(obj.getCurrentTask()).getDataType(Ytr));
             [~, d, obj.parameters.preprocessor] = evalc('obj.parameters.preprocessor.process(d)'); % Silence the preprocessor
-            obj.wrappedAlgo = obj.wrappedAlgo.train(d.X, d.Y);
+            obj.wrappedAlgo = obj.wrappedAlgo.train(d.X.data, d.Y.data);
         end
         
         function [labels, scores] = test_custom(obj, Xts)
-            d = Dataset.generateAnonymousDataset(obj.getCurrentTask(), Xts, ones(size(Xts, 1), 1));
+            d = Dataset(RealMatrix(Xtr), Tasks.getById(obj.getCurrentTask()).getDataType(ones(size(Xts, 1), 1)));
             if(~obj.parameters.training_only)
                 [~, d] = evalc('obj.parameters.preprocessor.processAsBefore(d)'); % Silence the preprocessor
             end
-            [labels, scores] = obj.wrappedAlgo.test(d.X);
+            [labels, scores] = obj.wrappedAlgo.test(d.X.data);
         end
         
         function b = hasCustomTesting(obj)

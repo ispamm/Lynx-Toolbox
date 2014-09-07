@@ -14,7 +14,6 @@ classdef KernelMatrix < DataType
         function obj = KernelMatrix(data)
             obj = obj@DataType(data);
             assert(isnumeric(data), 'Lynx:Validation:InvalidInput', 'Data must be a real matrix');
-            assert(size(data,1) == size(data,2), 'Lynx:Validation:InvalidInput', 'Data must be a square matrix');
             obj.id = DataTypes.KERNEL_MATRIX;
         end
         

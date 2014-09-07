@@ -41,6 +41,10 @@ classdef MultiLabelTask < BasicTask
             id = Tasks.ML;
         end
         
+        function datatype = getDataType(obj, y)
+            datatype = MultiLabelMatrix(y);
+        end
+        
     end
     
 end

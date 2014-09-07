@@ -41,6 +41,10 @@ classdef MulticlassClassificationTask < BasicTask
             id = Tasks.MC;
         end
         
+        function datatype = getDataType(obj, y)
+            datatype = IntegerLabelsVector(y);
+        end
+        
     end
     
 end

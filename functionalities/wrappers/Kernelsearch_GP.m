@@ -50,8 +50,8 @@ classdef Kernelsearch_GP < Wrapper
         
         function p =  initParameters(~, p)
             p.addParamValue('partition_strategy', KFoldPartition(3));
-            p.addParamValue('pop_size', 50);
-            p.addParamValue('gen', 10);
+            p.addParamValue('pop_size', 5);
+            p.addParamValue('gen', 2);
             p.addParamValue('reproduction_rate', 0.9);
             p.addParamValue('mutation_rate', 0.2);
             p.addParamValue('elitism', 2);
@@ -107,14 +107,14 @@ classdef Kernelsearch_GP < Wrapper
         
         function fit  = computeFitnessIndividual(obj, k, X, Y )
             Omega = k.evaluate(X, []);
-            data = Dataset.generateAnonymousDataset(obj.getCurrentTask(), Omega, Y, true);
+            data = obj.generateDataset(KernelMatrix(Omega), Y);
             data = data.generateSinglePartition(obj.parameters.partition_strategy);
             fit = PerformanceEvaluator.getInstance().computePerformance(obj.wrappedAlgo, data);
             fit = fit{1}.getFinalizedValue();
         end
         
         function b = checkForCompatibility(obj, model)
-            b = model.isOfClass('SupportVectorMachine');
+            b = model.isOfClass('SupportVectorMachine') || model.isOfClass('RegularizedLeastSquare');
         end
         
         

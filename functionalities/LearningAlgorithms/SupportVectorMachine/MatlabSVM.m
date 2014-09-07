@@ -65,8 +65,8 @@ classdef MatlabSVM < LearningAlgorithm
             b = true;
         end
         
-        function res = isDatasetAllowed(~, d)
-            res = d.task == Tasks.R;
+        function res = isDatasetAllowed(obj, d)
+            res = d.task == Tasks.BC;
             res = res && obj.model.isDatasetAllowed(d);
         end
         

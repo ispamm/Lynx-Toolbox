@@ -52,7 +52,7 @@ classdef Model < Parameterized
         a = getDefaultTrainingAlgorithm(obj);
         
         % Test the model
-        [labels, scores] = test(obj, Xts);
+        [labels, scores] = test(obj, d_test);
         
         % Check if a dataset is allowed by the model
         res = isDatasetAllowed(obj, d);

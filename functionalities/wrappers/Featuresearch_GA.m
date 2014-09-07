@@ -72,7 +72,7 @@ classdef Featuresearch_GA < Wrapper
         
         function perf = computePerformanceIndividual(obj, features, Xtr, Ytr)
             p = PerformanceEvaluator.getInstance();
-            perfs = p.computePerformance(obj.wrappedAlgo,obj.constructDataset(Xtr, Ytr, features));
+            perfs = p.computePerformance(obj.wrappedAlgo, obj.constructDataset(Xtr, Ytr, features));
             perf = perfs{1}.getFinalizedValue();
             % Hack for positive performance measures (e.g.
             % MatthewCorrelationCoefficient)
@@ -82,7 +82,7 @@ classdef Featuresearch_GA < Wrapper
         end
         
         function data = constructDataset(obj, X, Y, feat)
-            data = Dataset.generateAnonymousDataset(obj.getCurrentTask(), X(:,logical(feat)), Y);
+            data = Dataset(RealMatrix(X(:,logical(feat))), Tasks.getById(obj.getCurrentTask()).getDataType(Y));
             data = data.generateSinglePartition(obj.parameters.partition_strategy);
         end
             

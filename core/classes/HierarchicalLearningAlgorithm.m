@@ -66,7 +66,7 @@ classdef HierarchicalLearningAlgorithm < LearningAlgorithm
             
             % To have children, the learning algorithm must support
             % multiclass classification
-            if(obj.learningAlgorithm.isTaskAllowed(Tasks.MC))
+            if(obj.learningAlgorithm.isDatasetAllowed(Dataset(RealMatrix([]), [], Tasks.MC)))
                 obj.children{end+1} = node;
             else
                 error('Lynx:TaskIncompatibility:HierarchicalLearningModelError', 'To add a children to a hierarchical learning algorithm, its base learning algorithm must support multiclass classification');
@@ -89,7 +89,7 @@ classdef HierarchicalLearningAlgorithm < LearningAlgorithm
         function p = initParameters(~, p)
         end
         
-        function obj = train(obj, Xtr, Ytr)
+        function obj = train(obj, d)
             
             log = SimulationLogger.getInstance();
             
@@ -120,20 +120,20 @@ classdef HierarchicalLearningAlgorithm < LearningAlgorithm
             % is a non-terminal node, we group the output and set a
             % multiclass classification task.
             if(obj.getNArity() == 0)
-                groups = Ytr;
+                groups = d.Y.data;
                 obj.learningAlgorithm = obj.learningAlgorithm.setCurrentTask(obj.getCurrentTask());
             else
-                groups = obj.aggregator.group(Ytr);
+                groups = obj.aggregator.group(d.Y.data);
                 obj.learningAlgorithm = obj.learningAlgorithm.setCurrentTask(Tasks.MC);
             end
             
-            obj.learningAlgorithm = obj.learningAlgorithm.train(Xtr, groups);
+            obj.learningAlgorithm = obj.learningAlgorithm.train(Dataset(d.X, IntegerLabelsVector(groups), Tasks.MC));
             
             % Train all the children (if there is at least one)
             if(~isempty(obj.children))
                 for i = 1:obj.getNArity()
                     obj.children{i} = obj.children{i}.setCurrentTask(obj.getCurrentTask());
-                    obj.children{i} = obj.children{i}.train(Xtr(groups == i, :), Ytr(groups == i));
+                    obj.children{i} = obj.children{i}.train(d.X.data(groups == i, :), d.Y.data(groups == i));
                 end
             end
             
@@ -143,9 +143,9 @@ classdef HierarchicalLearningAlgorithm < LearningAlgorithm
             b = true;
         end
         
-        function [labels, scores] = test_custom(obj, Xts)
+        function [labels, scores] = test_custom(obj, d)
             
-            [orig_labels, scores] = obj.learningAlgorithm.test(Xts);
+            [orig_labels, scores] = obj.learningAlgorithm.test(d);
             labels = orig_labels;
             % If there are children, compute the final labels.
             % TODO: Compute the correct scores.
@@ -153,7 +153,7 @@ classdef HierarchicalLearningAlgorithm < LearningAlgorithm
                 for i = 1:obj.getNArity()
                     currentSplit = orig_labels == i;
                     [currentLabels, ~] = ...
-                        obj.children{i}.test(Xts(currentSplit, :));
+                        obj.children{i}.test(d.X(currentSplit, :));
                     labels(currentSplit) = currentLabels;
                 end
             end

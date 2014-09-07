@@ -116,10 +116,10 @@ classdef Dataset
                 currentY = obj.Y.data(obj.shuffles{ii});
                 
                 if(~isempty(obj.ss_strategy))
-                    obj.ss_partitions{ii} = obj.ss_strategy.partition(currentY.data);
-                    obj.partitions{ii} = partitionStrategy.partition(currentY.data(obj.ss_partitions{ii}.getTrainingIndexes));
+                    obj.ss_partitions{ii} = obj.ss_strategy.partition(currentY);
+                    obj.partitions{ii} = partitionStrategy.partition(currentY(obj.ss_partitions{ii}.getTrainingIndexes));
                 else
-                    obj.partitions{ii} = partitionStrategy.partition(currentY.data);
+                    obj.partitions{ii} = partitionStrategy.partition(currentY);
                 end
             end
             
@@ -160,15 +160,14 @@ classdef Dataset
             % will be processed with the default DatasetFactory objects of
             % input and output.
             
-            t = Tasks.getById(obj.task);
             if(nargin == 2)
                 newDatasets = f.process(obj);
             else
             
-                firstProcessed = t.getDatasetFactory().process(obj);
+                firstProcessed = obj.Y.getDefaultFactory().process(obj);
                 secondProcessed = {};
                 for i = 1:length(firstProcessed)
-                    fact = obj.X.getDefaultFactory(obj);
+                    fact = obj.X.getDefaultFactory();
                     secondProcessed = [secondProcessed, fact.process(firstProcessed{i})];
                 end
                 newDatasets = secondProcessed;

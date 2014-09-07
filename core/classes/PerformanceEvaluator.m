@@ -95,7 +95,7 @@ classdef PerformanceEvaluator < SingletonClass
             end
             
             % Check if the current task is allowed
-            if(~ algo.isTaskAllowed(dataset.task))
+            if(~ algo.isDatasetAllowed(dataset))
                 algo = [];
                 return;
             end
@@ -108,6 +108,16 @@ classdef PerformanceEvaluator < SingletonClass
                 % Set the current task
                 algo = algo.setCurrentTask(dataset.task);
                 t = clock;
+                
+                if(~saveFold)
+                    try
+                        kernelType = algo.getParameter('kernel_type');
+                        if(strcmp(kernelType, 'custom'))
+                            dataset.X = KernelMatrix(dataset.X.data);
+                        end
+                    catch
+                    end
+                end
                 
                 % Partition the data
                 [Xtrn, Ytr, Xtst, Ytst] = dataset.getFold(ii);
