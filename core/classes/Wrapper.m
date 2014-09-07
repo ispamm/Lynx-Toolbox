@@ -48,8 +48,8 @@ classdef Wrapper <  LearningAlgorithm
             end
         end
         
-        function res = isTaskAllowed(obj, task)
-            res = obj.wrappedAlgo.isTaskAllowed(task);
+        function res = isDatasetAllowed(obj, d)
+            res = obj.wrappedAlgo.isDatasetAllowed(d);
         end
         
         function value = getParameter(obj, param)

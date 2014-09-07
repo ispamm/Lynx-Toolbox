@@ -167,8 +167,9 @@ classdef OnlineRLS < LearningAlgorithm
             end
         end
 
-        function res = isTaskAllowed(~, task)
-            res = task == Tasks.R || task == Tasks.BC;
+        function res = isDatasetAllowed(~, d)
+            res = d.task == Tasks.R || d.task == Tasks.BC;
+            res = res && obj.model.isDasetAllowed(d);
         end
         
         function b = checkForCompatibility(~, model)

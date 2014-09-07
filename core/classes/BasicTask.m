@@ -1,29 +1,24 @@
 % BasicTask - A possible learning task
 %   A task is a basic learning task, e.g. regression. This class
-%   provides utility methods for constructing the datasets of a given
-%   task, checking their consistency, and keeping tracks of the folders
-%   where they are stored. Note that this implements the Singleton
-%   pattern.
+%   provides utility methods  checking the consistency of datasets, and 
+%   keeping tracks of the folders where they are stored. Note that this 
+%   implements the Singleton pattern.
 %
 % BasicTask properties:
 %
 %   folders - Cell array of folders where the datasets are stored
 %   performance_measure - Current primary performance measure
-%   dataset_factory - Current DatasetFactory object
 %
 % BasicTask methods:
 %
 %   getPerformanceMeasure - Return the current PerformanceMeasure
 %   object for this task
 %
-%   getDatasetFactory - Return the default DatasetFactory object
-%   for constructing a dataset for this task
-%
 %   getDescription - Return a string describing the task
 %
 %   getTaskId - Return the unique id of this learning task
 %
-%   checkForConsistency - Check that a given .mat file is consistent
+%   checkForConsistency - Check that a given dataset is consistent
 %   with this task
 %
 %   loadDataset - Search for a given .mat file inside the specified
@@ -46,8 +41,6 @@ classdef BasicTask < SingletonClass
         folders;
         % Performance measure
         performance_measure;
-        % Dataset factory object
-        dataset_factory;
     end
     
     methods(Abstract)
@@ -57,6 +50,9 @@ classdef BasicTask < SingletonClass
         
         % Return the unique ID of this task
         id = getTaskId(obj);
+        
+        % Check for consistency
+        obj = checkForConsistency(obj, d);
         
     end
     
@@ -73,34 +69,13 @@ classdef BasicTask < SingletonClass
             % Change the performance measure for this task
             obj.performance_measure = p;
         end
-        
-        function setDatasetFactory(obj, f)
-            % Change the dataset factory for this task
-            obj.dataset_factory = f;
-        end
-        
+
         function p = getPerformanceMeasure(obj)
             % Return the default performance measure for this task
             p = obj.performance_measure;
         end
         
-        function f = getDatasetFactory(obj)
-            % Return the default DatasetFactory object for this task
-            f = obj.dataset_factory;
-        end
-        
-        function obj = checkForConsistency(obj, o, name)
-            % Check that the dataset loaded from a .mat file is consistent
-            % with the current task
-            assert(isfield(o, 'X'), 'Lynx:Initialization:InvalidDataset', sprintf('The dataset %s does not contain an input matrix X', name));
-            assert(isfield(o, 'Y'), 'Lynx:Initialization:InvalidDataset', sprintf('The dataset %s does not contain an output matrix Y', name));
-            assert(isfield(o, 'info'), 'Lynx:Initialization:InvalidDataset', sprintf('The dataset %s does not contain a descriptive string ''info''', name));
-            
-            assert(isnumeric(o.X), 'Lynx:Initialization:InvalidDataset', sprintf('The input matrix X for dataset %s is not valid', name));
-            assert(isnumeric(o.Y), 'Lynx:Initialization:InvalidDataset', sprintf('The output matrix Y for dataset %s is not valid', name));
-        end
-        
-        function d = loadDataset(obj, dataset_file, dataset_name)
+        function d = loadDataset(obj, dataset_file)
             % Search a given .mat file inside the associated folders, and
             % check its consistency with respect to the task
             filename = strcat(dataset_file, '.mat');
@@ -115,7 +90,6 @@ classdef BasicTask < SingletonClass
                 if(exist(strcat(fold, filename), 'file'))
                     
                     d = load(strcat(fold, filename));
-                    obj = obj.checkForConsistency(d, dataset_name);
                     found = true;
                     
                 end

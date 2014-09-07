@@ -17,8 +17,7 @@ classdef Tasks < uint32
         R   (1),  % Regression
         BC  (2), % Binary Classification
         MC  (3), % Multiclass Classification
-        PR  (4), % Prediction
-        ML  (5)  % Multi-label
+        ML  (4)  % Multi-label
     end
     
     methods

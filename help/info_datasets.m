@@ -10,5 +10,5 @@
 tasks = class_filter(fullfile(XmlConfiguration.getRoot(), 'core/classes/Tasks/'), 'BasicTask');
 
 fprintf('Generating report...\n');
-report('templates/Available Datasets.rpt', '-quiet');
-%report('templates/Available Datasets.rpt');
+%report('templates/Available Datasets.rpt', '-quiet');
+report('templates/Available Datasets.rpt');

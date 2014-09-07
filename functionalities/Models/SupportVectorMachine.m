@@ -57,8 +57,9 @@ classdef SupportVectorMachine < Model
 
         end
         
-        function res = isTaskAllowed(~, t)
-            res = t == Tasks.R || t == Tasks.BC;
+        function res = isDatasetAllowed(~, d)
+            res = d.task == Tasks.R || d.task == Tasks.BC;
+            res = res && (d.X.id == DataTypes.REAL_MATRIX || d.X.id == DataTypes.KERNEL_MATRIX);
         end
     
     end

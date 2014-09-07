@@ -1,8 +1,5 @@
 % RegressionTask - A regression task
-%   This requires inside the .mat file: (i) a Nxd matrix of inputs,
-%   where N is the number of samples and d the dimensionality of every
-%   input; (ii) a Nx1 vector of outputs, where each element can be a
-%   real number; (iii) an info string describing the dataset.
+%   This requires that the output is a RealLabelsVector.
 
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is
 % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
@@ -20,7 +17,6 @@ classdef RegressionTask < BasicTask
         function obj = RegressionTask()
             obj = obj@BasicTask();
             obj.performance_measure = MeanSquaredError();
-            obj.dataset_factory = DummyDatasetFactory();
             obj = obj.addFolder('datasets/R');
         end
     end
@@ -33,9 +29,8 @@ classdef RegressionTask < BasicTask
     
     methods
 
-        function obj = checkForConsistency(obj, o, name)
-            obj.checkForConsistency@BasicTask(o, name);
-            assert((size(o.Y, 1) == size(o.X, 1)) && size(o.Y,2) == 1, 'Lynx:Initialization:InvalidDataset', sprintf('Size of the matrices for dataset %s is not consistent', name));
+        function obj = checkForConsistency(obj, d)
+            assert(isa(d.Y), 'RealLabelsVector', 'Lynx:Validation:InvalidDataset', 'Output for dataset %s must be a real vector', d.name);
         end
         
         function s = getDescription(obj)

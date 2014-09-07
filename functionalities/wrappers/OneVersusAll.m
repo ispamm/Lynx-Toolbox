@@ -71,8 +71,8 @@ classdef OneVersusAll < Wrapper
             end
         end
         
-        function res = isTaskAllowed(obj, task)
-           res = (task == Tasks.MC) || obj.wrappedAlgo.isTaskAllowed(task); 
+        function res = isDatasetAllowed(obj, d)
+           res = (d.task == Tasks.MC) || obj.wrappedAlgo.isDatasetAllowed(d); 
         end
     end
     

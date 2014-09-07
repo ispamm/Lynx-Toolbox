@@ -38,8 +38,9 @@ classdef MultilayerPerceptron < Model
             a = MatlabMLP(obj);
         end
         
-        function res = isTaskAllowed(~, ~)
-            res = true;
+        function res = isDatasetAllowed(~, d)
+            res = d.task == Tasks.R || d.task == Tasks.BC || d.task == Tasks.MC;
+            res = res && d.X.id == DataTypes.REAL_MATRIX;
         end
     end
     

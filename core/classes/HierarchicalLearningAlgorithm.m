@@ -159,16 +159,16 @@ classdef HierarchicalLearningAlgorithm < LearningAlgorithm
             end
         end
         
-        function res = isTaskAllowed(obj, task)
+        function res = isDatasetAllowed(obj, d)
             % Check if the task is allowed
             
             % A task is allowed if it is allowed at every terminal node
             if (obj.getNArity() == 0)
-                res = obj.learningAlgorithm.isTaskAllowed(task);
+                res = obj.learningAlgorithm.isDatasetAllowed(d);
             else
                 res = true;
                 for i=1:obj.getNArity()
-                    res = res & obj.children{i}.isTaskAllowed(task);
+                    res = res & obj.children{i}.isDatasetAllowed(d);
                 end
             end
         end

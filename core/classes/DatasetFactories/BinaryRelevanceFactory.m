@@ -12,18 +12,20 @@ classdef BinaryRelevanceFactory < DatasetFactory
 
     methods
 
-        function datasets = create(obj, task, data_id, data_name, o)
+        function datasets = process(obj, d)
 
-            nLabels = size(o.Y, 2);
-            newX = o.X;
+            nLabels = size(d.Y.data, 2);
+            newX = d.X;
+            
             newtask = Tasks.BC;
             datasets = cell(nLabels, 1);
             
             for j=1:nLabels
-                newY = o.Y(:, j);
-                newname = sprintf('%s (%s)', data_name, o.labels_info{j});
+                newY = d.Y.data(:, j);
+                newname = sprintf('%s (%s)', data_name, d.labels_info{j});
                 newID = sprintf('%s-%d', data_id, j);
-                datasets{j} = Dataset(newID, newname, newtask, newX, newY);
+                datasets{j} = Dataset(newX, BinaryLabelsVector(newY), newtask);
+                datasets{j} = datasets{j}.setIdAndName(newID, newname);
             end
             
             fprintf('Extracted %i different binary classification datasets from original dataset %s\n', nLabels, data_name);

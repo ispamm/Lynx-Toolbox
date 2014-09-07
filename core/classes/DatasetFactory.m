@@ -1,4 +1,4 @@
-% DatasetFactory - Create one or more datasets from a .mat file
+% DatasetFactory - Create one or more datasets from a Dataset object
 %   This implements a unique create method to be derived
 
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is
@@ -10,8 +10,8 @@
 classdef DatasetFactory
     
     methods(Abstract)
-        % Create a dataset from a loaded .mat file
-        datasets = create(obj, task, dID, data_name, o);
+        % Create one or more datasets from an existing one
+        datasets = process(obj, d);
     end
     
 end

@@ -54,8 +54,8 @@ classdef Model < Parameterized
         % Test the model
         [labels, scores] = test(obj, Xts);
         
-        % Check if a task is allowed by the model
-        res = isTaskAllowed(obj, task);
+        % Check if a dataset is allowed by the model
+        res = isDatasetAllowed(obj, d);
         
     end
     

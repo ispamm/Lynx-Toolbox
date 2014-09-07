@@ -85,10 +85,7 @@ classdef MatlabMLP < LearningAlgorithm
             end
             
         end
-        
-        function res = isTaskAllowed(~, ~)
-            res = true;
-        end
+      
     end
     
     methods(Static)

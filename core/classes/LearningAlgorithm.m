@@ -152,8 +152,8 @@ classdef LearningAlgorithm < Parameterized
             end
         end
         
-        function res = isTaskAllowed(obj, task)
-            res = obj.model.isTaskAllowed(task);
+        function res = isDatasetAllowed(obj, d)
+            res = obj.model.isDatasetAllowed(d);
         end
         
         function stat = getStatistics(obj)

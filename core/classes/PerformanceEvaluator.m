@@ -86,17 +86,6 @@ classdef PerformanceEvaluator < SingletonClass
             
             log = SimulationLogger.getInstance();
             
-            % Eventually save some details in the SimulationLogger
-            if(~saveFold)
-                try
-                    kernelType = algo.getParameter('kernel_type');
-                    if(strcmp(kernelType, 'custom'))
-                        dataset.isKernelMatrix = true;
-                    end
-                catch
-                end
-            end
-            
             % Initialize the perf object for output
             secPerfs = obj.secondaryPerformanceMeasures{uint32(dataset.task)};
             perf = cell(length(secPerfs) + 1, 1);

@@ -62,8 +62,9 @@ classdef ExtremeLearningMachine < Model
             
         end
         
-        function res = isTaskAllowed(~, t)
-            res = (t == Tasks.R || t == Tasks.BC || t == Tasks.MC);
+        function res = isDatasetAllowed(~, d)
+            res = d.task == Tasks.R || d.task == Tasks.BC || d.task == Tasks.MC;
+            res = res && d.X.id == DataTypes.REAL_MATRIX;
         end
         
         function obj = generateWeights(obj, d)
