@@ -90,10 +90,14 @@ names_admm(~admm) = [];
 
 p = FormatAsMultiplePlots();
 
-p.displayOnConsole(cons_error, s.datasets.getNames(), names_consensus, false);
-p.displayOnConsole(primal_residual, s.datasets.getNames(), names_admm, false);
-p.displayOnConsole(dual_residual, s.datasets.getNames(), names_admm, false);
-p.displayOnConsole(eps_pri, s.datasets.getNames(), names_admm, false);
-p.displayOnConsole(eps_dual, s.datasets.getNames(), names_admm, false);
+if(~isempty(names_consensus))
+    p.displayOnConsole(cons_error, s.datasets.getNames(), names_consensus, false);
+end
 
+if(~isempty(names_admm))
+    p.displayOnConsole(primal_residual, s.datasets.getNames(), names_admm, false);
+    p.displayOnConsole(dual_residual, s.datasets.getNames(), names_admm, false);
+    p.displayOnConsole(eps_pri, s.datasets.getNames(), names_admm, false);
+    p.displayOnConsole(eps_dual, s.datasets.getNames(), names_admm, false);
+end
        

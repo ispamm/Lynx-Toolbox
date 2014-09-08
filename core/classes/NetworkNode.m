@@ -32,7 +32,7 @@ classdef NetworkNode
                 end
                 old_value = current_value;
                 current_value = new_value./(length(idx) + 1);
-                consensus_error(ii) = norm(new_value - old_value);
+                consensus_error(ii) = norm(current_value - old_value);
             end
             final_value = current_value;
         end
