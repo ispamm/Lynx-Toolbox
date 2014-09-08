@@ -28,7 +28,7 @@ classdef DataDistributedLearningAlgorithm < LearningAlgorithm & NetworkNode
     
     methods(Abstract=true)
         % Train the model
-        obj = train_locally(obj, Xtr, Ytr);
+        obj = train_locally(obj, dataset);
     end
     
     methods
@@ -37,13 +37,13 @@ classdef DataDistributedLearningAlgorithm < LearningAlgorithm & NetworkNode
            obj = obj@LearningAlgorithm(model, varargin{:});
        end
        
-       function obj = train(obj, Xtr, Ytr)
-           fprintf('\t\tDistributing data (%i examples each approximately)...\n', floor(size(Xtr, 1)/obj.topology.N));
-           obj = obj.executeBeforeTraining(size(Xtr, 2));
+       function obj = train(obj, dataset)
+           fprintf('\t\tDistributing data (%i examples each approximately)...\n', floor(size(dataset.X.data, 1)/obj.topology.N));
+           obj = obj.executeBeforeTraining(size(dataset.X.data, 2));
            spmd(obj.topology.N)
-                Xtr = codistributed(Xtr, codistributor1d(1));
-                Ytr = codistributed(Ytr, codistributor1d(1));
-                obj_local = obj.train_locally(getLocalPart(Xtr), getLocalPart(Ytr));
+                dataset.X.data = codistributed(dataset.X.data, codistributor1d(1));
+                dataset.Y.data = codistributed(dataset.Y.data, codistributor1d(1));
+                obj_local = obj.train_locally(Dataset(getLocalPart(dataset.X.data), getLocalPart(dataset.Y.data), dataset.task));
            end
            obj = obj.executeAfterTraining(obj_local);
        end

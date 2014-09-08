@@ -30,16 +30,16 @@ classdef GPUSupport < AdditionalFeature
         function [a, d] = executeBeforeEachExperiment(obj, a, d)
             % Transfer the dataset on the GPU
             if(a.hasGPUSupport())
-                d.X = gpuArray(d.X);
-                d.Y = gpuArray(d.Y);
+                d.X.data = gpuArray(d.X.data);
+                d.Y.data = gpuArray(d.Y.data);
             end
         end
         
         function [a, d] = executeAfterEachExperiment(obj, a, d)
             % Gather the dataset
             if(a.hasGPUSupport())
-                d.X = gather(d.X);
-                d.Y = gather(d.Y);
+                d.X.data = gather(d.X.data);
+                d.Y.data = gather(d.Y.data);
             end
         end
         

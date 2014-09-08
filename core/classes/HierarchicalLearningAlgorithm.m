@@ -121,10 +121,8 @@ classdef HierarchicalLearningAlgorithm < LearningAlgorithm
             % multiclass classification task.
             if(obj.getNArity() == 0)
                 groups = d.Y.data;
-                obj.learningAlgorithm = obj.learningAlgorithm.setCurrentTask(obj.getCurrentTask());
             else
                 groups = obj.aggregator.group(d.Y.data);
-                obj.learningAlgorithm = obj.learningAlgorithm.setCurrentTask(Tasks.MC);
             end
             
             obj.learningAlgorithm = obj.learningAlgorithm.train(Dataset(d.X, IntegerLabelsVector(groups), Tasks.MC));
@@ -132,8 +130,7 @@ classdef HierarchicalLearningAlgorithm < LearningAlgorithm
             % Train all the children (if there is at least one)
             if(~isempty(obj.children))
                 for i = 1:obj.getNArity()
-                    obj.children{i} = obj.children{i}.setCurrentTask(obj.getCurrentTask());
-                    obj.children{i} = obj.children{i}.train(d.X.data(groups == i, :), d.Y.data(groups == i));
+                    obj.children{i} = obj.children{i}.train(Dataset(d.X.data(groups == i, :), d.Y.data(groups == i), obj.task));
                 end
             end
             
@@ -153,7 +150,7 @@ classdef HierarchicalLearningAlgorithm < LearningAlgorithm
                 for i = 1:obj.getNArity()
                     currentSplit = orig_labels == i;
                     [currentLabels, ~] = ...
-                        obj.children{i}.test(d.X(currentSplit, :));
+                        obj.children{i}.test(Dataset(d.X.data(currentSplit, :), [], obj.task));
                     labels(currentSplit) = currentLabels;
                 end
             end

@@ -113,12 +113,6 @@ classdef Wrapper <  LearningAlgorithm
             end
         end
         
-        function d = generateDataset(obj, X, Y)
-            % Utility function for constructing datasets
-            t = Tasks.getById(obj.getCurrentTask());
-            d = Dataset(X, t.getDataType(Y), obj.getCurrentTask());
-        end
-        
     end
     
 end

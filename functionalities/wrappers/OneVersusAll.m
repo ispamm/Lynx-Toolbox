@@ -17,7 +17,7 @@ classdef OneVersusAll < Wrapper
         
         function obj = OneVersusAll(wrappedAlgo, varargin)
             obj = obj@Wrapper(wrappedAlgo, varargin{:});
-            if(~obj.wrappedAlgo.isTaskAllowed(Tasks.BC))
+            if(~obj.wrappedAlgo.isDatasetAllowed(Dataset(RealMatrix([]), [], Tasks.BC)))
                 error('Lynx:Runtime:UnsupportedAlgorithm', 'OneVersusAll requires a base algorithm supporting binary classification');
             end
         end
@@ -25,27 +25,27 @@ classdef OneVersusAll < Wrapper
         function p = initParameters(~, p)
         end
         
-        function obj = train(obj, Xtr, Ytr)
+        function obj = train(obj, d)
             
-            if(~(obj.getCurrentTask() == Tasks.MC))
+            if(~(d.task == Tasks.MC))
                 
-                obj.wrappedAlgo = obj.wrappedAlgo.setCurrentTask(obj.getCurrentTask());
-                obj.wrappedAlgo = obj.wrappedAlgo.train(Xtr, Ytr);
+                obj.wrappedAlgo = obj.wrappedAlgo.train(d);
                 
             else
                 
+                Ytr = d.Y.data;
                 nClasses = max(Ytr);
                 obj.models = cell(1, nClasses);
-            
-                obj.wrappedAlgo = obj.wrappedAlgo.setCurrentTask(Tasks.BC);
+    
+                d.task = Tasks.BC;
                 
                 for i = 1:nClasses
                    
-                    Y = zeros(size(Ytr,1), 1);
-                    Y(Ytr == i) = 1;
-                    Y(Ytr ~= i) = -1;
+                    d.Y.data = zeros(size(Ytr,1), 1);
+                    d.Y.data(Ytr == i) = 1;
+                    d.Y.data(Ytr ~= i) = -1;
                     
-                    obj.models{i} = obj.wrappedAlgo.train(Xtr, Y);
+                    obj.models{i} = obj.wrappedAlgo.train(d);
                     
                 end
                 
@@ -57,14 +57,14 @@ classdef OneVersusAll < Wrapper
             b = true;
         end
         
-        function [labels, scores] = test_custom(obj, Xts)
-            if(obj.getCurrentTask() ~= Tasks.MC)
-                [labels, scores] = obj.wrappedAlgo.test(Xts);
+        function [labels, scores] = test_custom(obj, d)
+            if(d.task ~= Tasks.MC)
+                [labels, scores] = obj.wrappedAlgo.test(d);
             else
-                scores = zeros(size(Xts,1), length(obj.models));
-                
+                scores = zeros(size(d.X.data,1), length(obj.models));
+                d.task = Tasks.BC;
                 for i=1:length(obj.models)
-                    [~, scores(:,i)] = obj.models{i}.test(Xts);
+                    [~, scores(:,i)] = obj.models{i}.test(d);
                 end
                 
                 labels = convert_scores(scores, Tasks.MC);

@@ -49,7 +49,11 @@ classdef OnlineRLS < LearningAlgorithm
             p.addParamValue('cParam2', 0);
         end
         
-        function obj = train(obj, Xtr, Ytr)
+        function obj = train(obj, d)
+            
+            % Get training data
+            Xtr = d.X.data;
+            Ytr = d.Y.data;
             
             obj.model.Xtr = Xtr;
             [N, ~] = size(Xtr);

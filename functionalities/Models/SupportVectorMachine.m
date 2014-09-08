@@ -45,16 +45,8 @@ classdef SupportVectorMachine < Model
             p.addParamValue('nu', 0.1);
         end
         
-        function [labels, scores] = test(obj, Xts)
-            
-            if(strcmp(obj.parameters.kernel_type, 'custom'))
-                K = Xts;
-            else
-                K = kernel_matrix(obj.support_vectors, obj.parameters.kernel_type, obj.parameters.kernel_para, Xts);
-            end
-            scores = obj.coefficients.*K + obj.b;
-            labels = convert_scores(scores, obj.getTask());
-
+        function [labels, scores] = test(obj, d)
+            % TODO
         end
         
         function res = isDatasetAllowed(~, d)

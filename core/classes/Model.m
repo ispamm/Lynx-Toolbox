@@ -11,17 +11,13 @@
 %   initDefaultTrainingAlgorithm - Initialize a default training
 %   algorithm
 %
-%   test - Takes an Mxd input matrix Xts, and returns the labels (and
+%   test - Takes a testing dataset, and returns the labels (and
 %   confidence scores) computed on each of the M samples. If the
 %   model or the task do not admit confidence scores, the scores
 %   are set equal to the labels.
 %
-%   isTaskAllowed - Returns a boolean indicating whether a given task
-%   is currently allowed
-%
-%   setCurrentTask - Set the current task
-%
-%   getCurrentTask - Returns the current task
+%   isDatasetAllowed - Returns a boolean indicating whether a given dataset
+%   is allowed
 %
 %   isOfClass - Check whether the model is of a given class
 
@@ -41,9 +37,6 @@ classdef Model < Parameterized
         % Name of the model
         name;
         
-        % Current task
-        task;
-        
     end
     
     methods(Abstract=true)
@@ -52,7 +45,7 @@ classdef Model < Parameterized
         a = getDefaultTrainingAlgorithm(obj);
         
         % Test the model
-        [labels, scores] = test(obj, d_test);
+        [labels, scores] = test(obj, dataset);
         
         % Check if a dataset is allowed by the model
         res = isDatasetAllowed(obj, d);
@@ -67,16 +60,6 @@ classdef Model < Parameterized
             
             obj.id = id;
             obj.name = name;
-        end
-        
-        function obj = setCurrentTask(obj, t)
-            % Set the current task
-            obj.task = t;
-        end
-        
-        function t = getCurrentTask(obj)
-            % Get the current task
-            t = obj.task;
         end
         
         function b = isOfClass(obj, c)

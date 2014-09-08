@@ -27,7 +27,7 @@ classdef KernelMatrix < DataType
         end
         
         function data = shuffle(obj, shuff)
-            data = obj;
+            data = KernelMatrix(obj.data(shuff, :));
         end
         
         function s = getDescription(obj)

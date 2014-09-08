@@ -9,7 +9,7 @@
 
 function [p, t, a] = performSingleExperiment(obj, currentConfiguration)
 
-% Get current configuration
+% Get current configuration (run - dataset - algorithm)
 r_id = currentConfiguration(1);
 d_id = currentConfiguration(2);
 a_id = currentConfiguration(3);
@@ -23,9 +23,8 @@ currentDataset = currentDataset.setCurrentPartition(r_id);
 % Get the current algorithm
 currentAlgo = obj.algorithms.get(a_id);
 
+% Set the current run on the logger
 log = SimulationLogger.getInstance();
-log.setAdditionalParameter('dataset_id', currentDataset.id);
-log.setAdditionalParameter('dataset_name', currentDataset.name);
 log.setAdditionalParameter('run', r_id);
 
 % Printing information on screen
@@ -39,7 +38,7 @@ end
 
 % Printing semi-supervised information
 if(log.flags.semisupervised && currentAlgo.isOfClass('SemiSupervisedLearningAlgorithm'))
-    [~, ~, ~, ~, Xu, ~] = currentDataset.getFold(1);
+    [~, ~,Xu] = currentDataset.getFold(1);
     cprintf('comment', '[Semi-supervised mode, %d unlabeled samples]\n', size(Xu, 1));
 else
     fprintf('\n');

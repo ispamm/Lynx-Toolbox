@@ -41,7 +41,7 @@ classdef EmbedTimeseriesFactory < DatasetFactory
             end
             
             datasets = {Dataset(RealMatrix(X_embedded), RealLabelsVector(Y), Tasks.R)};
-            fprintf('Embedded dataset %s, %i samples extracted\n', data_name, size(X_embedded, 1));
+            fprintf('Embedded dataset %s, %i samples extracted\n', d.name, size(X_embedded, 1));
 
         end
     end

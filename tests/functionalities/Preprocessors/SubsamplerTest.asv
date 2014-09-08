@@ -12,12 +12,13 @@ classdef SubsamplerTest < matlab.unittest.TestCase
         end
         
         function testWithPredictionTask(testCase)
-           d = Dataset(TimeSeries([1; 2; 3; 4; 5; 6]), [],Tasks.R);
+            d = Dataset(Ti([1 2; 3 4; 5 6]), RealLabelsVector([1; 2; 3]),Tasks.R);
+           d = Dataset.generateAnonymousDataset(Tasks.PR, [1; 2; 3; 4; 5; 6], []);
            p = Subsampler();
            d = p.process(d);
-           testCase.assertEqual(length(d.X.data), 3);
-           testCase.assertEqual(d.X.data, [1; 2; 3]);
-           testCase.assertEqual(d.task, Tasks.R);
+           testCase.assertEqual(length(d.X), 3);
+           testCase.assertEqual(d.X, [1; 2; 3]);
+           testCase.assertEqual(d.task, Tasks.PR);
         end
         
     end  

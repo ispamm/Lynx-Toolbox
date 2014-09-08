@@ -40,10 +40,6 @@ classdef RegressionTask < BasicTask
         function id = getTaskId(obj)
             id = Tasks.R;
         end
-        
-        function datatype = getDataType(obj, y)
-            datatype = RealLabelsVector(y);
-        end
 
     end
   

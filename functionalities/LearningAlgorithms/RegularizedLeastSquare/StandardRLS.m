@@ -29,9 +29,13 @@ classdef StandardRLS < LearningAlgorithm
         function p = initParameters(~, p)
         end
         
-        function obj = train(obj, Xtr, Ytr)
+        function obj = train(obj, d)
             
-            if(obj.getCurrentTask() == Tasks.MC)
+            % Get training data
+            Xtr = d.X.data;
+            Ytr = d.Y.data;
+            
+            if(d.task == Tasks.MC)
                 Ytr  = dummyvar(Ytr);
             end
             

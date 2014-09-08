@@ -37,9 +37,13 @@ classdef ParameterSweep < Wrapper
             p.addParamValue('finalTraining', true);
         end
         
-        function obj = train(obj, Xtr, Ytr)
-            dataset = obj.generateDataset(RealMatrix(Xtr), Ytr);
-            dataset = dataset.generateSinglePartition(obj.parameters.partition_strategy);
+        function obj = train(obj, d)
+            
+            % Get training data
+            Xtr = d.X.data;
+            Ytr = d.Y.data;
+            
+            d = d.generateSinglePartition(obj.parameters.partition_strategy);
             
             bestPerf = [];
             
@@ -57,7 +61,7 @@ classdef ParameterSweep < Wrapper
                     obj.wrappedAlgo = obj.wrappedAlgo.setParameter(obj.parameters.parameterNames{i}, paramsToTest(i));
                 end
                 
-                currentPerf = PerformanceEvaluator.getInstance().computePerformance(obj.wrappedAlgo, dataset);
+                currentPerf = PerformanceEvaluator.getInstance().computePerformance(obj.wrappedAlgo, d);
                 
                 if(isempty(bestPerf))
                     bestPerf = currentPerf{1};
@@ -95,10 +99,10 @@ classdef ParameterSweep < Wrapper
             t = clock;
             
             if(obj.parameters.finalTraining)
-                obj.wrappedAlgo = obj.wrappedAlgo.train(Xtr, Ytr);
+                obj.wrappedAlgo = obj.wrappedAlgo.train(d);
             else
-                [Xtr, Ytr, ~, ~, ~, ~] = dataset.getFold(1);
-                obj.wrappedAlgo = obj.wrappedAlgo.train(Xtr, Ytr);
+                [d, ~, ~] = d.getFold(1);
+                obj.wrappedAlgo = obj.wrappedAlgo.train(d);
             end
             
             trainingTime = etime(clock, t);

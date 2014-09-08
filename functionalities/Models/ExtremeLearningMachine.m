@@ -54,11 +54,14 @@ classdef ExtremeLearningMachine < Model
             p.addParamValue('type', 'sigmoid', @(x) assert(isingroup(x, {'sigmoid', 'sinusoid', 'hardlimit'}), 'Hidden nodes type of ExtremeLearningMachine is invalid'));
         end
         
-        function [labels, scores] = test(obj, Xts)
+        function [labels, scores] = test(obj, d)
+            
+            % Get training data
+            Xts = d.X.data;
             
             H_temp_test = obj.computeHiddenMatrix(Xts);
             scores =(H_temp_test * obj.outputWeights);
-            labels = convert_scores(scores, obj.getCurrentTask());
+            labels = convert_scores(scores, d.task);
             
         end
         

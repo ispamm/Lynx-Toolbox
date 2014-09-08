@@ -22,8 +22,12 @@ classdef BaselineTrainingAlgorithm < LearningAlgorithm
         function p = initParameters(~, p)
         end
         
-        function obj = train(obj, ~, Ytr)
-            if(obj.getCurrentTask() == Tasks.R)
+        function obj = train(obj, d)
+            
+            % Get training data
+            Ytr = d.Y.data;
+            
+            if(d.task == Tasks.R)
                 obj.model.avValue  = mean(Ytr);
             else
                 [obj.model.distribution, obj.model.values] = hist(Ytr, unique(Ytr));

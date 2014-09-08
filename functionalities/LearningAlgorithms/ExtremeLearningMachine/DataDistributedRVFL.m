@@ -27,12 +27,15 @@ classdef DataDistributedRVFL < DataDistributedLearningAlgorithm
             p.addParamValue('admm_rho', 0.1);
         end
         
-        function obj = train_locally(obj, Xtr, Ytr)
+        function obj = train_locally(obj, d)
+            % Get training data
+            Xtr = d.X.data;
+            Ytr = d.Y.data;
             
-            [N, d] = size(Xtr);
+            [N, ~] = size(Xtr);
             N_hidden = obj.getParameter('hiddenNodes');
             
-            if(obj.getCurrentTask() == Tasks.MC)
+            if(d.task == Tasks.MC)
                 Ytr  = dummyvar(Ytr);
             end
             

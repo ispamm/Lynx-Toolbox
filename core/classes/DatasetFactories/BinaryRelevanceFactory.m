@@ -22,13 +22,13 @@ classdef BinaryRelevanceFactory < DatasetFactory
             
             for j=1:nLabels
                 newY = d.Y.data(:, j);
-                newname = sprintf('%s (%s)', data_name, d.labels_info{j});
-                newID = sprintf('%s-%d', data_id, j);
+                newname = sprintf('%s (%s)', d.name, d.Y.labels_info{j});
+                newID = sprintf('%s-%d', d.id, j);
                 datasets{j} = Dataset(newX, BinaryLabelsVector(newY), newtask);
                 datasets{j} = datasets{j}.setIdAndName(newID, newname);
             end
             
-            fprintf('Extracted %i different binary classification datasets from original dataset %s\n', nLabels, data_name);
+            fprintf('Extracted %i different binary classification datasets from original dataset %s\n', nLabels, d.name);
             
         end
     end

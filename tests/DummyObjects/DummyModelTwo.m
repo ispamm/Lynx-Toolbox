@@ -19,10 +19,10 @@ classdef DummyModelTwo < Model
         function p = initParameters(~, p)
         end
         
-        function [labels, scores] = test(obj, Xts)
+        function [labels, scores] = test(obj, d)
         end
         
-        function res = isTaskAllowed(~, t)
+        function res = isDatasetAllowed(~, d)
         end
     end
     

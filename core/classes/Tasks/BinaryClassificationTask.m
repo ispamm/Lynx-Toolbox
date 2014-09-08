@@ -44,10 +44,6 @@ classdef BinaryClassificationTask < BasicTask
             id = Tasks.BC;
         end
         
-        function datatype = getDataType(obj, y)
-            datatype = BinaryLabelsVector(y);
-        end
-
     end
   
 end

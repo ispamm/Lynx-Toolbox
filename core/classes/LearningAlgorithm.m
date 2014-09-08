@@ -12,17 +12,12 @@
 %
 % LearningAlgorithm Methods:
 %
-%   train - Takes an Nxd input matrix Xtr, and associated labels Ytr,
-%   and trains its internal model.
+%   train - Takes a dataset and train the object
 %
 %   test_custom - An optional testing procedure
 %
 %   isTaskAllowed - Returns a boolean indicating whether a given task
 %   is allowed
-%
-%   setTask - Set the current task
-%
-%   getTask - Returns the current task
 %
 %   getParameter - Return a parameter used for training or internal
 %   of the model
@@ -62,7 +57,7 @@ classdef LearningAlgorithm < Parameterized
     methods(Abstract=true)
         
         % Train the model
-        obj = train(obj, Xtr, Ytr)
+        obj = train(obj, dataset)
         
         % Check for compatibility
         b = checkForCompatibility(obj, model);
@@ -97,34 +92,21 @@ classdef LearningAlgorithm < Parameterized
             b = false;
         end
         
-        function [labels, scores] = test_custom(obj, Xts)
+        function [labels, scores] = test_custom(obj, dataset)
             % Test the model with a custom testing procedure
             error('Lynx:Runtime:MethodNotOverloaded', 'The training algorithm %s has no custom testing procedure', class(obj));
         end
         
-        function [labels, scores] = test(obj, Xts)
+        function [labels, scores] = test(obj, dataset)
             % Test using the training algorithm custom testing, if defined,
             % or the global one
             if(obj.hasCustomTesting())
-                [labels, scores] = obj.test_custom(Xts);
+                [labels, scores] = obj.test_custom(dataset);
             else
-                [labels, scores] = obj.model.test(Xts);
+                [labels, scores] = obj.model.test(dataset);
             end
         end
-        
-        function obj = setCurrentTask(obj, t)
-            % Set the current task
-            obj.task = t;
-            if(~isempty(obj.model))
-                obj.model = obj.model.setCurrentTask(t);
-            end
-        end
-        
-        function t = getCurrentTask(obj)
-            % Get the current task
-            t = obj.task;
-        end
-        
+                
         function value = getParameter(obj, param)
             % Get the value of a parameter
             try

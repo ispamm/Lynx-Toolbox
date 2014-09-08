@@ -21,7 +21,6 @@ function add_dataset(data_id, data_name, file, f)
         d = tasks{ii}.loadDataset(file);
         if(~isempty(d))
             found = true;
-            d = d.dataset;
             d = d.setIdAndName(data_id, data_name);
             if(nargin == 4)
                 d = d.process(f);
@@ -29,6 +28,7 @@ function add_dataset(data_id, data_name, file, f)
                 d = d.process();
             end
             for jj = 1:length(d)
+                d{jj} = d{jj}.setIdAndName(data_id, data_name);
                 s.datasets = s.datasets.addElement(d{jj});
             end
         end

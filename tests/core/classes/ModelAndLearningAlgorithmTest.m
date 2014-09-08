@@ -49,8 +49,8 @@ classdef ModelAndLearningAlgorithmTest < matlab.unittest.TestCase
         function testTrainingAndTesting(testCase)
             m = DummyModel('a', 'b', 0.5);
             a = m.getDefaultTrainingAlgorithm();
-            a = a.train([], [1; 3; 2]);
-            testCase.verifyEqual(a.test([0.5; 1]), [3.5; 4.5]);
+            a = a.train(Dataset(RealMatrix([]), RealLabelsVector([1; 3; 2]), Tasks.R));
+            testCase.verifyEqual(a.test(Dataset(RealMatrix([0.5; 1]), [], Tasks.R)), [3.5; 4.5]);
         end
 
     end  

@@ -35,13 +35,17 @@ classdef RegularizedELM < LearningAlgorithm
             p.addParamValue('C', 1, @(x) assert(x > 0, 'Regularization parameter of RegularizedELM must be > 0'));
         end
         
-        function obj = train(obj, Xtr, Ytr)
+        function obj = train(obj, dataset)
+            
+            % Get training data
+            Xtr = dataset.X.data;
+            Ytr = dataset.Y.data;
             
             [N, d] = size(Xtr);
             
             N_hidden = obj.getParameter('hiddenNodes');
             
-            if(obj.getCurrentTask() == Tasks.MC)
+            if(dataset.task == Tasks.MC)
                 Ytr  = dummyvar(Ytr);
             end
 

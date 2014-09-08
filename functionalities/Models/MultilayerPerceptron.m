@@ -30,7 +30,7 @@ classdef MultilayerPerceptron < Model
             p.addParamValue('hiddenNodes', 10, @(x) assert(mod(x,1) == 0 && x > 0, 'Number of hidden nodes of MLP must be > 0'));
         end
         
-        function [labels, scores] = test(obj, Xts)
+        function [labels, scores] = test(obj, d)
             % TODO
         end
         

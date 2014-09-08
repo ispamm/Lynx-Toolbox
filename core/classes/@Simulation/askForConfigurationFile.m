@@ -1,6 +1,7 @@
 function obj = askForConfigurationFile( obj )
 
 % askForConfigurationFile - Ask for a configuration file
+%   Files are contained in the ROOT/configs folder.
 
 files = getAllFiles(fullfile(XmlConfiguration.getRoot(), 'configs'));
 
@@ -15,7 +16,7 @@ end
 files(to_remove) = [];
 
 result = -1;
-while(result < 1 || result > length(files) )
+while(~isnumeric(result) || ~(numel(result) == 1)  || result < 1 || result > length(files) )
                  
     cprintf('-text', '\nPlease select a configuration file:\n\n');
     for i = 1:length(files)

@@ -5,6 +5,8 @@
 %
 %   d = Dataset(X, Y, task);
 %
+%   Where X and Y are proper DataType objects.
+%
 %   Set an id and name as:
 %
 %   d = d.setIdAndName(id, name);
@@ -23,7 +25,7 @@
 %
 %   Finally, get the partitioned data of fold i as:
 %
-%   [Xtr, Ytr, Xtst, Ytst, Xu] = d.getFold(i);
+%   [dataset_training, dataset_test, dataset_unsupervised] = d.getFold(i);
 %
 %   See also: PartitionStrategy, DataType.
 %
@@ -42,10 +44,10 @@
 %   i-th one. This can only be called after the partitions have been
 %   generated, otherwise an error will be thrown.
 %
-%   [XTRN, YTRN, XTST, YTST] = OBJ.GETFOLD(I) returns the training and
+%   [DTRAIN, DTEST] = OBJ.GETFOLD(I) returns the training and
 %   testing data subdivided on the base of the current partition.
 %
-%   [XTRN, YTRN, XTST, YTST, XU] = OBJ.GETFOLD(I) is the same as
+%   [DTRAIN, DTEST, DUNSUPERVISED] = OBJ.GETFOLD(I) is the same as
 %   before, but also returns the unlabeled inputs for semi-supervised
 %   training
 
@@ -78,7 +80,7 @@ classdef Dataset
         function obj = Dataset(X, Y, task, info)
             % Constructor of the Dataset object. 
             % X and Y are the input and output DataType objects
-
+            
             obj.task = task;
             assert(isa(X, 'DataType'), 'Lynx:Validation:InvalidInput', 'X must be a valid DataType object');
             assert(isa(Y, 'DataType') || isempty(Y), 'Lynx:Validation:InvalidInput', 'Y must be a valid DataType object');
@@ -91,6 +93,9 @@ classdef Dataset
             else
                 obj.info = info;
             end
+            
+            obj.id = '';
+            obj.name = '';
      
         end
         
@@ -112,12 +117,12 @@ classdef Dataset
             
             for ii=1:N
                 % Shuffle the dataset
-                obj.shuffles{ii} = randperm(length(obj.Y.data));
+                obj.shuffles{ii} = randperm(size(obj.Y.data, 1));
                 currentY = obj.Y.data(obj.shuffles{ii});
                 
                 if(~isempty(obj.ss_strategy))
                     obj.ss_partitions{ii} = obj.ss_strategy.partition(currentY);
-                    obj.partitions{ii} = partitionStrategy.partition(currentY(obj.ss_partitions{ii}.getTrainingIndexes));
+                    obj.partitions{ii} = partitionStrategy.partition(currentY(obj.ss_partitions{ii}.getTrainingIndexes, :));
                 else
                     obj.partitions{ii} = partitionStrategy.partition(currentY);
                 end
@@ -150,7 +155,10 @@ classdef Dataset
             % Set id and name of the dataset
             % id must be an alphanumerical string for identification, name
             % an alphanumerical string given as name.
+            
+            assert(ischar(id), 'Lynx:Validation:InvalidInput', '%s is not a valid identifier for a dataset', id);
             obj.id = id;
+            assert(ischar(name), 'Lynx:Validation:InvalidInput', '%s is not a valid name for a dataset', name);
             obj.name = name;
         end
         
@@ -164,7 +172,11 @@ classdef Dataset
                 newDatasets = f.process(obj);
             else
             
-                firstProcessed = obj.Y.getDefaultFactory().process(obj);
+                if(~isempty(obj.Y))
+                    firstProcessed = obj.Y.getDefaultFactory().process(obj);
+                else
+                    firstProcessed = {obj};
+                end
                 secondProcessed = {};
                 for i = 1:length(firstProcessed)
                     fact = obj.X.getDefaultFactory();
@@ -175,7 +187,7 @@ classdef Dataset
             end
         end
         
-        function [Xtrn, Ytrn, Xtst, Ytst, Xu] = getFold(obj, ii)
+        function [dataset_train, dataset_test, dataset_unsupervised] = getFold(obj, ii)
             % Partition the data according to the current partition index
             % and fold ii
             
@@ -189,9 +201,8 @@ classdef Dataset
                 ss_p = obj.ss_partitions{obj.currentPartition};
                 [X, Xu] = X.partition(ss_p.getTestIndexes(), ss_p.getTrainingIndexes());
                 [Y, ~] = Y.partition(ss_p.getTestIndexes(), ss_p.getTrainingIndexes());
-                Xu = Xu.data;
             else
-                Xu = [];
+                Xu = RealMatrix([]);
             end
             
             p = obj.partitions{obj.currentPartition};
@@ -200,10 +211,13 @@ classdef Dataset
             [Xtrn, Xtst] = X.partition(p.getTrainingIndexes(), p.getTestIndexes());
             [Ytrn, Ytst] = Y.partition(p.getTrainingIndexes(), p.getTestIndexes());
             
-            Xtrn = Xtrn.data;
-            Ytrn = Ytrn.data;
-            Xtst = Xtst.data;
-            Ytst = Ytst.data;
+            dataset_train = Dataset(Xtrn, Ytrn, obj.task);
+            dataset_test = Dataset(Xtst, Ytst, obj.task);
+            dataset_unsupervised = Dataset(Xu, [], obj.task);
+            
+            dataset_train = dataset_train.setIdAndName(obj.id, obj.name);
+            dataset_test = dataset_test.setIdAndName(obj.id, obj.name);
+            dataset_unsupervised = dataset_unsupervised.setIdAndName(obj.id, obj.name);
             
         end
 
@@ -227,6 +241,14 @@ classdef Dataset
                 s = obj.Y.getDescription();
             else
                 s = '';
+            end
+        end
+        
+        function s = getDescription(obj)
+            if(isempty(obj.getYDescription()))
+                s = obj.getXDescription();
+            else
+                s = sprintf('%s, %s', obj.getXDescription(), obj.getYDescription());
             end
         end
             

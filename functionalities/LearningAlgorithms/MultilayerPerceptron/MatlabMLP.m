@@ -26,16 +26,20 @@ classdef MatlabMLP < LearningAlgorithm
         function p = initParameters(~, p)
         end
         
-        function obj = train(obj, Xtr, Ytr)
+        function obj = train(obj, d)
             
-            if(obj.getCurrentTask() == Tasks.R)
+            % Get training data
+            Xtr = d.X.data;
+            Ytr = d.Y.data;
+            
+            if(d.task == Tasks.R)
                 obj.netStruct = feedforwardnet(obj.getParameter('hiddenNodes'));
             else
                 obj.netStruct = patternnet(obj.getParameter('hiddenNodes'));
             end
             
             cval = get_partition( Ytr, 0.2 );
-            if(obj.getCurrentTask() == Tasks.MC)
+            if(d.task == Tasks.MC)
                 Ytr  = dummyvar(Ytr);
             end
             
@@ -75,7 +79,11 @@ classdef MatlabMLP < LearningAlgorithm
             b = true;
         end
         
-        function [labels, scores] = test_custom(obj, Xts)
+        function [labels, scores] = test_custom(obj, d)
+            
+            % Get test data
+            Xts = d.X.data;
+            
             if(~isempty(Xts))
                 scores = obj.netStruct(Xts')';
                 labels = convert_scores(scores, obj.getCurrentTask());
