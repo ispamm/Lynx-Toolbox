@@ -11,9 +11,10 @@ classdef FormatAsMultiplePlots < OutputFormatter
     
     methods(Static)
         
-        function displayOnConsole(valuesCellArray, row_labels, column_labels)
-            
-            fprintf('See plots\n');
+        function displayOnConsole(valuesCellArray, row_labels, column_labels, print)
+            if(nargin < 4 && print)
+                fprintf('See plots\n');
+            end
             
             N_r = length(row_labels);
             N_c = length(column_labels);
@@ -60,7 +61,9 @@ classdef FormatAsMultiplePlots < OutputFormatter
 
             end
             
-            fprintf('\n');
+            if(nargin < 4 && print)
+                fprintf('\n');
+            end
             
         end
     end

@@ -25,9 +25,12 @@ classdef DataDistributedRVFL < DataDistributedLearningAlgorithm
             p.addParamValue('consensus_thres', 0.01);
             p.addParamValue('admm_max_steps', 10);
             p.addParamValue('admm_rho', 0.1);
+            p.addParamValue('admm_reltol', 0.001);
+            p.addParamValue('admm_abstol', 0.001);
         end
         
         function obj = train_locally(obj, d)
+            
             % Get training data
             Xtr = d.X.data;
             Ytr = d.Y.data;
@@ -58,31 +61,52 @@ classdef DataDistributedRVFL < DataDistributedLearningAlgorithm
             
             else
                
+                % Global term
                 z = zeros(N_hidden, 1);
-                u = zeros(N_hidden, 1);
+                
+                % Lagrange multipliers
+                t = zeros(N_hidden, 1);
+                
+                % Parameters
                 rho = obj.getParameter('admm_rho');
                 N_nodes = matlabpool('size');
+                steps = obj.getParameter('admm_max_steps');
                 
-                %if(N >= N_hidden)
-                    Hinv = inv(eye(N_hidden)*rho + H' * H);
-                %else
-                %    Hinv = inv(eye(size(H, 1))*rho + H * H');
-                %end
+                % Statistics initialization
+                obj.statistics.r_norm = zeros(steps, 1);
+                obj.statistics.s_norm = zeros(steps, 1);
+                obj.statistics.eps_pri = zeros(steps, 1);
+                obj.statistics.eps_dual = zeros(steps, 1);
                 
-                for jj = 1:obj.getParameter('admm_max_steps')
+                % Precompute the inverse matrix
+                Hinv = inv(eye(N_hidden)*rho + H' * H);
+                
+                for jj = 1:steps
                     
-                    %if(N >= N_hidden)
-                        obj.model.outputWeights = Hinv*(H'*Ytr + rho*(z - u));
-                    %else
-                    %    obj.model.outputWeights = H'*Hinv*(Ytr + rho*(z - u));
-                    %end
+                    % Compute current weights
+                    obj.model.outputWeights = Hinv*(H'*Ytr + rho*z - t);
                     
+                    % Run consensus
                     beta_avg = ...
                         obj.run_consensus(@() obj.model.outputWeights, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'));
-                    u_avg = obj.run_consensus(@() u, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'));
+                    t_avg = obj.run_consensus(@() t, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'));
                     
-                    z = ((N_nodes*rho)/(obj.getParameter('C') + N_nodes*rho))*(beta_avg + u_avg);
-                    u = u + obj.model.outputWeights - z;
+                    % Store the old z and update it
+                    zold = z;
+                    z = (rho*beta_avg + t_avg)/(obj.getParameter('C') + rho);
+
+                    % Compute the update for the Lagrangian multipliers
+                    t = t + rho*(obj.model.outputWeights - z);
+                    
+                    % Compute primal and dual residuals
+                    obj.statistics.r_norm(jj) = norm(obj.model.outputWeights - z);
+                    obj.statistics.s_norm(jj) = norm(-rho*(z - zold));
+
+                    % Compute epsilon values
+                    obj.statistics.eps_pri(jj) = sqrt(N_nodes)*obj.getParameter('admm_abstol') + ...
+                        obj.getParameter('admm_reltol')*max(norm(obj.model.outputWeights), norm(z));
+                    obj.statistics.eps_dual(jj)= sqrt(N_nodes)*obj.getParameter('admm_abstol') + ...
+                        obj.getParameter('admm_reltol')*norm(t);
                     
                 end
                 

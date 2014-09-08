@@ -43,7 +43,9 @@ classdef DataDistributedLearningAlgorithm < LearningAlgorithm & NetworkNode
            spmd(obj.topology.N)
                 dataset.X.data = codistributed(dataset.X.data, codistributor1d(1));
                 dataset.Y.data = codistributed(dataset.Y.data, codistributor1d(1));
-                obj_local = obj.train_locally(Dataset(getLocalPart(dataset.X.data), getLocalPart(dataset.Y.data), dataset.task));
+                dataset.X.data = getLocalPart(dataset.X.data);
+                dataset.Y.data = getLocalPart(dataset.Y.data);
+                obj_local = obj.train_locally(dataset);
            end
            obj = obj.executeAfterTraining(obj_local);
        end
