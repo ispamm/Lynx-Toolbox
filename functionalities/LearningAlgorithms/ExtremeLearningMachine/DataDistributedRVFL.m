@@ -38,6 +38,8 @@ classdef DataDistributedRVFL < DataDistributedLearningAlgorithm
             [N, ~] = size(Xtr);
             N_hidden = obj.getParameter('hiddenNodes');
             
+            % Get the logger
+            
             if(d.task == Tasks.MC)
                 Ytr  = dummyvar(Ytr);
             end
@@ -80,7 +82,7 @@ classdef DataDistributedRVFL < DataDistributedLearningAlgorithm
                 
                 % Precompute the inverse matrix
                 Hinv = inv(eye(N_hidden)*rho + H' * H);
-                
+
                 for jj = 1:steps
                     
                     % Compute current weights
@@ -107,7 +109,7 @@ classdef DataDistributedRVFL < DataDistributedLearningAlgorithm
                         obj.getParameter('admm_reltol')*max(norm(obj.model.outputWeights), norm(z));
                     obj.statistics.eps_dual(jj)= sqrt(N_nodes)*obj.getParameter('admm_abstol') + ...
                         obj.getParameter('admm_reltol')*norm(t);
-                    
+
                 end
                 
             end

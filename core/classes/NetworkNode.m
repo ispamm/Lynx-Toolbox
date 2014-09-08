@@ -27,11 +27,12 @@ classdef NetworkNode
                 new_value = current_value;
                 for jj = 1:length(idx)
                     neighbor_property = labSendReceive(idx(jj), idx(jj), current_value);
-                    consensus_error(ii) = consensus_error(ii) + norm(current_value - neighbor_property);
+                    %consensus_error(ii) = consensus_error(ii) + norm(current_value - neighbor_property);
                     new_value = new_value + neighbor_property;
                 end
+                old_value = current_value;
                 current_value = new_value./(length(idx) + 1);
-                consensus_error(ii) = consensus_error(ii) / length(idx);
+                consensus_error(ii) = norm(new_value - old_value);
             end
             final_value = current_value;
         end
