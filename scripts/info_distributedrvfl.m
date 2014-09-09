@@ -9,12 +9,11 @@
 
 s = Simulation.getInstance();
 algos = find_algorithms('DataDistributedRVFL', s.algorithms);
+algos = [algos; find_algorithms('SerialDataDistributedRVFL', s.algorithms)];
 
 cons_error = cell(length(s.datasets), length(algos));
-primal_residual = cell(length(s.datasets), length(algos));
-dual_residual = cell(length(s.datasets), length(algos));
-eps_pri = cell(length(s.datasets), length(algos));
-eps_dual = cell(length(s.datasets), length(algos));
+primal_residual = cell(length(s.datasets), length(algos)*2);
+dual_residual = cell(length(s.datasets), length(algos)*2);
 names_consensus = cell(length(algos), 1);
 names_admm = cell(length(algos), 1);
 consensus = false(length(algos), 1);
@@ -23,6 +22,8 @@ admm = false(length(algos), 1);
 fprintf('Information on data-distributed RVFL: see plots.\n');
 
 w = 1;
+zz = 1;
+
 for i = algos
    
     algo = s.trainedAlgo{1, i, 1}{1};
@@ -59,19 +60,21 @@ for i = algos
 
            algo_stats = sum_structs(algo_stats);
            c = XYPlotContainer();
-           primal_residual{j, w} = c.store(XYPlot(1:length(algo_stats.r_norm), algo_stats.r_norm, ...
-               'Iteration', 'Primal residual norm'));
+           primal_residual{j, 2*(zz-1)+1} = c.store(XYPlot(1:length(algo_stats.r_norm), algo_stats.r_norm, ...
+               'Iteration', 'Norm'));
+           primal_residual{j, 2*(zz-1)+2} = c.store(XYPlot(1:length(algo_stats.eps_pri), algo_stats.eps_pri, ...
+               'Iteration', 'Norm'));
+           
            c = XYPlotContainer();
-           dual_residual{j, w} = c.store(XYPlot(1:length(algo_stats.s_norm), algo_stats.s_norm, ...
-               'Iteration', 'Dual residual norm'));
+           dual_residual{j, 2*(zz-1)+1} = c.store(XYPlot(1:length(algo_stats.s_norm), algo_stats.s_norm, ...
+               'Iteration', 'Norm'));
            c = XYPlotContainer();
-           eps_pri{j, w} = c.store(XYPlot(1:length(algo_stats.eps_pri), algo_stats.eps_pri, ...
-               'Iteration', 'Epsilon (primal)'));
-           c = XYPlotContainer();
-           eps_dual{j, w} = c.store(XYPlot(1:length(algo_stats.eps_dual), algo_stats.eps_dual, ...
-               'Iteration', 'Epsilon (dual)'));
+           dual_residual{j, 2*(zz-1)+2} = c.store(XYPlot(1:length(algo_stats.eps_dual), algo_stats.eps_dual, ...
+               'Iteration', 'Norm'));
 
        end
+       
+       zz = zz + 2;
 
     end
     
@@ -82,10 +85,8 @@ end
 cons_error(:, ~consensus) = [];
 names_consensus(~consensus) = [];
 
-primal_residual(:, ~admm) = [];
-dual_residual(:, ~admm) = [];
-eps_pri(:, ~admm) = [];
-eps_dual(:, ~admm) = [];
+primal_residual(:, zz+1:end) = [];
+dual_residual(:, zz+1:end) = [];
 names_admm(~admm) = [];
 
 p = FormatAsMultiplePlots();
@@ -93,11 +94,16 @@ p = FormatAsMultiplePlots();
 if(~isempty(names_consensus))
     p.displayOnConsole(cons_error, s.datasets.getNames(), names_consensus, false);
 end
-
 if(~isempty(names_admm))
-    p.displayOnConsole(primal_residual, s.datasets.getNames(), names_admm, false);
-    p.displayOnConsole(dual_residual, s.datasets.getNames(), names_admm, false);
-    p.displayOnConsole(eps_pri, s.datasets.getNames(), names_admm, false);
-    p.displayOnConsole(eps_dual, s.datasets.getNames(), names_admm, false);
+    legend1 = cell(length(names_admm)*2, 1);
+    legend2 = cell(length(names_admm)*2, 1);
+    for ii = 1:length(names_admm)
+        legend1{2*(ii-1)+1} = sprintf('%s - Primal Residual', names_admm{ii});
+        legend1{2*(ii-1)+2} = sprintf('%s - Epsilon', names_admm{ii});
+        legend2{2*(ii-1)+1} = sprintf('%s - Dual Residual', names_admm{ii});
+        legend2{2*(ii-1)+2} = sprintf('%s - Epsilon', names_admm{ii});
+    end
+    p.displayOnConsole(primal_residual, s.datasets.getNames(), legend1, false);
+    p.displayOnConsole(dual_residual, s.datasets.getNames(), legend2, false);
 end
        

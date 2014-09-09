@@ -11,12 +11,16 @@ classdef DistributeData < AdditionalFeature
     properties
         topology;
         topologies;
+        disable_check;
+        disable_parallel;
     end
     
     methods
         
-        function obj = DistributeData(topology)
+        function obj = DistributeData(topology, disable_check, disable_parallel)
             obj.topology = topology;
+            obj.disable_check = disable_check;
+            obj.disable_parallel = disable_parallel;
         end
         
         function executeAfterInitialization(obj)
@@ -34,15 +38,21 @@ classdef DistributeData < AdditionalFeature
                 error('Lynx:Runtime:IncompatibleFeatures', 'Cannot distribute data if already running in a cluster configuration');
             end
             
-            % Open the pool of workers
-            matlabpool('open');
-            
-            % Check that there are enough labs
-            if(matlabpool('size') < obj.topology.N)
-                error('Lynx:Runtime:SmallCluster', 'Maximum number of nodes in this cluster is %i', matlabpool('size'));
+            if(~obj.disable_parallel)
+                % Open the pool of workers
+                matlabpool('open');
             end
             
-            check_install_on_cluster();
+            if(~obj.disable_check)
+            
+                % Check that there are enough labs
+                if(matlabpool('size') < obj.topology.N)
+                    error('Lynx:Runtime:SmallCluster', 'Maximum number of nodes in this cluster is %i', matlabpool('size'));
+                end
+
+                check_install_on_cluster();
+                
+            end
             
         end
         
@@ -50,11 +60,14 @@ classdef DistributeData < AdditionalFeature
             if(a.isOfClass('DataDistributedLearningAlgorithm'))
                 log = SimulationLogger.getInstance();
                 a.topology = obj.topologies{log.getAdditionalParameter('run')};
+                a = a.executeBeforeTraining(size(d.X.data, 2));
             end
         end
         
         function [a, d] = executeAfterEachExperiment(obj, a, d)
-
+            if(a.isOfClass('DataDistributedLearningAlgorithm'))
+                a = a.executeAfterTraining();
+            end
         end
         
         function executeBeforeFinalization(obj)

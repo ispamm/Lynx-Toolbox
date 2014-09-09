@@ -63,10 +63,14 @@ classdef NetworkTopology
                 view(b);
                 set(0, 'ShowHiddenHandles', 'on');
                 bgfig = gcf;
+                position = get(bgfig, 'Position');
                 c = get(bgfig, 'Children');
-                copyobj(c(1), figure);
+                h = figure;
+                copyobj(c(1), h);
                 figshift;
-                set(gcf, 'Name', t);
+                set(h, 'Name', t);
+                set(h, 'Units', 'points');
+                set(h, 'Position', position);
                 close(bgfig);
             end
         end

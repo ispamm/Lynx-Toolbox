@@ -57,6 +57,8 @@ p = PerformanceEvaluator.getInstance();
     p.computePerformance(currentAlgo, currentDataset, true );
 if(isempty(a))
     cprintf('err', '\t\t Not Allowed\n');
+else
+    currentAlgo = a;
 end
 
 % Execute custom features

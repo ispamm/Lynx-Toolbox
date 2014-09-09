@@ -12,6 +12,11 @@ classdef FormatAsMultiplePlots < OutputFormatter
     methods(Static)
         
         function displayOnConsole(valuesCellArray, row_labels, column_labels, print)
+            
+            if(nargin == 3)
+                print = true;
+            end
+            
             if(nargin < 4 && print)
                 fprintf('See plots\n');
             end

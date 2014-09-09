@@ -24,6 +24,7 @@
 classdef DataDistributedLearningAlgorithm < LearningAlgorithm & NetworkNode
     
     properties
+        obj_locals;
     end
     
     methods(Abstract=true)
@@ -36,30 +37,30 @@ classdef DataDistributedLearningAlgorithm < LearningAlgorithm & NetworkNode
        function obj = DataDistributedLearningAlgorithm(model, varargin)
            obj = obj@LearningAlgorithm(model, varargin{:});
        end
-       
+
        function obj = train(obj, dataset)
            fprintf('\t\tDistributing data (%i examples each approximately)...\n', floor(size(dataset.X.data, 1)/obj.topology.N));
-           obj = obj.executeBeforeTraining(size(dataset.X.data, 2));
            spmd(obj.topology.N)
+
                 dataset.X.data = codistributed(dataset.X.data, codistributor1d(1));
                 dataset.Y.data = codistributed(dataset.Y.data, codistributor1d(1));
                 dataset.X.data = getLocalPart(dataset.X.data);
                 dataset.Y.data = getLocalPart(dataset.Y.data);
-                obj_local = obj.train_locally(dataset);
+                obj.obj_locals = obj.train_locally(dataset);
+
            end
-           obj = obj.executeAfterTraining(obj_local);
        end
        
        function obj = executeBeforeTraining(obj, ~)
        end
        
-       function obj = executeAfterTraining(obj, obj_local)
-           stats = cell(length(obj_local), 1);
-           for i = 1:length(obj_local)
-               o = obj_local{i};
+       function obj = executeAfterTraining(obj)
+           stats = cell(length(obj.obj_locals), 1);
+           for i = 1:length(obj.obj_locals)
+               o = obj.obj_locals{i};
                stats{i} = o.statistics;
            end
-           obj = obj_local{1};
+           obj = obj.obj_locals{1};
            obj.statistics = sum_structs(stats);
        end
              

@@ -24,7 +24,7 @@ classdef DataDistributedRVFL < DataDistributedLearningAlgorithm
             p.addParamValue('consensus_max_steps', 10);
             p.addParamValue('consensus_thres', 0.01);
             p.addParamValue('admm_max_steps', 10);
-            p.addParamValue('admm_rho', 0.1);
+            p.addParamValue('admm_rho', 1);
             p.addParamValue('admm_reltol', 0.001);
             p.addParamValue('admm_abstol', 0.001);
         end
@@ -58,7 +58,7 @@ classdef DataDistributedRVFL < DataDistributedLearningAlgorithm
                 % Execute consensus algorithm
                 if(obj.getParameter('consensus_max_steps') > 0)
                     [obj.model.outputWeights, obj.statistics.consensus_error] = ...
-                        obj.run_consensus(@() obj.model.outputWeights, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'));
+                        obj.run_consensus(obj.model.outputWeights, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'));
                 end
             
             else
@@ -90,8 +90,8 @@ classdef DataDistributedRVFL < DataDistributedLearningAlgorithm
                     
                     % Run consensus
                     beta_avg = ...
-                        obj.run_consensus(@() obj.model.outputWeights, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'));
-                    t_avg = obj.run_consensus(@() t, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'));
+                        obj.run_consensus(obj.model.outputWeights, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'));
+                    t_avg = obj.run_consensus(t, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'));
                     
                     % Store the old z and update it
                     zold = z;
