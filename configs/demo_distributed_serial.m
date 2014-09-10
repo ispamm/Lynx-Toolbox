@@ -15,7 +15,15 @@ add_dataset('G', 'G50C', 'g50c');
 %add_dataset('S', 'Statlib', 'statlib_calhousing');
 
 add_feature(SetSeedPRNG(1));
-add_feature(DistributeData(RandomTopology(30, 0.2), true, true));
+
+%add_feature(DistributeData(RandomTopology(30, 0.2), true, true));
+%add_feature(DistributeData(CyclicLatticeTopology(30, 2), true, true));
+%add_feature(DistributeData(CyclicLatticeTopology(30, 4), true, true));
+%add_feature(DistributeData(FullyConnectedTopology(30), true, true));
+%add_feature(DistributeData(LinearTopology(30, 1), true, true));
+%add_feature(DistributeData(LinearTopology(30, 2), true, true));
+add_feature(DistributeData(SmallWorldTopology(30, 2, 0.1), 'disable_check', 'disable_parallel'));
+
 add_feature(ExecuteOutputScripts('info_distributedrvfl'));
 
 %add_performance(Tasks.R, NormalizedRootMeanSquaredError(), true);
@@ -23,4 +31,4 @@ add_performance(Tasks.BC, RocCurve());
 add_performance(Tasks.BC, PrecisionRecallCurve());
 add_performance(Tasks.BC, ConfusionMatrix());
 
-set_runs(10);
+set_runs(5);

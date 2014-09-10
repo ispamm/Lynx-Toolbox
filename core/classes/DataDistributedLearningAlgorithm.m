@@ -40,15 +40,20 @@ classdef DataDistributedLearningAlgorithm < LearningAlgorithm & NetworkNode
 
        function obj = train(obj, dataset)
            fprintf('\t\tDistributing data (%i examples each approximately)...\n', floor(size(dataset.X.data, 1)/obj.topology.N));
+           obj = obj.executeBeforeTraining(size(dataset.X.data, 2));
+           
            spmd(obj.topology.N)
 
                 dataset.X.data = codistributed(dataset.X.data, codistributor1d(1));
                 dataset.Y.data = codistributed(dataset.Y.data, codistributor1d(1));
                 dataset.X.data = getLocalPart(dataset.X.data);
                 dataset.Y.data = getLocalPart(dataset.Y.data);
-                obj.obj_locals = obj.train_locally(dataset);
+                o = obj.train_locally(dataset);
 
            end
+           
+           obj.obj_locals = o;
+           obj = obj.executeAfterTraining();
        end
        
        function obj = executeBeforeTraining(obj, ~)

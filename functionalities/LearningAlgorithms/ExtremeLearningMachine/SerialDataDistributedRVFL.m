@@ -31,6 +31,7 @@ classdef SerialDataDistributedRVFL < DataDistributedLearningAlgorithm
         
         function obj = train(obj, d)
             
+            obj = obj.executeBeforeTraining(size(d.X.data, 2));
             d = d.generateSinglePartition(KFoldPartition(obj.topology.N));
             fprintf('\t\tEach node will have approximately %i patterns.\n', floor(size(d.X.data, 1)/obj.topology.N));
             

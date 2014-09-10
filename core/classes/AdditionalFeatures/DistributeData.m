@@ -17,10 +17,10 @@ classdef DistributeData < AdditionalFeature
     
     methods
         
-        function obj = DistributeData(topology, disable_check, disable_parallel)
+        function obj = DistributeData(topology, varargin)
             obj.topology = topology;
-            obj.disable_check = disable_check;
-            obj.disable_parallel = disable_parallel;
+            obj.disable_check = any(strcmp(varargin, 'disable_check'));
+            obj.disable_parallel = any(strcmp(varargin, 'disable_parallel'));
         end
         
         function executeAfterInitialization(obj)
@@ -60,14 +60,10 @@ classdef DistributeData < AdditionalFeature
             if(a.isOfClass('DataDistributedLearningAlgorithm'))
                 log = SimulationLogger.getInstance();
                 a.topology = obj.topologies{log.getAdditionalParameter('run')};
-                a = a.executeBeforeTraining(size(d.X.data, 2));
             end
         end
         
         function [a, d] = executeAfterEachExperiment(obj, a, d)
-            if(a.isOfClass('DataDistributedLearningAlgorithm'))
-                a = a.executeAfterTraining();
-            end
         end
         
         function executeBeforeFinalization(obj)
