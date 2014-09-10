@@ -48,7 +48,11 @@ classdef DataDistributedLearningAlgorithm < LearningAlgorithm & NetworkNode
                 dataset.Y.data = codistributed(dataset.Y.data, codistributor1d(1));
                 dataset.X.data = getLocalPart(dataset.X.data);
                 dataset.Y.data = getLocalPart(dataset.Y.data);
-                o = obj.train_locally(dataset);
+                try
+                    o = obj.train_locally(dataset);
+                catch err
+                    err.message;
+                end
 
            end
            

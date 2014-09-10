@@ -13,6 +13,7 @@ classdef DistributeData < AdditionalFeature
         topologies;
         disable_check;
         disable_parallel;
+        disable_printing;
     end
     
     methods
@@ -21,6 +22,7 @@ classdef DistributeData < AdditionalFeature
             obj.topology = topology;
             obj.disable_check = any(strcmp(varargin, 'disable_check'));
             obj.disable_parallel = any(strcmp(varargin, 'disable_parallel'));
+            obj.disable_printing = any(strcmp(varargin, 'disable_parallel'));
         end
         
         function executeAfterInitialization(obj)
@@ -67,9 +69,11 @@ classdef DistributeData < AdditionalFeature
         end
         
         function executeBeforeFinalization(obj)
-            fprintf('Network topology: see plot.\n');
-            for i = 1:length(obj.topologies)
-                obj.topologies{i}.visualize(sprintf('Network topology for run %i', i));
+            if(~obj.disable_printing)
+                fprintf('Network topology: see plot.\n');
+                for i = 1:length(obj.topologies)
+                    obj.topologies{i}.visualize(sprintf('Network topology for run %i', i));
+                end
             end
         end
 

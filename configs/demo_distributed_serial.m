@@ -4,31 +4,25 @@
 add_model('ELM', 'Centralized ELM', @ExtremeLearningMachine);
 add_model('LOC-ELM', 'Local ELM', @ExtremeLearningMachine);
 %add_model('CONS-ELM', 'Distributed ELM (Consensus)', @ExtremeLearningMachine);
-add_model('ADMM-ELM', 'ADMM-ELM', @ExtremeLearningMachine);
+%add_model('ADMM-ELM', 'ADMM-ELM', @ExtremeLearningMachine);
 
 set_training_algorithm('LOC-ELM', @SerialDataDistributedRVFL, 'consensus_max_steps', 0);
 %set_training_algorithm('CONS-ELM', @SerialDataDistributedRVFL, 'consensus_max_steps', 250);
-set_training_algorithm('ADMM-ELM', @SerialDataDistributedRVFL, 'train_algo', 'admm', ...
-    'consensus_max_steps', 100, 'admm_max_steps', 300, 'admm_rho', 1, 'admm_reltol', 0.001, 'admm_abstol', 0.001);
+%set_training_algorithm('ADMM-ELM', @SerialDataDistributedRVFL, 'train_algo', 'admm', ...
+%    'consensus_max_steps', 100, 'admm_max_steps', 100, 'admm_rho', 1, 'admm_reltol', -1, 'admm_abstol', -1);
 
-add_dataset('G', 'G50C', 'g50c');
-%add_dataset('S', 'Statlib', 'statlib_calhousing');
+%add_dataset('G', 'G50C', 'g50c');
+add_dataset('S', 'Sylva', 'sylva ');
 
 add_feature(SetSeedPRNG(1));
 
-%add_feature(DistributeData(RandomTopology(30, 0.2), true, true));
-%add_feature(DistributeData(CyclicLatticeTopology(30, 2), true, true));
-%add_feature(DistributeData(CyclicLatticeTopology(30, 4), true, true));
-%add_feature(DistributeData(FullyConnectedTopology(30), true, true));
-%add_feature(DistributeData(LinearTopology(30, 1), true, true));
-%add_feature(DistributeData(LinearTopology(30, 2), true, true));
-add_feature(DistributeData(SmallWorldTopology(30, 2, 0.1), 'disable_check', 'disable_parallel'));
+add_feature(DistributeData(RandomTopology(50, 0.2), 'disable_check', 'disable_parallel', 'disable_printing'));
 
 add_feature(ExecuteOutputScripts('info_distributedrvfl'));
 
-%add_performance(Tasks.R, NormalizedRootMeanSquaredError(), true);
+add_performance(Tasks.R, NormalizedRootMeanSquaredError(), true);
 add_performance(Tasks.BC, RocCurve());
 add_performance(Tasks.BC, PrecisionRecallCurve());
 add_performance(Tasks.BC, ConfusionMatrix());
 
-set_runs(5);
+set_runs(3);

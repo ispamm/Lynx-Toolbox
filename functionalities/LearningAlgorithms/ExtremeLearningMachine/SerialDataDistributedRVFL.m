@@ -101,9 +101,9 @@ classdef SerialDataDistributedRVFL < DataDistributedLearningAlgorithm
                     [~, d_local] = d.getFold(ii);
                     Xtr = d_local.X.data;
                     Hinv{ii} = obj.model.computeHiddenMatrix(Xtr);
-                    HY{ii} = Hinv{ii}'*d_local.Y.data;
-                    Hinv{ii} = inv(eye(N_hidden)*rho + Hinv{ii}' * Hinv{ii});
-            
+                    HY{ii} = obj.getParameter('C')*Hinv{ii}'*d_local.Y.data;
+                    Hinv{ii} = inv(eye(N_hidden)*rho + obj.getParameter('C') * Hinv{ii}' * Hinv{ii});
+                    
                 end
 
                 beta = zeros(N_hidden, N_nodes);
@@ -124,7 +124,7 @@ classdef SerialDataDistributedRVFL < DataDistributedLearningAlgorithm
                     
                     % Store the old z and update it
                     zold = z;
-                    z = (rho*beta_avg + t_avg)/(obj.getParameter('C') + rho);
+                    z = (rho*beta_avg + t_avg)/(1 + rho);
 
                     % Compute the update for the Lagrangian multipliers
                     for jj = 1:N_nodes

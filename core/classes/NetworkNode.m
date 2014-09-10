@@ -28,7 +28,6 @@ classdef NetworkNode
             % Initialize data structures
             current_value = initial_value;
             consensus_error = zeros(steps, 1);
-            terminate = codistributed.false(obj.topology.N, 1);
             
             % Get neighbors indexes
             idx = obj.getNeighbors(labindex);
@@ -43,8 +42,9 @@ classdef NetworkNode
                 
                 for jj = 1:length(idx)
                     
-                    % Check if a neighbor is still available and receive
-                    % data
+                    % Receive data
+                    while(~labProbe(idx(jj)))
+                    end
                     neighbor_property = labReceive(idx(jj));
                     new_value = new_value + neighbor_property;
                     
@@ -54,16 +54,6 @@ classdef NetworkNode
                 old_value = current_value;
                 current_value = new_value./(length(idx) + 1);
                 consensus_error(ii) = norm(current_value - old_value);
-                
-                % Termination criterion
-                if(threshold >= 0)
-                    if(consensus_error(ii) < threshold)
-                        terminate(labindex) = true;
-                    end
-                    if(all(terminate))
-                        break;
-                    end
-                end
                 
             end
             

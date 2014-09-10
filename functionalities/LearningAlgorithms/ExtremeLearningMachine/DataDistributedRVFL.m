@@ -37,9 +37,7 @@ classdef DataDistributedRVFL < DataDistributedLearningAlgorithm
             
             [N, ~] = size(Xtr);
             N_hidden = obj.getParameter('hiddenNodes');
-            
-            % Get the logger
-            
+
             if(d.task == Tasks.MC)
                 Ytr  = dummyvar(Ytr);
             end
@@ -81,12 +79,12 @@ classdef DataDistributedRVFL < DataDistributedLearningAlgorithm
                 obj.statistics.eps_dual = zeros(steps, 1);
                 
                 % Precompute the inverse matrix
-                Hinv = inv(eye(N_hidden)*rho + H' * H);
+                Hinv = inv(eye(N_hidden)*rho + obj.getParameter('C') * H' * H);
 
                 for jj = 1:steps
                     
                     % Compute current weights
-                    obj.model.outputWeights = Hinv*(H'*Ytr + rho*z - t);
+                    obj.model.outputWeights = Hinv*(obj.getParameter('C')*H'*Ytr + rho*z - t);
                     
                     % Run consensus
                     beta_avg = ...
@@ -95,7 +93,7 @@ classdef DataDistributedRVFL < DataDistributedLearningAlgorithm
                     
                     % Store the old z and update it
                     zold = z;
-                    z = (rho*beta_avg + t_avg)/(obj.getParameter('C') + rho);
+                    z = (rho*beta_avg + t_avg)/(1 + rho);
 
                     % Compute the update for the Lagrangian multipliers
                     t = t + rho*(obj.model.outputWeights - z);
