@@ -29,10 +29,6 @@ classdef DistributedLearningAlgorithm < LearningAlgorithm & NetworkNode
            
            obj = obj.executeBeforeTraining(size(dataset.X.data, 2));
            
-           if(dataset.task == Tasks.MC)
-                dataset.Y  = IntegerLabelsVector(dummyvar(dataset.Y.data));
-           end
-           
            if(obj.distribute_data && obj.parallelized)
                
                fprintf('\t\tDistributing data (%i examples each approximately)...\n', floor(size(dataset.X.data, 1)/obj.topology.N));

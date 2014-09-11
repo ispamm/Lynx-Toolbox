@@ -11,10 +11,10 @@ set_training_algorithm('CONS-ELM', @DataDistributedRVFL, 'consensus_max_steps', 
 set_training_algorithm('ADMM-ELM', @DataDistributedRVFL, 'train_algo', 'admm', 'consensus_max_steps', 100, ...
     'admm_rho', 1, 'admm_max_steps', 25);
 
-add_dataset('G', 'G50C', 'g50c');
+%add_dataset('G', 'G50C', 'g50c');
 
 add_feature(SetSeedPRNG(1));
-add_feature(InitializeTopology(RandomTopology(2, 0.2), 'distribute_data'));
+add_feature(InitializeTopology(RandomTopology(6, 0.2), 'distribute_data'));
 add_feature(ExecuteOutputScripts('info_distributedrvfl'));
 
 add_performance(Tasks.R, NormalizedRootMeanSquaredError(), true);

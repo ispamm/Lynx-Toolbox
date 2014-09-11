@@ -36,7 +36,7 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
             is_multiclass = d.task == Tasks.MC;
             
             if(is_multiclass)
-                nLabels = size(d.Y.data, 2);
+                nLabels = max(d.Y.data);
                 beta = zeros(N_hidden, nLabels, N_nodes);
             else
                 beta = zeros(N_hidden, N_nodes);
@@ -47,16 +47,21 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
                 for ii = 1:N_nodes
                     
                     d_local = obj.getLocalPart(d, ii);
+                    
                     Xtr = d_local.X.data;
-                    Ytr = d_local.Y.data;
+                    if(is_multiclass)
+                        Ytr = dummyvar(d_local.Y.data);
+                    else
+                        Ytr = d_local.Y.data;
+                    end
                     [N, ~] = size(Xtr);
                     
                     H = obj.model.computeHiddenMatrix(Xtr);
                     
                     if(N >= N_hidden)
-                        out = (eye(N_hidden)./obj.parameters.C + H' * H) \ ( H' * Ytr );
+                        out = (eye(N_hidden)*obj.parameters.C + H' * H) \ ( H' * Ytr );
                     else
-                        out = H'*inv(eye(size(H, 1))./obj.parameters.C + H * H') *  Ytr ;
+                        out = H'*inv(eye(size(H, 1))*obj.parameters.C + H * H') *  Ytr ;
                     end
                     
                     if(is_multiclass)
@@ -121,7 +126,7 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
                     Xtr = d_local.X.data;
                     
                     Hinv{ii} = obj.model.computeHiddenMatrix(Xtr);
-                    HY{ii} = Hinv{ii}'*d_local.Y.data;
+                    HY{ii} = Hinv{ii}'*dummyvar(d_local.Y.data);
                     Hinv{ii} = inv(eye(N_hidden)*rho + Hinv{ii}' * Hinv{ii});
                     
                 end
@@ -138,7 +143,7 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
                     
                         % Compute current weights
                         if(is_multiclass)
-                            beta(:, :, jj) = Hinv{jj}*(HY{jj} + rho*z - t(:, jj));
+                            beta(:, :, jj) = Hinv{jj}*(HY{jj} + rho*z - t(:, :, jj));
                         else
                             beta(:, jj) = Hinv{jj}*(HY{jj} + rho*z - t(:, jj));
                         end
@@ -165,15 +170,23 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
                     
                     % Compute primal and dual residuals
                     for jj = 1:N_nodes
+                        if(is_multiclass)
+                            newbeta = beta(:, :, jj);
+                            newt = t(:, :, jj);
+                        else
+                            newbeta = beta(:, jj);
+                            newt = t(:, jj);
+                        end
                         obj.statistics.r_norm(ii) = obj.statistics.r_norm(ii) + ...
-                            norm(beta(:, jj) - z, 'fro');
+                            norm(newbeta - z, 'fro');
                         % Compute epsilon values
                         obj.statistics.eps_pri(ii) = obj.statistics.eps_pri(ii) + ...
                             sqrt(N_nodes)*obj.getParameter('admm_abstol') + ...
-                            obj.getParameter('admm_reltol')*max(norm(beta(:, jj), 'fro'), norm(z, 'fro'));
+                            obj.getParameter('admm_reltol')*max(norm(newbeta, 'fro'), norm(z, 'fro'));
+                        
                         obj.statistics.eps_dual(ii)= obj.statistics.eps_dual(ii) + ...
                             sqrt(N_nodes)*obj.getParameter('admm_abstol') + ...
-                            obj.getParameter('admm_reltol')*norm(t(:, jj), 'fro');
+                            obj.getParameter('admm_reltol')*norm(newt, 'fro');
                     end
                     
                     obj.statistics.r_norm(ii) = obj.statistics.r_norm(ii)/N_nodes;
