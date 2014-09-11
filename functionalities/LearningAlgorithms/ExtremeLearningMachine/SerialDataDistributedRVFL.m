@@ -6,7 +6,7 @@
 % Programmed and Copyright by Simone Scardapane:
 % simone.scardapane@uniroma1.it
 
-classdef SerialDataDistributedRVFL < DataDistributedLearningAlgorithm
+classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
     
     properties
     end
@@ -14,7 +14,7 @@ classdef SerialDataDistributedRVFL < DataDistributedLearningAlgorithm
     methods
         
         function obj = SerialDataDistributedRVFL(model, varargin)
-            obj = obj@DataDistributedLearningAlgorithm(model, varargin{:});
+            obj = obj@DistributedLearningAlgorithm(model, varargin{:});
         end
         
         function p = initParameters(~, p)
@@ -29,36 +29,42 @@ classdef SerialDataDistributedRVFL < DataDistributedLearningAlgorithm
             p.addParamValue('admm_abstol', 0.001);
         end
         
-        function obj = train(obj, d)
-            
-            obj = obj.executeBeforeTraining(size(d.X.data, 2));
-            d = d.generateSinglePartition(KFoldPartition(obj.topology.N));
-            fprintf('\t\tEach node will have approximately %i patterns.\n', floor(size(d.X.data, 1)/obj.topology.N));
+        function obj = train_locally(obj, d)
             
             N_hidden = obj.getParameter('hiddenNodes');
             N_nodes = obj.topology.N;         
+            is_multiclass = d.task == Tasks.MC;
             
-            if(d.task == Tasks.MC)
-                d.Y.data  = dummyvar(d.Y.data);
+            if(is_multiclass)
+                nLabels = size(d.Y.data, 2);
+                beta = zeros(N_hidden, nLabels, N_nodes);
+            else
+                beta = zeros(N_hidden, N_nodes);
             end
-            
-            beta = zeros(N_hidden, N_nodes);
             
             if(strcmp(obj.getParameter('train_algo'), 'consensus'))
               
                 for ii = 1:N_nodes
                     
-                    [~, d_local] = d.getFold(ii);
+                    d_local = obj.getLocalPart(d, ii);
                     Xtr = d_local.X.data;
                     Ytr = d_local.Y.data;
                     [N, ~] = size(Xtr);
                     
                     H = obj.model.computeHiddenMatrix(Xtr);
+                    
                     if(N >= N_hidden)
-                        beta(:, ii) = (eye(N_hidden)./obj.parameters.C + H' * H) \ ( H' * Ytr );
+                        out = (eye(N_hidden)./obj.parameters.C + H' * H) \ ( H' * Ytr );
                     else
-                        beta(:, ii) = H'*inv(eye(size(H, 1))./obj.parameters.C + H * H') *  Ytr ;
+                        out = H'*inv(eye(size(H, 1))./obj.parameters.C + H * H') *  Ytr ;
                     end
+                    
+                    if(is_multiclass)
+                        beta(:,:,ii) = out;
+                    else
+                        beta(:,ii) = out;
+                    end
+                    
                     clear H
             
                 end
@@ -68,7 +74,11 @@ classdef SerialDataDistributedRVFL < DataDistributedLearningAlgorithm
                     [obj.model.outputWeights, obj.statistics.consensus_error] = ...
                         obj.run_consensus_serial(beta, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'));
                 else
-                    obj.model.outputWeights = beta(:, 1);
+                    if(is_multiclass)
+                        obj.model.outputWeights = beta(:, :, 1);
+                    else
+                        obj.model.outputWeights = beta(:, 1);
+                    end
                 end
                     
             
@@ -78,10 +88,18 @@ classdef SerialDataDistributedRVFL < DataDistributedLearningAlgorithm
                 s = SimulationLogger.getInstance();
                 
                 % Global term
-                z = zeros(N_hidden, 1);
+                if(is_multiclass)
+                    z = zeros(N_hidden, nLabels);
+                else
+                    z = zeros(N_hidden, 1);
+                end
                 
                 % Lagrange multipliers
-                t = zeros(N_hidden, N_nodes);
+                if(is_multiclass)
+                    t = zeros(N_hidden, nLabels, N_nodes);
+                else
+                    t = zeros(N_hidden, N_nodes);
+                end
                 
                 % Parameters
                 rho = obj.getParameter('admm_rho');
@@ -96,24 +114,34 @@ classdef SerialDataDistributedRVFL < DataDistributedLearningAlgorithm
                 % Precompute the inverse matrices
                 Hinv = cell(N_nodes, 1);
                 HY = cell(N_nodes, 1);
+                
                 for ii = 1:N_nodes
                     
-                    [~, d_local] = d.getFold(ii);
+                    d_local = obj.getLocalPart(d, ii);
                     Xtr = d_local.X.data;
+                    
                     Hinv{ii} = obj.model.computeHiddenMatrix(Xtr);
-                    HY{ii} = obj.getParameter('C')*Hinv{ii}'*d_local.Y.data;
-                    Hinv{ii} = inv(eye(N_hidden)*rho + obj.getParameter('C') * Hinv{ii}' * Hinv{ii});
+                    HY{ii} = Hinv{ii}'*d_local.Y.data;
+                    Hinv{ii} = inv(eye(N_hidden)*rho + Hinv{ii}' * Hinv{ii});
                     
                 end
 
-                beta = zeros(N_hidden, N_nodes);
+                if(is_multiclass)
+                    beta = zeros(N_hidden, nLabels, N_nodes);
+                else
+                    beta = zeros(N_hidden, N_nodes);
+                end
                 
                 for ii = 1:steps
 
                     for jj = 1:N_nodes
                     
                         % Compute current weights
-                        beta(:, jj) = Hinv{jj}*(HY{jj} + rho*z - t(:, jj));
+                        if(is_multiclass)
+                            beta(:, :, jj) = Hinv{jj}*(HY{jj} + rho*z - t(:, jj));
+                        else
+                            beta(:, jj) = Hinv{jj}*(HY{jj} + rho*z - t(:, jj));
+                        end
                     
                     end
                     
@@ -124,30 +152,34 @@ classdef SerialDataDistributedRVFL < DataDistributedLearningAlgorithm
                     
                     % Store the old z and update it
                     zold = z;
-                    z = (rho*beta_avg + t_avg)/(1 + rho);
+                    z = (rho*beta_avg + t_avg)/(obj.getParameter('C') + rho);
 
                     % Compute the update for the Lagrangian multipliers
                     for jj = 1:N_nodes
-                        t(:, jj) = t(:, jj) + rho*(beta(:, jj) - z);
+                        if(is_multiclass)
+                            t(:, :, jj) = t(:, :, jj) + rho*(beta(:, :, jj) - z);
+                        else
+                            t(:, jj) = t(:, jj) + rho*(beta(:, jj) - z);
+                        end
                     end
                     
                     % Compute primal and dual residuals
                     for jj = 1:N_nodes
                         obj.statistics.r_norm(ii) = obj.statistics.r_norm(ii) + ...
-                            norm(beta(:, jj) - z);
+                            norm(beta(:, jj) - z, 'fro');
                         % Compute epsilon values
                         obj.statistics.eps_pri(ii) = obj.statistics.eps_pri(ii) + ...
                             sqrt(N_nodes)*obj.getParameter('admm_abstol') + ...
-                            obj.getParameter('admm_reltol')*max(norm(beta(:, jj)), norm(z));
+                            obj.getParameter('admm_reltol')*max(norm(beta(:, jj), 'fro'), norm(z, 'fro'));
                         obj.statistics.eps_dual(ii)= obj.statistics.eps_dual(ii) + ...
                             sqrt(N_nodes)*obj.getParameter('admm_abstol') + ...
-                            obj.getParameter('admm_reltol')*norm(t(:, jj));
+                            obj.getParameter('admm_reltol')*norm(t(:, jj), 'fro');
                     end
                     
                     obj.statistics.r_norm(ii) = obj.statistics.r_norm(ii)/N_nodes;
                     obj.statistics.eps_pri(ii) = obj.statistics.eps_pri(ii)/N_nodes;
                     obj.statistics.eps_dual(ii) = obj.statistics.eps_dual(ii)/N_nodes;
-                    obj.statistics.s_norm(ii) = norm(-rho*(z - zold));
+                    obj.statistics.s_norm(ii) = norm(-rho*(z - zold), 'fro');
                     
                     if(s.flags.debug && mod(ii, 10) == 0)
                         fprintf('\t\tADMM iteration #%i: primal residual = %.2f, dual_residual = %.2f.\n', ...
@@ -161,16 +193,17 @@ classdef SerialDataDistributedRVFL < DataDistributedLearningAlgorithm
 
                 end
                 
-                obj.model.outputWeights = beta(:, 1);
+                if(is_multiclass)
+                    obj.model.outputWeights = beta(:, :, 1);
+                else
+                    obj.model.outputWeights = beta(:, 1);
+                end
 
             end
             
             obj.obj_locals{1} = obj;
         end
-        
-        function obj = train_locally(obj, ~)
-        end
-        
+
         function obj = executeBeforeTraining(obj, d)
             obj.model = obj.model.generateWeights(d);
         end
