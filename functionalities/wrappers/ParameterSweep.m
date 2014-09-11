@@ -39,10 +39,6 @@ classdef ParameterSweep < Wrapper
         
         function obj = train(obj, d)
             
-            % Get training data
-            Xtr = d.X.data;
-            Ytr = d.Y.data;
-            
             d = d.generateSinglePartition(obj.parameters.partition_strategy);
             
             bestPerf = [];

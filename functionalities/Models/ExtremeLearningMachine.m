@@ -72,11 +72,9 @@ classdef ExtremeLearningMachine < Model
         
         function obj = generateWeights(obj, d)
             % Generate randomly the weights
-            if(isempty(obj.weights_l1))
-                N_hidden = obj.parameters.hiddenNodes;
-                obj.weights_l1 = rand(N_hidden, d)*2-1;
-                obj.bias_l1 = rand(N_hidden,1)*2-1;
-            end
+            N_hidden = obj.parameters.hiddenNodes;
+            obj.weights_l1 = rand(N_hidden, d)*2-1;
+            obj.bias_l1 = rand(N_hidden,1)*2-1;
         end
         
         function H = computeHiddenMatrix(obj, X)
