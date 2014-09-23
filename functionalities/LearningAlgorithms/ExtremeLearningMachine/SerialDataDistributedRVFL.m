@@ -115,6 +115,7 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
                 obj.statistics.s_norm = zeros(steps, 1);
                 obj.statistics.eps_pri = zeros(steps, 1);
                 obj.statistics.eps_dual = zeros(steps, 1);
+                obj.statistics.consensus_steps = zeros(steps, 1);
                 
                 % Precompute the inverse matrices
                 Hinv = cell(N_nodes, 1);
@@ -151,9 +152,12 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
                     end
                     
                     % Run consensus
-                    beta_avg = ...
+                    [beta_avg, tmp1] = ...
                         obj.run_consensus_serial(beta, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'));
-                    t_avg = obj.run_consensus_serial(t, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'));
+                    [t_avg, tmp2] = obj.run_consensus_serial(t, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'));
+                    
+                    % Save statistic
+                    obj.statistics.consensus_steps(ii) = max(sum(tmp1 ~= 0), sum(tmp2 ~=0));
                     
                     % Store the old z and update it
                     zold = z;

@@ -103,6 +103,11 @@ classdef NetworkTopology
             S = graphconncomp(sparse(obj.W), 'Weak', true, 'Directed', false);
             b = S == 1;
         end
+        
+        function d = getMaxDegree(obj)
+            % Get the maximum degree
+            d = max(sum(obj.W));
+        end
     end
     
     methods(Abstract)

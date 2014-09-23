@@ -14,6 +14,7 @@ algos = [algos; find_algorithms('SerialDataDistributedRVFL', s.algorithms)];
 cons_error = cell(length(s.datasets), length(algos));
 primal_residual = cell(length(s.datasets), length(algos)*2);
 dual_residual = cell(length(s.datasets), length(algos)*2);
+cons_steps = cell(length(s.datasets), length(algos));
 names_consensus = cell(length(algos), 1);
 names_admm = cell(length(algos), 1);
 consensus = false(length(algos), 1);
@@ -43,7 +44,8 @@ for i = algos
            c = XYPlotContainer();
            cons_error{j, w} = c.store(XYPlot(1:length(algo_stats.consensus_error), algo_stats.consensus_error, ...
                'Iteration', 'Disagreement'));
-
+        
+           fprintf('Average number of consensus iterations on dataset %s: %i\n', s.datasets.get(j).name, sum(algo_stats.consensus_error~=0));
        end
       
     elseif(strcmp(algo.parameters.train_algo{1}, 'admm'))
@@ -71,7 +73,21 @@ for i = algos
            c = XYPlotContainer();
            dual_residual{j, 2*(zz-1)+2} = c.store(XYPlot(1:length(algo_stats.eps_dual), algo_stats.eps_dual, ...
                'Iteration', 'Norm'));
+           
+           c = XYPlotContainer();
+           dual_residual{j, 2*(zz-1)+1} = c.store(XYPlot(1:length(algo_stats.s_norm), algo_stats.s_norm, ...
+               'Iteration', 'Norm'));
+           c = XYPlotContainer();
+           dual_residual{j, 2*(zz-1)+2} = c.store(XYPlot(1:length(algo_stats.eps_dual), algo_stats.eps_dual, ...
+               'Iteration', 'Norm'));
 
+           c = XYPlotContainer();
+           cons_steps{j, w} = c.store(XYPlot(1:length(algo_stats.consensus_steps), algo_stats.consensus_steps, ...
+               'Iteration', 'Disagreement'));
+           
+           fprintf('Average number of ADMM iterations on dataset %s: %i\n', s.datasets.get(j).name, sum(algo_stats.r_norm~=0));
+           fprintf('Average number of ADMM consensus iterations on dataset %s: %i\n', s.datasets.get(j).name, sum(algo_stats.consensus_steps));
+           
        end
        
        zz = zz + 2;
@@ -87,6 +103,7 @@ names_consensus(~consensus) = [];
 
 primal_residual(:, zz+1:end) = [];
 dual_residual(:, zz+1:end) = [];
+cons_steps(:, ~admm) = [];
 names_admm(~admm) = [];
 
 p = FormatAsMultiplePlots();
@@ -105,5 +122,6 @@ if(~isempty(names_admm))
     end
     p.displayOnConsole(primal_residual, s.datasets.getNames(), legend1, false);
     p.displayOnConsole(dual_residual, s.datasets.getNames(), legend2, false);
+    p.displayOnConsole(cons_steps, s.datasets.getNames(), names_admm, false);
 end
        
