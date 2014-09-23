@@ -1,4 +1,9 @@
 % TimeSeries - Time-series object
+%   A time-series is a vector of real numbers. Construct it as:
+%
+%   TimeSeries(data), where data is the vector.
+%
+%   Note that a time-series cannot be currently partitioned, nor shuffled.
 
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is
 % referenced and attributed as such. The original author maintains the right to be solely associated with this work.

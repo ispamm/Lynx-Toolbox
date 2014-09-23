@@ -1,8 +1,22 @@
-% NetworkNode - 
+% NetworkNode - Utility class for nodes in a network
+%   A network node has access to the topology of the network. For example,
+%   it can gather the indices of node i as:
+%
+%   obj.topology.getNeighbors(i);
+%
+%   Additionally, this class provides utility methods for running a
+%   consensus algorithm on the network.
+
+% License to use and modify this code is granted freely without warranty to all, as long as the original author is
+% referenced and attributed as such. The original author maintains the right to be solely associated with this work.
+%
+% Programmed and Copyright by Simone Scardapane:
+% simone.scardapane@uniroma1.it
+
 classdef NetworkNode
     
     properties
-        topology;
+        topology; % The topology of the network
     end
     
     methods
@@ -18,7 +32,17 @@ classdef NetworkNode
        end
         
         function [final_value, consensus_error] = run_consensus(obj, initial_value, steps, threshold)
-            % Execute consensus algorithm
+            % Execute consensus algorithm (parallel). This must be run
+            % inside an SPMD block. Parameters are:
+            %
+            %   - INITIAL_VALUE: initial value of the lab (vector of
+            %   numbers)
+            %   - STEPS - maximum number of consensus iterations
+            %   - THRESHOLD - currently unused
+            %
+            % Output values are the final value after the consensus
+            % strategy, and the evolution of disagreement during the
+            % consensus steps.
             
             % Check if we are inside an SPMD block
             if(isempty(getCurrentWorker()))
@@ -61,6 +85,22 @@ classdef NetworkNode
         end
         
         function [final_value, consensus_error] = run_consensus_serial(obj, initial_values, steps, threshold)
+            % This is a serial implementation of the consensus strategy.
+            % Parameters are:
+            %
+            %   - INITIAL_VALUES: matrix of initial values. For consensus
+            %   of d-dimensional vectors, this is a dxN matrix, where N is
+            %   the total number of agents. For consensus on RxC matrices,
+            %   this a RxCxN tensor.
+            %
+            %   - STEPS: maximum number of iterations
+            %
+            %   - THRESHOLD: threshold for the disagreement norm. When this
+            %   is the lower than the threshold on all nodes, consensus is
+            %   ended.
+            %
+            % Output values are the computed average, and the average
+            % evolution of the disagreement on the nodes.
             
             current_values = initial_values;
             consensus_error = zeros(steps, 1);

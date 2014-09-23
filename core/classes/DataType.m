@@ -1,7 +1,7 @@
 % DataType - A possible data type for learning
 %   Examples of this are: RealMatrix, BinaryLabelsVector, etc.
 %   It provides a method for partitioning the set of data according to some
-%   given indices, to shuffle the data, to get a description.
+%   given indices, to shuffle the data, and to get a description.
 
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is
 % referenced and attributed as such. The original author maintains the right to be solely associated with this work.

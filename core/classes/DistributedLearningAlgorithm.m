@@ -1,4 +1,14 @@
-% DistributedLearningAlgorithm -
+% DistributedLearningAlgorithm - A distributed learning algorithm
+%   This is used to implement distributed learning algorithms. This is used
+%   in two different modalities:
+%
+%   1) In parallel mode, each node is trained inside an SPMD block.
+%   2) In non-parallel mode, no action is done.
+%
+%   Also, it is possible to distribute data throughout the nodes. All these
+%   modalities can be activated/deactivated using the InitializeTopology
+%   feature.
+%   
 
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is
 % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
@@ -23,9 +33,14 @@ classdef DistributedLearningAlgorithm < LearningAlgorithm & NetworkNode
 
        function obj = DistributedLearningAlgorithm(model, varargin)
            obj = obj@LearningAlgorithm(model, varargin{:});
+           obj.topology = [];
        end
 
        function obj = train(obj, dataset)
+           
+           if(isempty(obj.topology))
+               error('Lynx:Runtime:MissingFeature', 'To use a distributed learning algorithm, please initialize the topology with the feature InitializeTopology');
+           end
            
            obj = obj.executeBeforeTraining(size(dataset.X.data, 2));
            

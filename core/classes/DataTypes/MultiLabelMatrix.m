@@ -1,6 +1,12 @@
 % MultiLabelMatrix - Matrix of labels
 %   N x M matrix of labels, where N is the number of patterns and M the
-%   number of labels. Each label can be +1 or -1.
+%   number of labels. Each label can be +1 or -1. This accepts an
+%   additional parameter, a cell array of strings describing the labels.
+%
+%   Example of usage (two patterns, three labels):
+%
+%       m = MultiLabelMatrix([1 -1 1; -1 1 -1], {'Label 1', 'Label 2',
+%       'Label 3');
 
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is
 % referenced and attributed as such. The original author maintains the right to be solely associated with this work.

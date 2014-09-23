@@ -1,4 +1,7 @@
 % FullyConnectedTopology - Fully connected topology
+%   A fully connected topology is a network where each node is connected to
+%   all the others. This has no parameters except the size of the network.
+%   
     
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is
 % referenced and attributed as such. The original author maintains the right to be solely associated with this work.

@@ -17,7 +17,7 @@ add_dataset('G', 'Garageband', 'garageband');
 
 add_feature(SetSeedPRNG(1));
 
-add_feature(InitializeTopology(RandomTopology(25, 0.2), 'disable_parallel', 'distribute_data'));
+%add_feature(InitializeTopology(RandomTopology(25, 0.2), 'disable_parallel', 'distribute_data'));
 
 add_feature(ExecuteOutputScripts('info_distributedrvfl'));
 

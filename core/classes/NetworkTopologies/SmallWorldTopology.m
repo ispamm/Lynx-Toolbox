@@ -1,5 +1,15 @@
 % SmallWorldTopology - Small world topology
-%   This is a small world graph
+%   This is a small world network topology, i.e., a graph with a very low
+%   diameter despite a relatively low mean degree of the nodes. This is
+%   constructed using the so-called Watts-Strogatz mechanism:
+%
+%       1) A cyclic lattice is constructed, with K/2 neighbors for each
+%       node.
+%       2) Every connection is randomly rewired with probability 'beta'.
+%
+%   Initialize it with the K and beta parameters:
+%
+%       t = SmallWorldTopology(N, K, beta);
     
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is
 % referenced and attributed as such. The original author maintains the right to be solely associated with this work.

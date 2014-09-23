@@ -1,9 +1,0 @@
-
-Per i data types:
-TEST EVERYTHING
-UPDATE MANUAL
-
-Per gli algoritmi distribuiti:
-AGGIUNGERE PROFILER
-CONTROLLARE CONSENSUS
-

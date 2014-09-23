@@ -1,6 +1,6 @@
 % RandomTopology - Random graph
 %   A random graph G(N, p) is a graph with N nodes, where each edge has
-%   probability p of being present (also known as Erdos-Renyi random
+%   probability p of being present (also known as Erd?s–Rényi random
 %   graph).
     
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is

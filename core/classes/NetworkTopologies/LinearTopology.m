@@ -1,4 +1,11 @@
 % LinearTopology - Linear topology
+%   A linear network of N agents is an ordered collection 1, ..., N of
+%   nodes, each one connected to its K direct successors (except the last
+%   N-K+1 nodes, connected to the remaining).
+%   
+%   Initialize the topology with the K parameter:
+%
+%       t = LinearTopology(N, K);
     
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is
 % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
