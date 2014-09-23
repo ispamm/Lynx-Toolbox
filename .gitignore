@@ -216,7 +216,7 @@ pip-log.txt
 
 # Custom folders to ignore
 # configs/
-# datasets/
+datasets/
 config.xml
 doc/
 lib/
