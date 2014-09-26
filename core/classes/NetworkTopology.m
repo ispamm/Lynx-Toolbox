@@ -90,7 +90,7 @@ classdef NetworkTopology
             obj = obj.construct();
             counter = 1;
             while(~(obj.isConnected()))
-                if(counter > 10)
+                if(counter > 25)
                     error('Lynx:Initialization:Stochastic', 'Failed to initialize a connected network topology');
                 end
                 obj = obj.construct();

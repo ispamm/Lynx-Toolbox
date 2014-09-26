@@ -30,7 +30,7 @@ classdef RandomTopology < NetworkTopology
         end
         
         function s = getDescription(obj)
-            s = sprintf('Random graph G(%i, %.1f)', obj.N, obj.p);
+            s = sprintf('Random graph G(%i, %.2f)', obj.N, obj.p);
         end
     end
     

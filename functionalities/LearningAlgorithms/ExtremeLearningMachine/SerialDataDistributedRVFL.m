@@ -127,7 +127,12 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
                     Xtr = d_local.X.data;
                     
                     Hinv{ii} = obj.model.computeHiddenMatrix(Xtr);
-                    HY{ii} = Hinv{ii}'*dummyvar(d_local.Y.data);
+                    
+                    if(is_multiclass)
+                        HY{ii} = Hinv{ii}'*dummyvar(d_local.Y.data);
+                    else
+                        HY{ii} = Hinv{ii}'*d_local.Y.data;
+                    end
                     Hinv{ii} = inv(eye(N_hidden)*rho + Hinv{ii}' * Hinv{ii});
                     
                 end
