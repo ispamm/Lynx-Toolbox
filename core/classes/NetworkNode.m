@@ -107,15 +107,17 @@ classdef NetworkNode
             consensus_error = zeros(steps, 1);
             is_matrix = ndims(initial_values) == 3;
             
+            max_degree = obj.topology.getMaxDegree();
+            
             for ii = 1:steps
                 new_values = current_values;
                 for jj = 1:obj.topology.N
                     idx = obj.getNeighbors(jj);
                     if(is_matrix)
-                        new_values(:, :, jj) = (current_values(:, :, jj) + sum(current_values(:, :, idx), 3))/(length(idx) + 1);
+                        new_values(:, :, jj) = ((1-length(idx)/(max_degree+1))*current_values(:, :, jj) + (1/(max_degree + 1))*sum(current_values(:, :, idx), 3));
                         consensus_error(ii) = consensus_error(ii) + norm(current_values(:, :, jj) - new_values(:, :, jj), 'fro');
                     else
-                        new_values(:, jj) = (current_values(:, jj) + sum(current_values(:, idx), 2))/(length(idx) + 1);
+                        new_values(:, jj) = ((1-length(idx)/(max_degree+1))*current_values(:, jj) + (1/(max_degree + 1))*sum(current_values(:, idx), 2));
                         consensus_error(ii) = consensus_error(ii) + norm(current_values(:, jj) - new_values(:, jj));
                     end
                 end
