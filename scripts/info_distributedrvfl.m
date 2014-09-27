@@ -83,7 +83,7 @@ for i = algos
 
            c = XYPlotContainer();
            cons_steps{j, w} = c.store(XYPlot(1:length(algo_stats.consensus_steps), algo_stats.consensus_steps, ...
-               'Iteration', 'Disagreement'));
+               'Iteration', 'Consensus iterations in ADMM'));
            
            fprintf('Average number of ADMM iterations on dataset %s: %i\n', s.datasets.get(j).name, sum(algo_stats.r_norm~=0));
            fprintf('Average number of ADMM consensus iterations on dataset %s: %i\n', s.datasets.get(j).name, sum(algo_stats.consensus_steps));
