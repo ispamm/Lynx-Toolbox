@@ -102,31 +102,31 @@ classdef NetworkNode
             % Output values are the computed average, and the average
             % evolution of the disagreement on the nodes.
             
+                
             current_values = initial_values;
             consensus_error = zeros(steps, 1);
             is_matrix = ndims(initial_values) == 3;
             
+            max_degree = obj.topology.getMaxDegree();
+            
             for ii = 1:steps
+                new_values = current_values;
                 for jj = 1:obj.topology.N
                     idx = obj.getNeighbors(jj);
                     if(is_matrix)
-                        new_value = (current_values(:, :, jj) + sum(current_values(:, :, idx), 3))/(length(idx) + 1);
-                        consensus_error(ii) = consensus_error(ii) + norm(current_values(:, :, jj) - new_value, 'fro');
-                        current_values(:,:,jj) = new_value;
+                        new_values(:, :, jj) = ((1-length(idx)/(max_degree+1))*current_values(:, :, jj) + (1/(max_degree + 1))*sum(current_values(:, :, idx), 3));
+                        consensus_error(ii) = consensus_error(ii) + norm(current_values(:, :, jj) - new_values(:, :, jj), 'fro');
                     else
-                        new_value = (current_values(:, jj) + sum(current_values(:, idx), 2))/(length(idx) + 1);
-                        consensus_error(ii) = consensus_error(ii) + norm(current_values(:, jj) - new_value);
-                        current_values(:,jj) = new_value;
+                        new_values(:, jj) = ((1-length(idx)/(max_degree+1))*current_values(:, jj) + (1/(max_degree + 1))*sum(current_values(:, idx), 2));
+                        consensus_error(ii) = consensus_error(ii) + norm(current_values(:, jj) - new_values(:, jj));
                     end
                 end
+                
                 consensus_error(ii) = consensus_error(ii)./obj.topology.N;
+                current_values = new_values;
+                
                 if(consensus_error(ii) < threshold)
-                    if(is_matrix)
-                        final_value = current_values(:, :, 1);
-                    else
-                        final_value = current_values(:, 1);
-                    end
-                    return;
+                    break;
                 end
             end
             
@@ -135,6 +135,7 @@ classdef NetworkNode
             else
                 final_value = current_values(:, 1);
             end
+            
             
         end
         
