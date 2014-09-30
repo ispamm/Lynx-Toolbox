@@ -134,11 +134,11 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
                     
                     HY{ii} = Hinv{ii}'*d_local.Y.data;
                     
-                    %if(size(Xtr, 1) > N_hidden)
+                    if(size(Xtr, 1) > N_hidden)
                         Hinv{ii} = inv(eye(N_hidden)*rho + Hinv{ii}' * Hinv{ii});
-                    %else
-                    %    Hinv{ii} = (1/rho)*(eye(N_hidden) - Hinv{ii}'*inv(rho*eye(size(Xtr, 1)) + Hinv{ii}*Hinv{ii}')*Hinv{ii});
-                    %end
+                    else
+                        Hinv{ii} = (1/rho)*(eye(N_hidden) - Hinv{ii}'*inv(rho*eye(size(Xtr, 1)) + Hinv{ii}*Hinv{ii}')*Hinv{ii});
+                    end
                     
                     
                 end

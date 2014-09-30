@@ -50,7 +50,7 @@ classdef LaplacianELM < SemiSupervisedLearningAlgorithm
             
             % STEP 2: Initialize H matrix of ELM network
             
-            if(d.task == Tasks.MC)
+            if(dtrain.task == Tasks.MC)
                 Ytr  = dummyvar(Ytr);
             end
             
