@@ -84,7 +84,6 @@ classdef Dataset
             obj.task = task;
             assert(isa(X, 'DataType'), 'Lynx:Validation:InvalidInput', 'X must be a valid DataType object');
             assert(isa(Y, 'DataType') || isempty(Y), 'Lynx:Validation:InvalidInput', 'Y must be a valid DataType object');
-            assert(isa(task, 'Tasks'), 'Lynx:Validation:InvalidInput', 'The specified task is invalid');
             obj.X = X;
             obj.Y = Y;
 
@@ -200,8 +199,8 @@ classdef Dataset
             
             if(~isempty(obj.ss_strategy))
                 ss_p = obj.ss_partitions{obj.currentPartition};
-                [X, Xu] = X.partition(ss_p.getTrainingIndexes(), ss_p.getTestIndexes());
-                [Y, ~] = Y.partition(ss_p.getTrainingIndexes(), ss_p.getTestIndexes());
+                [X, Xu] = X.partition(ss_p.getTestIndexes(), ss_p.getTrainingIndexes());
+                [Y, ~] = Y.partition(ss_p.getTestIndexes(), ss_p.getTrainingIndexes());
             else
                 Xu = RealMatrix([]);
             end

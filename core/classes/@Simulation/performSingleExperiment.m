@@ -38,8 +38,8 @@ end
 
 % Printing semi-supervised information
 if(log.flags.semisupervised && currentAlgo.isOfClass('SemiSupervisedLearningAlgorithm'))
-    [~, ~, Xu] = currentDataset.getFold(1);
-    cprintf('comment', '[Semi-supervised mode, %i unlabeled samples]\n', size(Xu.X.data, 1));
+    [~, ~,Xu] = currentDataset.getFold(1);
+    cprintf('comment', '[Semi-supervised mode, %d unlabeled samples]\n', size(Xu, 1));
 else
     fprintf('\n');
 end
