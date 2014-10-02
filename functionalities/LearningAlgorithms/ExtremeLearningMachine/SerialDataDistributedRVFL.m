@@ -23,6 +23,8 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
                 'Lynx:Runtime:Validation', 'The train_algo of SerialDataDistributedRVFL can be: consensus, admm'));
             p.addParamValue('consensus_max_steps', 10);
             p.addParamValue('consensus_thres', 0.01);
+            p.addParamValue('consensus_noise', 0);
+            p.addParamValue('consensus_prob', 0);
             p.addParamValue('admm_max_steps', 10);
             p.addParamValue('admm_rho', 1);
             p.addParamValue('admm_reltol', 0.001);
@@ -77,7 +79,7 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
                 % Execute (serial) consensus algorithm
                 if(obj.getParameter('consensus_max_steps') > 0)
                     [obj.model.outputWeights, obj.statistics.consensus_error] = ...
-                        obj.run_consensus_serial(beta, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'));
+                        obj.run_consensus_serial(beta, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'), obj.getParameter('consensus_noise'), obj.getParameter('consensus_prob'));
                 else
                     if(is_multiclass)
                         obj.model.outputWeights = beta(:, :, 1);
@@ -164,8 +166,8 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
                     
                     % Run consensus
                     [beta_avg, tmp1] = ...
-                        obj.run_consensus_serial(beta, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'));
-                    [t_avg, tmp2] = obj.run_consensus_serial(t, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'));
+                        obj.run_consensus_serial(beta, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'), obj.getParameter('consensus_noise'), obj.getParameter('consensus_prob'));
+                    [t_avg, tmp2] = obj.run_consensus_serial(t, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'), obj.getParameter('consensus_noise'), obj.getParameter('consensus_prob'));
                     
                     % Save statistic
                     obj.statistics.consensus_steps(ii) = max(sum(tmp1 ~= 0), sum(tmp2 ~=0));
