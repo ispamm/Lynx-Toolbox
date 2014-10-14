@@ -5,21 +5,22 @@ In this chapter, we show how to design new datasets, models, training algorithms
 
 \section{Storing a new dataset}
 
-A new dataset must be stored as a .mat file inside the ``\textit{datasets/xxx}'' folder, where \textit{xxx} is the id of the corresponding task. 
-For the tasks currently implemented in Lynx, each mat file must contains the following variables:
+A new dataset must be stored as a \verb|Dataset| object saved inside the ``\textit{datasets/xxx}'' folder, where \textit{xxx} is the id of the corresponding task. Each dataset is composed of an input and output \verb|DataType| objects. For more information on the currently implemented data types, see Table \ref{tab:basicinputs} and \ref{tab:basictasks}. 
 
-\begin{enumerate}
-	\item \verb|X|: an $N \times d$ matrix of input patterns, where $N$ is the number of observations and $d$ the dimensionality of the input.
-	\item \verb|Y|: an $N$-dimensional vector of corresponding output values. For regression, each value is real. For binary classification, each element can take the values $-1$ or $+1$. Finally, for multiclass classification, each element can take a value in $\left\{1, \ldots, M\right\}$, where $M$ is the number of classes.
-	\item \verb|info|: a string describing the dataset.
-\end{enumerate}
+As an example, we create a dataset object from the abalone dataset of MATLAB:
 
-Matrices can be stored as dense matrices or as sparse matrices. The name of the file identifies the dataset in the program. For non-basic tasks, the following applies:
+\begin{lstlisting}
+load abalone_dataset
+inputs = RealMatrix(abaloneInputs');
+outputs = IntegerLabelsVector(abaloneTargets');
+d = Dataset(inputs, outputs, Tasks.MC, 'Abalone');
+\end{lstlisting} 
 
-\begin{enumerate}
-	\item For prediction tasks, \verb|X| is an $N$-dimensional column vector containing the samples of the time-series, while \verb|Y| is an empty matrix.
-	\item For multi-label tasks, \verb|Y| is a $N \times T$ matrix, where $T$ is the number of labels. Additionally, a \verb|labels_info| variable must be present, corresponding to a $T\times1$ cell array of strings with the label descriptions.
-\end{enumerate}
+\noindent The third parameter is the task associated to the dataset, while the fourth is a string describing it. Finally, we can let Lynx save it on the disk:
+
+\begin{lstlisting}
+save_dataset(d, 'abalone');
+\end{lstlisting}
 
 \section{Parameterized classes}
 \label{sec:parameterizedclasses}
@@ -114,7 +115,8 @@ end
 The main function of a \verb|Model| class is a \verb|test| method for getting the predictions of the model on a particular set of input patterns. We are guaranteed that this is always called after training the algorithm with a suitable training method. Here is an example implementation in our case:
 
 \begin{lstlisting}
-function [labels, scores] = test(obj, Xts)
+function [labels, scores] = test(obj, dataset)
+   Xts = dataset.Y.data;
    neighbors = knnsearch(obj.trainingData, Xts);
    N_testing = size(Xts, 1);
    labels = zeros(N_testing, 1);
@@ -142,11 +144,11 @@ function a = getDefaultTrainingAlgorithm(obj)
 end
 \end{lstlisting}
 
-\noindent Then, a function returning all the possible tasks that are allowed by the model:
+\noindent Then, a function returning all the possible datasets that are allowed by the model:
 
 \begin{lstlisting}
-function res = isTaskAllowed(~, t)
-   res = (t == Tasks.R || t == Tasks.BC || t == Tasks.MC);
+function res = isDatasetCompatible(~, d)
+   res = isa(d.X, 'RealMatrix') && (d.task == Tasks.R || d.task == Tasks.BC || d.task == Tasks.MC);
 end
 \end{lstlisting}
 
@@ -180,7 +182,9 @@ end
 \noindent Now we need to implement a training method. In this case, we simply save the input matrix \verb|Xtr| and output vector \verb|Ytr| in the corresponding properties of the model:
 
 \begin{lstlisting}
-function obj = train(obj, Xtr, Ytr)
+function obj = train(obj, dataset)
+   Xtr = dataset.X.data;
+   Ytr = dataset.Y.data;
    obj.model.trainingInputs = Xtr;
    obj.model.trainingOutputs = Ytr;                    
 end
@@ -209,10 +213,10 @@ A \verb|TrainingAlgorithm| object can have additional methods that we have not u
 Implementing a semi-supervised algorithm follows the same guidelines as before. The only differences are that the algorithm should derive from \verb|SemiSupervisedLearningAlgorithm| instead of \verb|LearningAlgorithm|, and that the training method has a different signature:
 
 \begin{lstlisting}
-function obj = train_semisupervised(obj, Xtr, Ytr, Xu);
+function obj = train_semisupervised(obj, dataset, dataset_u);
 \end{lstlisting}
 
-\noindent Note that an implementation must handle the case where the additional matrix \verb|Xu| is empty.
+\noindent Note that an implementation must handle the case where the additional parameter \verb|dataset_u| is empty.
 
 \section{Implementing a Wrapper}
 
@@ -264,14 +268,15 @@ end
 \noindent Now we define the training method:
 
 \begin{lstlisting}
-function obj = train(obj, Xtr, Ytr)
-   p = cvpartition(Ytr, 'holdout', obj.parameters.d);
-   obj.wrappedAlgo = obj.wrappedAlgo.setCurrentTask(obj.geCurrentTask());
-   obj.wrappedAlgo = obj.wrappedAlgo.train(Xtr(training(p), :), Ytr(training(p));
+function obj = train(obj, dataset)
+   p = cvpartition(dataset.Y.data, 'holdout', obj.parameters.d);
+   dataset.X.data = dataset.X.data(training(p), :);
+   dataset.Y.data = dataset.Y.data(training(p));
+   obj.wrappedAlgo = obj.wrappedAlgo.train(dataset);
 end
 \end{lstlisting}
 
-\noindent The most important part in this code is that we need to set the current task in our base algorithm, before calling its training method. In general, we may also need to access some training property of the base algorithm, or to set it to a new value (think of the \verb|ParameterSweep| wrapper). However, wrappers can nest one inside each other, and the required training parameter can in principle be at any level of the hierarchy. \verb|Wrapper| overrides \verb|getTrainingParam| and \verb|setTrainingParam| to this end. As an example, suppose we want to access property ``\verb|C|'' of our base algorithm. This is done as:
+\noindent In general, we may also need to access some training property of the base algorithm, or to set it to a new value (think of the \verb|ParameterSweep| wrapper). However, wrappers can nest one inside each other, and the required training parameter can in principle be at any level of the hierarchy. \verb|Wrapper| overrides \verb|getTrainingParam| and \verb|setTrainingParam| to this end. As an example, suppose we want to access property ``\verb|C|'' of our base algorithm. This is done as:
 
 \begin{lstlisting}
 C = obj.getParameter('C');
@@ -285,22 +290,16 @@ obj.wrappedAlgo = obj.setParameter('C', C + 1);
 
 \subsubsection{Evaluating an Algorithm}
 
-A common need when designing a wrapper is that of evaluating the performance of the base algorithm using a given partition of the data. To this end, three steps are needed. First, starting from the input training matrices \verb|X| and \verb|Y| we generate a dataset:
+A common need when designing a wrapper is that of evaluating the performance of the base algorithm using a given partition \verb|p| of the data. First, we generate the partitions to be used for validating. Supposing we have chosen a \verb|PartitionStrategy| ``p'', we can call:
 
 \begin{lstlisting}
-d = Dataset.generateAnonymousDataset(obj.getTask(), X, Y);
+dataset = dataset.generateSinglePartition(p);
 \end{lstlisting}
 
-\noindent Successively, we generate the partitions to be used for validating. Supposing we have chosen a \verb|PartitionStrategy| ``p'', we can call:
+\noindent Then, we call an utility function to perform the actual test:
 
 \begin{lstlisting}
-d = g.generateSinglePartition(p);
-\end{lstlisting}
-
-\noindent Finally, we call an utility function to perform the actual test:
-
-\begin{lstlisting}
-perfs = PerformanceEvaluator.computePerformance(obj.wrappedAlgo, d);
+perfs = PerformanceEvaluator.computePerformance(obj.wrappedAlgo, dataset);
 \end{lstlisting}
 
 \noindent \verb|perfs| is a cell array containing all the performance values that were selected in the simulation for the given task. To access the primary measure, we can select the first element of the cell array. If we have two performance measures \verb|p1| and \verb|p2|, we can compare them using the \verb|isBetterThan| method of \verb|PerformanceMeasure|:
@@ -320,9 +319,9 @@ The \verb|SubsampleTrainingData| can also be implemented as a preprocessor to sa
 
 \begin{lstlisting}
 function d = process(obj, d)
-   p = cvpartition(d.Y, 'holdout', obj.parameters.d);
-   d.X = d.X(training(p), :);
-   d.Y = d.Y(training(p));
+   p = cvpartition(d.Y.data, 'holdout', obj.parameters.d);
+   d.X.data = d.X.data(training(p), :);
+   d.Y.data = d.Y.data(training(p));
 end
 \end{lstlisting}
 
