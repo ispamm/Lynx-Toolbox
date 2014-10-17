@@ -215,7 +215,7 @@ pip-log.txt
 .mr.developer.cfg
 
 # Custom folders to ignore
-# configs/
+configs/
 datasets/
 config.xml
 doc/

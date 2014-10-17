@@ -132,7 +132,7 @@ function [labels, scores] = test(obj, dataset)
 end
 \end{lstlisting}
 
-Here, \verb|Xts| is a matrix of input test patterns. \verb|labels| is an $N \times 1$ vector of predictions, where $N$ is the number of rows in \verb|Xts|, with the format specified by the current task. \verb|scores| is a matrix of ``raw'' values of the algorithm, such as confidence values or probability estimates for each class. In our case, for simplicity, we set them equal to the labels. Note that, if the current task is regression, we use the mean values of the $K$ closest neighbors, otherwise we use the most frequent value (for classification).
+Here, \verb|Xts| is a matrix of input test patterns. \verb|labels| is an $N \times 1$ vector of predictions, where $N$ is the number of rows in \verb|Xts|, with the format specified by the current data types. \verb|scores| is a matrix of ``raw'' values of the algorithm, such as confidence values or probability estimates for each class. In our case, for simplicity, we set them equal to the labels. Note that, if the current task is regression, we use the mean values of the $K$ closest neighbors, otherwise we use the most frequent value (for classification).
 
 \subsection{Other methods}
 
@@ -216,7 +216,7 @@ Implementing a semi-supervised algorithm follows the same guidelines as before. 
 function obj = train_semisupervised(obj, dataset, dataset_u);
 \end{lstlisting}
 
-\noindent Note that an implementation must handle the case where the additional parameter \verb|dataset_u| is empty.
+\noindent \verb|dataset_u| is an additional dataset containing only input patterns. Note that an implementation must handle the case where the additional parameter \verb|dataset_u| is empty.
 
 \section{Implementing a Wrapper}
 

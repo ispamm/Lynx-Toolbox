@@ -34,10 +34,10 @@ add_dataset('Y', 'Yacht', 'uci_yacht');
 \subsection{Adding a multilabel dataset}
 \label{sec:multilabeldataset}
 
-You may have seen during the simulation that some tasks have no performance measure assigned to them (e.g., multilabel classification tasks). These may be taught as ``\textit{incomplete}'' tasks, i.e., tasks for which no training algorithms are available. Currently, they are handled by transforming them (after loading the datasets) into other, more ``basic'' tasks. In particular:
+You may have seen during the simulation that the multilabel classification task has no performance measure assigned to it. This is because it is an ``\textit{incomplete}'' data type, i.e., a data type for which no training algorithms is available. A similar thing can be said about time-series inputs, which cannot currently be used directly by any model. Hence, they are handled by transforming them (after loading the datasets) into other, more ``basic'' tasks. In particular:
 
 \begin{itemize}
-\item Prediction tasks are transformed into regression tasks by embedding the timeseries into a phase space.
+\item Time-series datasets are transformed into regression datasets by embedding the time-series into a phase space.
 \item Multilabel classification tasks are transfomed into multiple binary classification tasks (the so-called \textit{binary relevance} method).
 \end{itemize}
 
@@ -54,7 +54,7 @@ Extracted 36 different binary classification datasets from original
   dataset Cal 500
 \end{console}
 
-\noindent The $36$ tasks have sequential ids given by C-1, C-2, etc. Similarly, try to add a prediction dataset:
+\noindent The $36$ tasks have sequential ids given by C-1, C-2, etc. Similarly, try to add a dataset with a time-series as input:
 
 \begin{lstlisting}
 add_dataset('M', 'Mackey-glass', 'mackeyglass');
