@@ -1,4 +1,6 @@
-% SerialDataDistributedRVFL - 
+% SerialDataDistributedRVFL - Serialized version of a distributed RVFL
+%   Refer to: ...
+%   
 
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is
 % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
@@ -21,11 +23,9 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
             p.addParamValue('C', 1, @(x) assert(x > 0, 'Regularization parameter of SerialDataDistributedRVFL must be > 0'));
             p.addParamValue('train_algo', 'consensus', @(x) assert(isingroup(x, {'consensus', 'admm'}), ...
                 'Lynx:Runtime:Validation', 'The train_algo of SerialDataDistributedRVFL can be: consensus, admm'));
-            p.addParamValue('consensus_max_steps', 10);
-            p.addParamValue('consensus_thres', 0.01);
-            p.addParamValue('consensus_noise', 0);
-            p.addParamValue('consensus_prob', 0);
-            p.addParamValue('admm_max_steps', 10);
+            p.addParamValue('consensus_max_steps', 300);
+            p.addParamValue('consensus_thres', 0.001);
+            p.addParamValue('admm_max_steps', 300);
             p.addParamValue('admm_rho', 1);
             p.addParamValue('admm_reltol', 0.001);
             p.addParamValue('admm_abstol', 0.001);
@@ -79,7 +79,7 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
                 % Execute (serial) consensus algorithm
                 if(obj.getParameter('consensus_max_steps') > 0)
                     [obj.model.outputWeights, obj.statistics.consensus_error] = ...
-                        obj.run_consensus_serial(beta, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'), obj.getParameter('consensus_noise'), obj.getParameter('consensus_prob'));
+                        obj.run_consensus_serial(beta, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'));
                 else
                     if(is_multiclass)
                         obj.model.outputWeights = beta(:, :, 1);
@@ -166,8 +166,8 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
                     
                     % Run consensus
                     [beta_avg, tmp1] = ...
-                        obj.run_consensus_serial(beta, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'), obj.getParameter('consensus_noise'), obj.getParameter('consensus_prob'));
-                    [t_avg, tmp2] = obj.run_consensus_serial(t, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'), obj.getParameter('consensus_noise'), obj.getParameter('consensus_prob'));
+                        obj.run_consensus_serial(beta, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'));
+                    [t_avg, tmp2] = obj.run_consensus_serial(t, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'));
                     
                     % Save statistic
                     obj.statistics.consensus_steps(ii) = max(sum(tmp1 ~= 0), sum(tmp2 ~=0));
@@ -250,15 +250,17 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
         end
         
         function pNames = getParametersNames()
-            pNames = {'C'}; 
+            pNames = {'C', 'train_algo', 'consensus_max_steps', 'consensus_thres', 'admm_max_steps', 'admm_rho', 'admm_reltol', 'admm_abstol'}; 
         end
         
         function pInfo = getParametersDescription()
-            pInfo = {'Regularization factor'};
+            pInfo = {'Regularization factor', 'Training algorithm', 'Iterations of consensus', 'Threshold of consensus', ...
+                'Iterations of ADMM', 'Penalty parameter of ADMM', 'Relative tolerance of ADMM', 'Absolute tolerance of ADMM'};
         end
         
         function pRange = getParametersRange()
-            pRange = {'Positive real number, default is 1'};
+            pRange = {'Positive real number, default is 1', 'String in {consensus [default], admm}', 'Positive integer, default to 300', 'Positive real number, default to 0.001', ...
+                'Positive integer, default to 300', 'Positive real number, default to 1', 'Positive real number, default to 0.001', 'Positive real number, default to 0.001'};
         end    
     end
     

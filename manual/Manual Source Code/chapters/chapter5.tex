@@ -5,9 +5,16 @@ In this chapter, we show how to design new datasets, models, training algorithms
 
 \section{Storing a new dataset}
 
-A new dataset must be stored as a \verb|Dataset| object saved inside the ``\textit{datasets/xxx}'' folder, where \textit{xxx} is the id of the corresponding task. Each dataset is composed of an input and output \verb|DataType| objects. For more information on the currently implemented data types, see Table \ref{tab:basicinputs} and \ref{tab:basictasks}. 
+A dataset is composed of four components:
 
-As an example, we create a dataset object from the abalone dataset of MATLAB:
+\begin{itemize}
+\item An \textit{input} \verb|DataType| object, containing all the inputs of the dataset (see Table \ref{tab:basicinputs}).
+\item An \textit{output} \verb|DataType| object, containing all the outputs of the dataset (see Table \ref{tab:basictasks}).
+\item A \textit{task} id, detailing the corresponding task (should match with the output type).
+\item A string describing the dataset.
+\end{itemize}
+
+A new dataset must be stored as a \verb|Dataset| object saved inside the ``\textit{datasets/xxx}'' folder, where \textit{xxx} is the id of the corresponding task. As an example, we create a dataset object from the abalone dataset of MATLAB (a multiclass classification problem):
 
 \begin{lstlisting}
 load abalone_dataset

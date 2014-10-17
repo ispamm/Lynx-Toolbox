@@ -52,17 +52,36 @@ the test and prints the information on screen. The first two arguments are cell 
 \item \verb|s = getDescription| returns a string describing the statistical test.
 \end{itemize}
 
-\section{Tasks, datasets and factories}
+\section{Data types}
+
+You can create a new data type in two steps:
+
+\begin{itemize}
+\item First, add a new item to the \verb|DataTypes| enum, identifying the new type.
+\item Then, properly extend the class \verb|DataType|. 
+\end{itemize}
+
+The class \verb|DataType| requires three methods:
+
+\begin{itemize}
+\item \verb|partition| takes two set of indices, and creates two partitions of the data.
+\item \verb|shuffle| takes a random permutation of the integers $1,\ldots,N$ (where $N$ is the number of examples) and shuffles the data accordingly.
+\item \verb|getDescription| gives a description of the data.
+\end{itemize}
+
+Moreover, you need to assign the correct ID (the one you defined previously) in the constructor. If your class needs a particular \verb|DatasetFactory| object, set the respective property \verb|factory| in the constructor.
+
+\section{Tasks and dataset factories}
 
 Any task in Lynx derives from \verb|BasicTask|. Loading a dataset in Lynx proceeds as follows:
 
 \begin{itemize}
 \item Every task has an associated set of folders that contains datasets of the corresponding type. Starting from the filename, the dataset is searched from all the basic tasks, and associated to the first task containing a .mat file with the corresponding name.
 \item The .mat file is checked for consistency using the \verb|checkForConsistency| method of the corresponding task's class.
-\item One or more datasets are created using a \verb|DatasetFactory| object. In particular, every data type in Lynx has an associated factory. When loading a dataset, the toolbox calls subsequently the factories of the input and output data types of the dataset.
+\item One or more datasets are created using a \verb|DatasetFactory| object. In particular, remember from the previous section that every data type in Lynx has an associated factory. When loading a dataset, the toolbox calls subsequently the factories of the input and output data types of the dataset.
 \end{itemize}
 
-\noindent For example, consider a multilabel classification task, whose dataset is composed by aa \verb|RealMatrix| as input and a \verb|MultilabelMatrix| as output. \verb|RealMatrix| is associated to the \verb|DummyFactory| object, which does nothing on the dataset. The \verb|MultilabelMatrix|, instead, is associated to the \verb|BinaryRelevanceFactory|, which generates the multiple binary classification datasets. Going back to the design of tasks, in the constructor of a task, you must define three properties:
+\noindent For example, consider a multilabel classification task, whose dataset is composed by aa \verb|RealMatrix| as input and a \verb|MultilabelMatrix| as output. \verb|RealMatrix| is associated to the \verb|DummyFactory| object, which does nothing on the dataset. The \verb|MultilabelMatrix|, instead, is associated to the \verb|BinaryRelevanceFactory|, which generates the multiple binary classification datasets. Going back to the design of tasks, in the constructor of a task, you must define two properties:
 
 \begin{itemize}
 \item \verb|folders| is a cell array of folders containing datasets of this type.

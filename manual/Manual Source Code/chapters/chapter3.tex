@@ -66,7 +66,13 @@ add_dataset('M', 'Mackey-glass', 'mackeyglass');
 Embedded dataset Mackey-glass, 4993 samples extracted
 \end{console}
 
-How to ``complete'' these tasks, and how to design new ones, are topics explored in the last chapter of the manual.
+The transformation is handled by a default \verb|DatasetFactory| object. You can change it by supplying an additional parameter to \verb|add_dataset|. As an example, by default time-series are embedded into a $7$-dimensional phase space, and the output is set to one-step ahead: this corresponds to an object \verb|EmbedTimeseriesFactory(7,1)|. We can choose to have a $2$-step ahead prediction by the following call:
+
+\begin{lstlisting}
+add_dataset('M', 'Mackey-glass', 'mackeyglass', EmbedTimeseriesFactory(7, 2));
+\end{lstlisting}
+
+How to ``complete'' data types, and how to design new ones, are topics explored in the last chapter of the manual.
 
 \section{Adding a model}
 
