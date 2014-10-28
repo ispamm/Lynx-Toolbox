@@ -84,7 +84,7 @@ classdef NetworkNode
             final_value = current_value;
         end
         
-        function [final_value, consensus_error] = run_consensus_serial(obj, initial_values, steps, threshold, noise_var, noise_prob)
+        function [final_value, consensus_error] = run_consensus_serial(obj, initial_values, steps, threshold)
             % This is a serial implementation of the consensus strategy.
             % Parameters are:
             %
@@ -107,11 +107,6 @@ classdef NetworkNode
             consensus_error = zeros(steps, 1);
             is_matrix = ndims(initial_values) == 3;
             
-            size1 = size(current_values, 1);
-            if(is_matrix)
-                size2 = size(current_values, 2);
-            end
-            
             max_degree = obj.topology.getMaxDegree();
             
             for ii = 1:steps
@@ -119,14 +114,10 @@ classdef NetworkNode
                 for jj = 1:obj.topology.N
                     idx = obj.getNeighbors(jj);
                     if(is_matrix)
-                        noise = randn(size1, size2, length(idx))*noise_var;
-                        noise(rand(size1, size2, length(idx)) > noise_prob) = 0;
-                        new_values(:, :, jj) = ((1-length(idx)/(max_degree+1))*current_values(:, :, jj) + (1/(max_degree + 1))*sum(current_values(:, :, idx) + noise, 3));
+                        new_values(:, :, jj) = ((1-length(idx)/(max_degree+1))*current_values(:, :, jj) + (1/(max_degree + 1))*sum(current_values(:, :, idx), 3));
                         consensus_error(ii) = consensus_error(ii) + norm(current_values(:, :, jj) - new_values(:, :, jj), 'fro');
                     else
-                        noise = randn(size1, length(idx))*noise_var;
-                        noise(rand(size1, length(idx)) > noise_prob) = 0;
-                        new_values(:, jj) = ((1-length(idx)/(max_degree+1))*current_values(:, jj) + (1/(max_degree + 1))*sum(current_values(:, idx) + noise, 2));
+                        new_values(:, jj) = ((1-length(idx)/(max_degree+1))*current_values(:, jj) + (1/(max_degree + 1))*sum(current_values(:, idx), 2));
                         consensus_error(ii) = consensus_error(ii) + norm(current_values(:, jj) - new_values(:, jj));
                     end
                 end
