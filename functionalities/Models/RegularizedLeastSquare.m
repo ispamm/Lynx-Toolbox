@@ -43,7 +43,11 @@ classdef RegularizedLeastSquare < Model
             p.addParamValue('C', 1, @(x) assert(x > 0, 'Regularization parameter of RN must be > 0'));
         end
         
-        function [labels, scores] = test(obj, Xts)
+        function [labels, scores] = test(obj, d)
+            
+            % Get training data
+            Xts = d.X.data;
+            
             if(isempty(obj.outputWeights))
                 scores = zeros(size(Xts, 1), 1);
             else
@@ -54,11 +58,12 @@ classdef RegularizedLeastSquare < Model
                 end
                 scores = (Omega_test' * obj.outputWeights);
             end
-            labels = convert_scores(scores, obj.getCurrentTask());
+            labels = convert_scores(scores, d.task);
         end
         
-        function res = isTaskAllowed(~, ~)
-            res = true;
+        function res = isDatasetAllowed(~, d)
+            res = d.task == Tasks.R || d.task == Tasks.BC || d.task == Tasks.MC;
+            res = res && (d.X.id == DataTypes.REAL_MATRIX || d.X.id == DataTypes.KERNEL_MATRIX);
         end
         
         function a = getDefaultTrainingAlgorithm(obj)

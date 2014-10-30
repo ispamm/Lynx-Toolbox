@@ -25,7 +25,12 @@ classdef LaplacianELM < SemiSupervisedLearningAlgorithm
             p.addParamValue('laplacian_degree', 1, @(x) assert(isnatural(x, false), 'Degree of the Laplacian of LaplacianELM must be a natural number'));
         end
         
-        function obj = train_semisupervised(obj, Xtr, Ytr, Xu)
+        function obj = train_semisupervised(obj, dtrain, du)
+            
+            % Get training data
+            Xtr = dtrain.X.data;
+            Ytr = dtrain.Y.data;
+            Xu = du.X.data;
             
             % STEP 1: Construct the graph Laplacian
             
@@ -45,7 +50,7 @@ classdef LaplacianELM < SemiSupervisedLearningAlgorithm
             
             % STEP 2: Initialize H matrix of ELM network
             
-            if(obj.getCurrentTask() == Tasks.MC)
+            if(dtrain.task == Tasks.MC)
                 Ytr  = dummyvar(Ytr);
             end
             

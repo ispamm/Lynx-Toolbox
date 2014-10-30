@@ -37,3 +37,25 @@ add_dataset('Y', 'Yacht (UCI)', 'uci_yacht');
 \begin{lstlisting}
 add_feature(ExecuteOutputScripts('info_hla'));
 \end{lstlisting}
+
+\section{Distributed learning algorithms}
+
+Distributed learning algorithms (DLA) represents algorithms that are trained in a fully decentralized way. To use a DLA, add the \verb|InitializeTopology| feature to determine the actual topology of the nodes:
+
+\begin{lstlisting}
+add_feature(InitializeTopology(t));
+\end{lstlisting}
+
+\noindent where \verb|t| can be any \verb|NetworkTopology| object (see the 'core/classes/NetworkTopologies' folder). If you want every node to have a part of the dataset, add the following flag:
+
+\begin{lstlisting}
+add_feature(InitializeTopology(t), 'distribute_data');
+\end{lstlisting}
+
+\noindent Distributed algorithms are run inside an SPMD block. You can also have algorithms that only simulate a parallel simulation, in this case add the flag:
+
+\begin{lstlisting}
+add_feature(InitializeTopology(t), 'disable_parallel');
+\end{lstlisting}
+
+\noindent DLA derive from the basic class \verb|DistributedLearningAlgorithm|, and they must implement the \verb|train_locally| method. In the distributed case, this will be executed inside the SPMD block. Otherwise, it is up to the algorithm to simulate the parallel behavior. Topology is stored inside the \verb|topology| property of the class. To see concrete implementations, see \verb|DataDistributedRVFL| and \verb|SerialDataDistributedRVFL|.

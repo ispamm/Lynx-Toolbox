@@ -26,16 +26,16 @@ classdef Subsampler < Preprocessor
         end
         
         function [dataset, obj] = process( obj, dataset )
-            N = size(dataset.X,1);
-            if(dataset.task == Tasks.R || dataset.task == Tasks.BC || dataset.task == Tasks.MC || dataset.task == Tasks.ML)
+            N = size(dataset.X.data,1);
+            if(~isa(dataset.X, 'TimeSeries'))
                 cv = cvpartition(N, 'Holdout', obj.parameters.d);
-                dataset.X = dataset.X(test(cv),:);
-                dataset.Y = dataset.Y(test(cv),:);
-            elseif(dataset.task == Tasks.PR)
-                splitPoint = floor(obj.parameters.d*length(dataset.X));
-                dataset.X = dataset.X(1:splitPoint);
+                dataset.X.data = dataset.X.data(test(cv),:);
+                dataset.Y.data = dataset.Y.data(test(cv),:);
+            else
+                splitPoint = floor(obj.parameters.d*length(dataset.X.data));
+                dataset.X.data = dataset.X.data(1:splitPoint);
             end
-            fprintf('Subsampled original dataset of %i elements to %i\n', N, size(dataset.X, 1));
+            fprintf('Subsampled original dataset of %i elements to %i\n', N, size(dataset.X.data, 1));
         end
         
         function dataset = processAsBefore(obj, dataset)

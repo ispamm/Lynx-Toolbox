@@ -22,7 +22,11 @@ classdef LibSVM < LearningAlgorithm
         function p = initParameters(~, p)
         end
         
-        function obj = train(obj, Xtr, Ytr)
+        function obj = train(obj, d)
+            
+            % Get training data
+            Xtr = d.X.data;
+            Ytr = d.Y.data;
             
             % Needed for custom kernel
             if(strcmp(obj.getParameter('kernel_type'), 'custom') && (any(isnan(Xtr(:))) || rcond(Xtr) < 10^-8))
@@ -38,7 +42,7 @@ classdef LibSVM < LearningAlgorithm
                 Xtr = kernel_matrix(Xtr, obj.getParameter('kernel_type'), obj.getParameter('kernel_para'));
             end
             
-            if(obj.getCurrentTask() == Tasks.R)
+            if(d.task == Tasks.R)
                 options = ['-s 4 -t 4 -c ',  ...
                     num2str(obj.getParameter('C')), ' -h 0 -q 1 -n ',  num2str(obj.getParameter('nu'))];
                 Xtr = [(1:size(Xtr,1))' Xtr];
@@ -57,7 +61,10 @@ classdef LibSVM < LearningAlgorithm
             b = model.isOfClass('SupportVectorMachine');
         end
         
-        function [labels, scores] = test_custom(obj, Xts)
+        function [labels, scores] = test_custom(obj, d)
+            
+            % Get test data
+            Xts = d.X.data;
             
             if(~isempty(Xts) && ~isempty(obj.svmStruct))
                 

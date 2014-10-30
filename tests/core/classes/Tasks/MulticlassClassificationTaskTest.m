@@ -23,7 +23,6 @@ classdef MulticlassClassificationTaskTest < matlab.unittest.TestCase
         function testForAssociatedObjects(testCase)
             b = MulticlassClassificationTask.getInstance();
             testCase.verifyEqual(class(b.getPerformanceMeasure()), 'MisclassificationError');
-            testCase.verifyEqual(class(b.getDatasetFactory()), 'DummyDatasetFactory');
             testCase.verifyEqual(b.getDescription(), 'Multiclass classification');
         end
         
@@ -41,18 +40,11 @@ classdef MulticlassClassificationTaskTest < matlab.unittest.TestCase
         
         function testValidDataset(testCase)
             MulticlassClassificationTask.getInstance().addFolder('tests/dummydatasets');
-            o = MulticlassClassificationTask.getInstance().loadDataset('valid_MC', 'a');
-            testCase.verifyEqual(o.X, [1 2 3; 4 5 6]');
-            testCase.verifyEqual(o.Y, [1; 2; 1]);
+            o = MulticlassClassificationTask.getInstance().loadDataset('valid_MC');
+            testCase.verifyEqual(o.X.data, [1 2 3; 4 5 6]');
+            testCase.verifyEqual(o.Y.data, [1; 2; 1]);
         end
         
-        function testInvalidDataset(testCase)
-            MulticlassClassificationTask.getInstance().addFolder('tests/dummydatasets');
-            testCase.verifyError(@()MulticlassClassificationTask.getInstance().loadDataset('invalid_MC_Y', 'a'), 'Lynx:Initialization:InvalidDataset');
-            testCase.verifyError(@()MulticlassClassificationTask.getInstance().loadDataset('invalid_MC_Y_2', 'a'), 'Lynx:Initialization:InvalidDataset');
-            testCase.verifyError(@()MulticlassClassificationTask.getInstance().loadDataset('invalid_MC_info', 'a'), 'Lynx:Initialization:InvalidDataset');
-        end
-       
     end  
     
 end

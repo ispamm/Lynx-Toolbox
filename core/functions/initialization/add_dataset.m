@@ -7,7 +7,7 @@
 % Programmed and Copyright by Simone Scardapane:
 % simone.scardapane@uniroma1.it
 
-function add_dataset(data_id, data_name, file, varargin)
+function add_dataset(data_id, data_name, file, f)
 
     s = Simulation.getInstance();
     
@@ -18,11 +18,17 @@ function add_dataset(data_id, data_name, file, varargin)
     
     % Search the dataset in each task
     while ii <= length(tasks) && ~found
-        d = tasks{ii}.loadDataset(file, data_name);
+        d = tasks{ii}.loadDataset(file);
         if(~isempty(d))
             found = true;
-            d = tasks{ii}.getDatasetFactory().create(tasks{ii}.getTaskId(), data_id, data_name, d);
+            d = d.setIdAndName(data_id, data_name);
+            if(nargin == 4)
+                d = d.process(f);
+            else
+                d = d.process();
+            end
             for jj = 1:length(d)
+                d{jj} = d{jj}.setIdAndName(data_id, data_name);
                 s.datasets = s.datasets.addElement(d{jj});
             end
         end

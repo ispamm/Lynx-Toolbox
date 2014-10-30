@@ -13,7 +13,7 @@
 
 function labels = convert_scores( scores, t )
 
-if t == Tasks.R || t == Tasks.PR
+if t == Tasks.R
     labels = scores;
 elseif t == Tasks.BC
     labels = sign(scores);

@@ -23,7 +23,6 @@ classdef BinaryClassificationTaskTest < matlab.unittest.TestCase
         function testForAssociatedObjects(testCase)
             b = BinaryClassificationTask.getInstance();
             testCase.verifyEqual(class(b.getPerformanceMeasure()), 'MisclassificationError');
-            testCase.verifyEqual(class(b.getDatasetFactory()), 'DummyDatasetFactory');
             testCase.verifyEqual(b.getDescription(), 'Binary classification');
         end
         
@@ -41,17 +40,11 @@ classdef BinaryClassificationTaskTest < matlab.unittest.TestCase
         
         function testValidDataset(testCase)
             BinaryClassificationTask.getInstance().addFolder('tests/dummydatasets');
-            o = BinaryClassificationTask.getInstance().loadDataset('valid_BC', 'a');
-            testCase.verifyEqual(o.X, [1 2 3; 4 5 6]);
-            testCase.verifyEqual(o.Y, [1; -1]);
+            o = BinaryClassificationTask.getInstance().loadDataset('valid_BC');
+            testCase.verifyEqual(o.X.data, [1 2 3; 4 5 6]);
+            testCase.verifyEqual(o.Y.data, [1; -1]);
         end
         
-        function testInvalidDataset(testCase)
-            BinaryClassificationTask.getInstance().addFolder('tests/dummydatasets');
-            testCase.verifyError(@()BinaryClassificationTask.getInstance().loadDataset('invalid_BC_Y', 'a'), 'Lynx:Initialization:InvalidDataset');
-            testCase.verifyError(@()BinaryClassificationTask.getInstance().loadDataset('invalid_BC_info', 'a'), 'Lynx:Initialization:InvalidDataset');
-        end
-       
     end  
     
 end

@@ -62,9 +62,9 @@ classdef Kernelsearch_GP < Wrapper
             p.addParamValue('fitness_sharing', false);
         end
         
-        function obj = train(obj, Xtr, Ytr)
+        function obj = train(obj, d)
             obj.wrappedAlgo = obj.wrappedAlgo.setParameter('kernel_type', 'custom');
-            fitFun = @(k) obj.computeFitnessIndividual( k, Xtr, Ytr );
+            fitFun = @(k) obj.computeFitnessIndividual( k, d );
             
             origC = obj.wrappedAlgo.getParameter('C');
             
@@ -80,14 +80,13 @@ classdef Kernelsearch_GP < Wrapper
                 'FITNESS_SHARING', obj.parameters.fitness_sharing, ...
                 'VERBOSE', SimulationLogger.getInstance().flags.debug);
             
-            obj.Xtr = Xtr;
-            Omega_train = obj.optimalKernel.evaluate(Xtr, []);
+            obj.Xtr = d.X.data;
+            d.X = KernelMatrix(obj.optimalKernel.evaluate(d.X.data, []));
             
             % Find the optimal regularization parameter
             obj.wrappedAlgo = ParameterSweep(obj.wrappedAlgo, {'C'}, {2^-5:10}, 'partition_strategy', obj.parameters.partition_strategy);
             
-            obj.wrappedAlgo = obj.wrappedAlgo.setCurrentTask(obj.getCurrentTask());
-            obj.wrappedAlgo = obj.wrappedAlgo.train(Omega_train, Ytr);
+            obj.wrappedAlgo = obj.wrappedAlgo.train(d);
             
             obj.wrappedAlgo = obj.wrappedAlgo.wrappedAlgo;
             obj.wrappedAlgo = obj.wrappedAlgo.setParameter('C', origC);
@@ -100,21 +99,20 @@ classdef Kernelsearch_GP < Wrapper
             b = true;
         end
         
-        function [labels, scores] = test_custom(obj, Xts)
-            Omega_test = obj.optimalKernel.evaluate(obj.Xtr, Xts);
-            [labels, scores] = obj.wrappedAlgo.test(Omega_test);
+        function [labels, scores] = test_custom(obj, d)
+            Omega_test = obj.optimalKernel.evaluate(obj.Xtr, d.X.data);
+            [labels, scores] = obj.wrappedAlgo.test(Dataset(KernelMatrix(Omega_test), [], d.task));
         end
         
-        function fit  = computeFitnessIndividual(obj, k, X, Y )
-            Omega = k.evaluate(X, []);
-            data = Dataset.generateAnonymousDataset(obj.getCurrentTask(), Omega, Y, true);
-            data = data.generateSinglePartition(obj.parameters.partition_strategy);
-            fit = PerformanceEvaluator.getInstance().computePerformance(obj.wrappedAlgo, data);
+        function fit  = computeFitnessIndividual(obj, k, d )
+            d.X = KernelMatrix(k.evaluate(d.X.data, []));
+            d = d.generateSinglePartition(obj.parameters.partition_strategy);
+            fit = PerformanceEvaluator.getInstance().computePerformance(obj.wrappedAlgo, d);
             fit = fit{1}.getFinalizedValue();
         end
         
         function b = checkForCompatibility(obj, model)
-            b = model.isOfClass('SupportVectorMachine');
+            b = model.isOfClass('SupportVectorMachine') || model.isOfClass('RegularizedLeastSquare');
         end
         
         

@@ -38,8 +38,12 @@ classdef BaselineModel < Model
         function p = initParameters(~, p)
         end
         
-        function [labels, scores] = test(obj, Xts)
-            if(obj.getCurrentTask() == Tasks.R)
+        function [labels, scores] = test(obj, d)
+            
+            % Get training data
+            Xts = d.X.data;
+            
+            if(d.task == Tasks.R)
                 % In case of regression, always return the mean value of
                 % the training set
                 labels = obj.avValue*ones(size(Xts, 1), 1);
@@ -57,8 +61,9 @@ classdef BaselineModel < Model
             
         end
         
-        function res = isTaskAllowed(~, t)
-            res = (t == Tasks.R || t == Tasks.BC || t == Tasks.MC);
+        function res = isDatasetAllowed(~, d)
+            res = d.task == Tasks.R || d.task == Tasks.BC || d.task == Tasks.MC;
+            res = res && d.X.id == DataTypes.REAL_MATRIX;
         end
     end
     

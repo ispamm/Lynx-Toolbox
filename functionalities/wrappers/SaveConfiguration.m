@@ -25,8 +25,8 @@ classdef SaveConfiguration < Wrapper
             p.addParamValue('dest_folder', 'models/'); 
         end
         
-        function obj = train(obj, Xtr, Ytr)
-            obj.wrappedAlgo = obj.wrappedAlgo.train(Xtr, Ytr);
+        function obj = train(obj, d)
+            obj.wrappedAlgo = obj.wrappedAlgo.train(d);
             model = obj.wrappedAlgo;
             
             if(~exist(obj.parameters.dest_folder, 'dir'))

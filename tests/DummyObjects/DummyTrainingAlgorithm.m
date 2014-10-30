@@ -19,8 +19,8 @@ classdef DummyTrainingAlgorithm < LearningAlgorithm
         function p = initParameters(~, p)
         end
         
-        function obj = train(obj, ~, Ytr)
-            obj.model.internalParameter  = mean(Ytr);
+        function obj = train(obj, d)
+            obj.model.internalParameter  = mean(d.Y.data);
         end
         
         function res = isTaskAllowed(~, ~)

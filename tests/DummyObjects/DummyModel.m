@@ -26,13 +26,13 @@ classdef DummyModel < Model
             p.addParamValue('p_pv', 3);
         end
         
-        function [labels, scores] = test(obj, Xts)
-            labels = obj.internalParameter + obj.parameters.p_req + (1:size(Xts, 1))';
+        function [labels, scores] = test(obj, d)
+            labels = obj.internalParameter + obj.parameters.p_req + (1:size(d.X.data, 1))';
             scores = labels;
         end
         
-        function res = isTaskAllowed(~, t)
-            res = (t == Tasks.R || t == Tasks.BC || t == Tasks.MC);
+        function res = isDatasetAllowed(~, d)
+            res = (d.task == Tasks.R || d.task == Tasks.BC || d.task == Tasks.MC);
         end
     end
     

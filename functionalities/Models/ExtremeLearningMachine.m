@@ -41,6 +41,8 @@ classdef ExtremeLearningMachine < Model
         
         function obj = ExtremeLearningMachine(id, name, varargin)
             obj = obj@Model(id, name, varargin{:});
+            obj.weights_l1 = [];
+            obj.bias_l1 = [];
         end
         
         function a = getDefaultTrainingAlgorithm(obj)
@@ -48,20 +50,24 @@ classdef ExtremeLearningMachine < Model
         end
         
         function p = initParameters(obj, p)
-            p.addParamValue('hiddenNodes', 50, @(x) assert(isnatural(x, false), 'Hidden nodes of ExtremeLearningMachine must be an integer > 0'));
+            p.addParamValue('hiddenNodes', 100, @(x) assert(isnatural(x, false), 'Hidden nodes of ExtremeLearningMachine must be an integer > 0'));
             p.addParamValue('type', 'sigmoid', @(x) assert(isingroup(x, {'sigmoid', 'sinusoid', 'hardlimit'}), 'Hidden nodes type of ExtremeLearningMachine is invalid'));
         end
         
-        function [labels, scores] = test(obj, Xts)
+        function [labels, scores] = test(obj, d)
+            
+            % Get training data
+            Xts = d.X.data;
             
             H_temp_test = obj.computeHiddenMatrix(Xts);
             scores =(H_temp_test * obj.outputWeights);
-            labels = convert_scores(scores, obj.getCurrentTask());
+            labels = convert_scores(scores, d.task);
             
         end
         
-        function res = isTaskAllowed(~, t)
-            res = (t == Tasks.R || t == Tasks.BC || t == Tasks.MC);
+        function res = isDatasetAllowed(~, d)
+            res = d.task == Tasks.R || d.task == Tasks.BC || d.task == Tasks.MC;
+            res = res && d.X.id == DataTypes.REAL_MATRIX;
         end
         
         function obj = generateWeights(obj, d)

@@ -22,7 +22,6 @@ classdef MultiLabelTaskTest < matlab.unittest.TestCase
         
         function testForAssociatedObjects(testCase)
             b = MultiLabelTask.getInstance();
-            testCase.verifyEqual(class(b.getDatasetFactory()), 'BinaryRelevanceFactory');
             testCase.verifyEqual(b.getDescription(), 'Multilabel classification');
         end
         
@@ -40,16 +39,11 @@ classdef MultiLabelTaskTest < matlab.unittest.TestCase
         
         function testValidDataset(testCase)
             MultiLabelTask.getInstance().addFolder('tests/dummydatasets');
-            o = MultiLabelTask.getInstance().loadDataset('valid_ML', 'a');
-            testCase.verifyEqual(o.X, [1 2 3; 4 5 6]);
-            testCase.verifyEqual(o.Y, [1 -1; -1 -1]);
+            o = MultiLabelTask.getInstance().loadDataset('valid_ML');
+            testCase.verifyEqual(o.X.data, [1 2 3; 4 5 6]);
+            testCase.verifyEqual(o.Y.data, [1 -1; -1 -1]);
         end
         
-        function testInvalidDataset(testCase)
-            MultiLabelTask.getInstance().addFolder('tests/dummydatasets');
-            testCase.verifyError(@()MultiLabelTask.getInstance().loadDataset('invalid_ML_Y', 'a'), 'Lynx:Initialization:InvalidDataset');
-        end
-       
     end  
     
 end

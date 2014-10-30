@@ -29,18 +29,18 @@ classdef PrincipalComponentAnalysis < Preprocessor
         end
         
         function [dataset, obj] = process( obj, dataset )
-            originalSize = size(dataset.X, 2);
-            [obj.prinComps, dataset.X, ~, ~, explained, obj.mu] = pca(dataset.X);
+            originalSize = size(dataset.X.data, 2);
+            [obj.prinComps, dataset.X.data, ~, ~, explained, obj.mu] = pca(dataset.X.data);
             explained = round(cumsum(explained));
             idx = explained <= obj.parameters.varianceToPreserve*100;
-            dataset.X = dataset.X(:, idx);
+            dataset.X.data = dataset.X.data(:, idx);
             obj.prinComps = obj.prinComps(:, idx);
             fprintf('PCA: extracted %i out of %i principal components in dataset %s\n', sum(idx), originalSize, dataset.name);
         end
         
         function dataset = processAsBefore(obj, dataset)
-            dataset.X = dataset.X - repmat(obj.mu, size(dataset.X, 1), 1);
-            dataset.X = dataset.X*obj.prinComps;
+            dataset.X.data = dataset.X.data - repmat(obj.mu, size(dataset.X.data, 1), 1);
+            dataset.X.data = dataset.X.data*obj.prinComps;
         end
         
     end

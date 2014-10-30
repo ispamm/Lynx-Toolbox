@@ -36,7 +36,12 @@ classdef Featuresearch_GA < Wrapper
             p.addParamValue('partition_strategy', KFoldPartition(3));
         end
         
-        function obj = train(obj, Xtr, Ytr)
+        function obj = train(obj, d)
+            
+            % Get training data
+            Xtr = d.X.data;
+            Ytr = d.Y.data;
+            
             nVars = size(Xtr, 2);
             
             assert(obj.parameters.popSize > nVars, 'Lynx:Validation:PopulationError', 'For Featuresearch_GA, population size should be at least as large as the number of variables');
@@ -55,7 +60,7 @@ classdef Featuresearch_GA < Wrapper
             options = gaoptimset('Generations', obj.parameters.gen, 'PopulationType', 'bitstring', 'PopulationSize', obj.parameters.popSize, ...
                 'Display', 'off', 'InitialPopulation', InitialPopulation);
 
-            obj.bestFeatures = ga(@(feat) obj.computePerformanceIndividual(feat, Xtr, Ytr),nVars,[],[],[],[],[],[],[],options);
+            obj.bestFeatures = ga(@(feat) obj.computePerformanceIndividual(feat, d),nVars,[],[],[],[],[],[],[],options);
             
             if(SimulationLogger.getInstance().flags.debug)
                 fprintf('\t\t Number of chosen features: %d\n', sum(obj.bestFeatures));
@@ -66,13 +71,14 @@ classdef Featuresearch_GA < Wrapper
             end
             
             obj.wrappedAlgo = obj.wrappedAlgo.setCurrentTask(obj.getCurrentTask());
-            obj.wrappedAlgo = obj.wrappedAlgo.train(Xtr(:, logical(obj.bestFeatures)), Ytr);
+            d.X.data = d.X.data(:, logical(obj.bestFeatures));
+            obj.wrappedAlgo = obj.wrappedAlgo.train(d);
             
         end
         
-        function perf = computePerformanceIndividual(obj, features, Xtr, Ytr)
+        function perf = computePerformanceIndividual(obj, features, d)
             p = PerformanceEvaluator.getInstance();
-            perfs = p.computePerformance(obj.wrappedAlgo,obj.constructDataset(Xtr, Ytr, features));
+            perfs = p.computePerformance(obj.wrappedAlgo, obj.constructDataset(d, features));
             perf = perfs{1}.getFinalizedValue();
             % Hack for positive performance measures (e.g.
             % MatthewCorrelationCoefficient)
@@ -81,17 +87,18 @@ classdef Featuresearch_GA < Wrapper
             end
         end
         
-        function data = constructDataset(obj, X, Y, feat)
-            data = Dataset.generateAnonymousDataset(obj.getCurrentTask(), X(:,logical(feat)), Y);
-            data = data.generateSinglePartition(obj.parameters.partition_strategy);
+        function d = constructDataset(obj, d, feat)
+            d.X.data = d.X.data(:,logical(feat));
+            d = d.generateSinglePartition(obj.parameters.partition_strategy);
         end
             
         function b = hasCustomTesting(obj)
             b = true;
         end
         
-        function [labels, scores] = test_custom(obj, Xts)
-            [labels, scores] = obj.wrappedAlgo.test(Xts(:, logical(obj.bestFeatures)));
+        function [labels, scores] = test_custom(obj, d)
+            d.X.data = d.X.data(:, logical(obj.bestFeatures));
+            [labels, scores] = obj.wrappedAlgo.test(d);
         end
         
         function b = checkForPrerequisites(obj)

@@ -22,7 +22,11 @@ classdef MatlabSVM < LearningAlgorithm
         function p = initParameters(~, p)
         end
         
-        function obj = train(obj, Xtr, Ytr)
+        function obj = train(obj, d)
+            
+            % Get training data
+            Xtr = d.X.data;
+            Ytr = d.Y.data;
             
             % Needed for custom kernel
             if(strcmp(obj.getParameter('kernel_type'), 'custom') && (any(isnan(Xtr(:))) || rcond(Xtr) < 10^-8))
@@ -47,9 +51,9 @@ classdef MatlabSVM < LearningAlgorithm
             b = model.isOfClass('SupportVectorMachine');
         end
         
-        function [labels, scores] = test_custom(obj, Xts)
+        function [labels, scores] = test_custom(obj, d)
             
-            labels = svmclassify(obj.svmStruct, Xts);
+            labels = svmclassify(obj.svmStruct, d.X.data);
             scores = labels;
             
         end
@@ -65,8 +69,9 @@ classdef MatlabSVM < LearningAlgorithm
             b = true;
         end
         
-        function res = isTaskAllowed(~, t)
-            res = t == Tasks.BC;
+        function res = isDatasetAllowed(obj, d)
+            res = d.task == Tasks.BC;
+            res = res && obj.model.isDatasetAllowed(d);
         end
         
     end

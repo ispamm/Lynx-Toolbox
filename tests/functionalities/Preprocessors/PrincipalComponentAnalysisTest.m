@@ -41,30 +41,30 @@ classdef PrincipalComponentAnalysisTest < matlab.unittest.TestCase
     methods (Test)
         
         function testWithAllPrincipalComponents(testCase)
-           d = Dataset.generateAnonymousDataset(Tasks.R, testCase.data, (1:2:20)');
+           d = Dataset(RealMatrix(testCase.data), RealLabelsVector((1:2:20)'),Tasks.R);
            p = PrincipalComponentAnalysis('varianceToPreserve', 1);
            d = p.process(d);
-           testCase.assertLessThan(abs(abs(d.X) - abs(testCase.transformedData)), 10^-1);
-           testCase.assertEqual(d.Y, (1:2:20)');
+           testCase.assertLessThan(abs(abs(d.X.data) - abs(testCase.transformedData)), 10^-1);
+           testCase.assertEqual(d.Y.data, (1:2:20)');
            testCase.assertEqual(d.task, Tasks.R);
         end
         
         function testWithOnePrincipalComponent(testCase)
-           d = Dataset.generateAnonymousDataset(Tasks.R, testCase.data, (1:2:20)');
+           d = Dataset(RealMatrix(testCase.data), RealLabelsVector((1:2:20)'),Tasks.R);
            p = PrincipalComponentAnalysis('varianceToPreserve', 0.98);
            d = p.process(d);
-           testCase.assertLessThan(abs(abs(d.X) - abs(testCase.transformedDataWithOnePrincipalComponent)), 10^-1);
-           testCase.assertEqual(d.Y, (1:2:20)');
+           testCase.assertLessThan(abs(abs(d.X.data) - abs(testCase.transformedDataWithOnePrincipalComponent)), 10^-1);
+           testCase.assertEqual(d.Y.data, (1:2:20)');
            testCase.assertEqual(d.task, Tasks.R);
         end
         
         function testProcessAsBefore(testCase)
-            d = Dataset.generateAnonymousDataset(Tasks.R, testCase.data, (1:2:20)');
+            d = Dataset(RealMatrix(testCase.data), RealLabelsVector((1:2:20)'),Tasks.R);
             p = PrincipalComponentAnalysis('varianceToPreserve', 1);
             [~, p] = p.process(d);
-            d = Dataset.generateAnonymousDataset(Tasks.R, testCase.data(1:4,:), (1:4)');
+            d = Dataset(RealMatrix(testCase.data(1:4,:)), RealLabelsVector((1:4)'),Tasks.R);
             d = p.processAsBefore(d);
-            testCase.assertLessThan(abs(abs(d.X) - abs(testCase.transformedData(1:4,:))), 10^-1);
+            testCase.assertLessThan(abs(abs(d.X.data) - abs(testCase.transformedData(1:4,:))), 10^-1);
         end
         
     end  

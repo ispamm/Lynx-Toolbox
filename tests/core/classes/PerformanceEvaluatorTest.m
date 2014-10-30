@@ -21,7 +21,6 @@ classdef PerformanceEvaluatorTest < matlab.unittest.TestCase
             testCase.assertEqual(class(p.getPrimaryPerformanceMeasure(Tasks.R)), 'MeanSquaredError');
             testCase.assertEqual(class(p.getPrimaryPerformanceMeasure(Tasks.BC)), 'MisclassificationError');
             testCase.assertEqual(class(p.getPrimaryPerformanceMeasure(Tasks.MC)), 'MisclassificationError');
-            testCase.assertEmpty(p.getPrimaryPerformanceMeasure(Tasks.PR));
             testCase.assertEmpty(p.getPrimaryPerformanceMeasure(Tasks.ML));
         end
         
@@ -31,7 +30,6 @@ classdef PerformanceEvaluatorTest < matlab.unittest.TestCase
             testCase.assertEqual(class(p.getPrimaryPerformanceMeasure(Tasks.R)), 'MeanSquaredError');
             testCase.assertEqual(class(p.getPrimaryPerformanceMeasure(Tasks.BC)), 'MisclassificationError');
             testCase.assertEqual(class(p.getPrimaryPerformanceMeasure(Tasks.MC)), 'MisclassificationError');
-            testCase.assertEmpty(p.getPrimaryPerformanceMeasure(Tasks.PR));
             testCase.assertEqual(class(p.getPrimaryPerformanceMeasure(Tasks.ML)), 'MeanAbsoluteError');
         end
         

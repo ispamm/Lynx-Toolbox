@@ -49,7 +49,11 @@ classdef OnlineRLS < LearningAlgorithm
             p.addParamValue('cParam2', 0);
         end
         
-        function obj = train(obj, Xtr, Ytr)
+        function obj = train(obj, d)
+            
+            % Get training data
+            Xtr = d.X.data;
+            Ytr = d.Y.data;
             
             obj.model.Xtr = Xtr;
             [N, ~] = size(Xtr);
@@ -167,8 +171,9 @@ classdef OnlineRLS < LearningAlgorithm
             end
         end
 
-        function res = isTaskAllowed(~, task)
-            res = task == Tasks.R || task == Tasks.BC;
+        function res = isDatasetAllowed(~, d)
+            res = d.task == Tasks.R || d.task == Tasks.BC;
+            res = res && obj.model.isDasetAllowed(d);
         end
         
         function b = checkForCompatibility(~, model)

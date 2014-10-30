@@ -15,8 +15,8 @@ function set_training_algorithm(algo_id, algo_func, varargin)
     
     try
         currentAlgo = algo_func(currentAlgo, varargin{:});
-    catch
-        error('Lynx:WrongArgument:AlgorithmNotFound', 'Cannot initialize algorithm %s, please verify the parameters', algo_name);
+    catch err
+        error('Lynx:WrongArgument:AlgorithmNotFound', 'Cannot initialize algorithm %s, error message: %s.', algo_id, err.message);
     end
     
     s.algorithms = s.algorithms.set(s.algorithms.findById(algo_id), currentAlgo);

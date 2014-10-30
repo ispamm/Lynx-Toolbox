@@ -26,7 +26,7 @@ classdef SemiSupervisedLearningAlgorithm < LearningAlgorithm
     
     methods(Abstract=true)
         % Train the model
-        obj = train_semisupervised(obj, Xtr, Ytr, Xu)
+        obj = train_semisupervised(obj, dtrain, dunsupervised)
     end
     
     methods
@@ -35,9 +35,9 @@ classdef SemiSupervisedLearningAlgorithm < LearningAlgorithm
            obj = obj@LearningAlgorithm(model, varargin{:});
        end
        
-       function obj = train(obj, Xtr, Ytr)
+       function obj = train(obj, dtrain)
             log = SimulationLogger.getInstance();
-            obj = obj.train_semisupervised(Xtr, Ytr, log.getAdditionalParameter('Xu'));
+            obj = obj.train_semisupervised(dtrain, log.getAdditionalParameter('d_unsupervised'));
         end
              
     end

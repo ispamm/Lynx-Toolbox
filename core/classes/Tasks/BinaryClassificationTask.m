@@ -2,12 +2,7 @@
 %   A binary classification task is the task of associating to every input
 %   element a value in {-1, +1}.
 %
-%   This requires inside the .mat file: 
-%
-%       (i) a Nxd matrix of inputs, where N is the number of samples and d 
-%           the dimensionality of every input
-%       (ii) a Nx1 vector of outputs, where each element can be -1 or +1
-%       (iii) an info string describing the dataset.
+%   This requires that the output is a BinaryLabelsVector.
 
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is
 % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
@@ -25,7 +20,6 @@ classdef BinaryClassificationTask < BasicTask
         function obj = BinaryClassificationTask()
             obj = obj@BasicTask();
             obj.performance_measure = MisclassificationError();
-            obj.dataset_factory = DummyDatasetFactory();
             obj = obj.addFolder('datasets/BC');
         end
     end
@@ -38,10 +32,8 @@ classdef BinaryClassificationTask < BasicTask
     
     methods
         
-        function obj = checkForConsistency(obj, o, name)
-            obj.checkForConsistency@BasicTask(o, name);
-            assert((size(o.Y, 1) == size(o.X, 1)) && size(o.Y,2) == 1, 'Lynx:Initialization:InvalidDataset', sprintf('Size of the matrices for dataset %s is not consistent', name));
-            assert(all(abs(o.Y) == 1), 'Lynx:Initialization:InvalidDataset', sprintf('Output matrix for dataset %s must contain only -1 or +1', name));
+        function obj = checkForConsistency(obj, d)
+            assert(isa(d.Y), 'BinaryLabelsVector', 'Lynx:Validation:InvalidDataset', 'Output for dataset %s must be a binary vector', d.name);
         end
         
         function s = getDescription(obj)
@@ -51,7 +43,7 @@ classdef BinaryClassificationTask < BasicTask
         function id = getTaskId(obj)
             id = Tasks.BC;
         end
-
+        
     end
   
 end

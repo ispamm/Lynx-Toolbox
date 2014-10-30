@@ -1,10 +1,5 @@
 % MultiLabelTask - A classification task with multiple binary labels
-%   This requires inside the .mat file: (i) a Nxd matrix of inputs,
-%   where N is the number of samples and d the dimensionality of every
-%   input; (ii) a NxT matrix of outputs, where each column corresponds
-%   to a specific binary classification task; (iii) an info string
-%   describing the dataset; a labels_info cell array of string
-%   describing each label.
+%   This requires that the output value is a MultiLabelMatrix.
 
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is
 % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
@@ -22,7 +17,6 @@ classdef MultiLabelTask < BasicTask
         function obj = MultiLabelTask()
             obj = obj@BasicTask();
             obj.performance_measure = [];
-            obj.dataset_factory = BinaryRelevanceFactory();
             obj = obj.addFolder('datasets/ML');
         end
     end
@@ -35,10 +29,8 @@ classdef MultiLabelTask < BasicTask
     
     methods
         
-        function obj = checkForConsistency(obj, o, name)
-            obj.checkForConsistency@BasicTask(o, name);
-            assert((size(o.Y, 1) == size(o.X, 1)) == 1, 'Lynx:Initialization:InvalidDataset', sprintf('Size of the matrices for dataset %s is not consistent', name));
-            assert(all(all(abs(o.Y) == 1)), 'Lynx:Initialization:InvalidDataset', sprintf('Output matrix for dataset %s must contain columns of -1 or +1', name));
+        function obj = checkForConsistency(obj, d)
+            assert(isa(d.Y), 'MultiLabelMatrix', 'Lynx:Validation:InvalidDataset', 'Output for dataset %s must be a multi-label matrix', d.name);
         end
         
         function s = getDescription(obj)

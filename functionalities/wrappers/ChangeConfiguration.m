@@ -32,17 +32,16 @@ classdef ChangeConfiguration < Wrapper
             p.addRequired('new_params_values');
         end
         
-        function obj = train(obj, Xtr, Ytr)
-            log = SimulationLogger.getInstance();
-            if(strcmp(log.getAdditionalParameter('dataset_id'), obj.parameters.dataset_id))
+        function obj = train(obj, d)
+            if(strcmp(d.id, obj.parameters.dataset_id))
                 obj.alternativeModel = obj.wrappedAlgo;
                 for i=1:length(obj.parameters.params_names)
                    obj.alternativeModel = obj.alternativeModel.setParameter(obj.parameters.params_names{i}, ...
                        obj.parameters.new_params_values{i});
                 end
-                obj.alternativeModel = obj.alternativeModel.train(Xtr, Ytr);
+                obj.alternativeModel = obj.alternativeModel.train(d);
             else
-                obj.wrappedAlgo = obj.wrappedAlgo.train(Xtr, Ytr);
+                obj.wrappedAlgo = obj.wrappedAlgo.train(d);
             end
         end
     
@@ -50,12 +49,11 @@ classdef ChangeConfiguration < Wrapper
             b = true;
         end
         
-        function [labels, scores] = test_custom(obj, Xts)
-            log = SimulationLogger.getInstance();
-            if(strcmp(log.getAdditionalParameter('dataset_id'), obj.parameters.dataset_id))
-                [labels, scores] = obj.alternativeModel.test(Xts);
+        function [labels, scores] = test_custom(obj, d)
+            if(strcmp(d.id, obj.parameters.dataset_id))
+                [labels, scores] = obj.alternativeModel.test(d);
             else
-                [labels, scores] = obj.wrappedAlgo.test(Xts);
+                [labels, scores] = obj.wrappedAlgo.test(d);
             end
         end
         

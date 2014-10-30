@@ -1,5 +1,5 @@
 % EmbedTimeseriesFactory - Embed the timeseries of a prediction task
-%   This DatasetFactory embeds the time series in the original file into
+%   This DatasetFactory embeds the time series in the original dataset into
 %   a R^d dimensional space. This effectively transform the original task
 %   into a regression task.
 
@@ -27,21 +27,22 @@ classdef EmbedTimeseriesFactory < DatasetFactory
             obj.timeHorizon = th;
         end
         
-        function datasets = create(obj, task, data_id, data_name, o)
+        function datasets = process(obj, d)
             
-            N = length(o.X);
+            N = length(d.X.data);
             N_embedded = N - obj.embeddingDimension - obj.timeHorizon + 1;
             
             X_embedded = zeros(N_embedded, obj.embeddingDimension);
             Y = zeros(N_embedded, 1);
             
             for i=1:N_embedded
-                X_embedded(i,:) = o.X(i:i + obj.embeddingDimension-1);
-                Y(i) = o.X(i + obj.embeddingDimension + obj.timeHorizon - 1);
+                X_embedded(i,:) = d.X.data(i:i + obj.embeddingDimension-1);
+                Y(i) = d.X.data(i + obj.embeddingDimension + obj.timeHorizon - 1);
             end
             
-            fprintf('Embedded dataset %s, %i samples extracted\n', data_name, size(X_embedded, 1));
-            datasets = {Dataset(data_id, data_name, Tasks.R, X_embedded, Y)};
+            datasets = {Dataset(RealMatrix(X_embedded), RealLabelsVector(Y), Tasks.R)};
+            fprintf('Embedded dataset %s, %i samples extracted\n', d.name, size(X_embedded, 1));
+
         end
     end
     

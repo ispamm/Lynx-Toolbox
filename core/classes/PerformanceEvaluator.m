@@ -84,21 +84,7 @@ classdef PerformanceEvaluator < SingletonClass
             folds = dataset.folds();
             trainingTime = TimeContainer();
             
-            % Eventually save some details in the SimulationLogger
             log = SimulationLogger.getInstance();
-            if(saveFold)
-                log.setAdditionalParameter('dataset_id', dataset.id);
-                log.setAdditionalParameter('dataset_name', dataset.name);
-                log.setAdditionalParameter('run', dataset.currentPartition);
-            else
-                try
-                    kernelType = algo.getParameter('kernel_type');
-                    if(strcmp(kernelType, 'custom'))
-                        dataset.isKernelMatrix = true;
-                    end
-                catch
-                end
-            end
             
             % Initialize the perf object for output
             secPerfs = obj.secondaryPerformanceMeasures{uint32(dataset.task)};
@@ -109,7 +95,7 @@ classdef PerformanceEvaluator < SingletonClass
             end
             
             % Check if the current task is allowed
-            if(~ algo.isTaskAllowed(dataset.task))
+            if(~ algo.isDatasetAllowed(dataset))
                 algo = [];
                 return;
             end
@@ -118,37 +104,36 @@ classdef PerformanceEvaluator < SingletonClass
             s_params = cell(1, folds);
             
             for ii = 1:folds
-                
-                % Set the current task
-                algo = algo.setCurrentTask(dataset.task);
+
                 t = clock;
                 
                 % Partition the data
-                [Xtrn, Ytr, Xtst, Ytst] = dataset.getFold(ii);
+                [dtrain, dtest, du] = dataset.getFold(ii);
+                
+                if(saveFold)
+                    log.setAdditionalParameter('d_unsupervised', du);
+                    log.setAdditionalParameter('fold', ii);
+                end
                 
                 if(saveFold && log.flags.debug)
                     fprintf('\t%s', dataset.getFoldInformation(ii));
                 end
-                
-                if(saveFold)
-                    log.setAdditionalParameter('fold', ii);
-                end
-                
+
                 % Train the algorithm
-                algo = algo.train(Xtrn, Ytr);
+                algo = algo.train(dtrain);
                 
                 % Store the training time
                 trainingTime = trainingTime.store(etime(clock, t));
                 
                 % Test the algorithm
-                [labels, scores] = algo.test(Xtst);
+                [labels, scores] = algo.test(dtest);
                 
                 % Compute primary performance
-                perf{1} = perf{1}.computeAndStore(Ytst, labels, scores);
+                perf{1} = perf{1}.computeAndStore(dtest.Y.data, labels, scores);
                 
                 % Compute secondary performances
                 for i = 1:length(secPerfs)
-                    perf{i + 1} = perf{i + 1}.computeAndStore(Ytst, labels, scores);
+                    perf{i + 1} = perf{i + 1}.computeAndStore(dtest.Y.data, labels, scores);
                 end
                 
                 % Collect training parameters and statistics

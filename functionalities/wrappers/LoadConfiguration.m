@@ -41,7 +41,8 @@ classdef LoadConfiguration < Wrapper
             p.addParamValue('params_to_load', []);
         end
         
-        function obj = train(obj, Xtr, Ytr)
+        function obj = train(obj, d)
+            
             
             log = SimulationLogger.getInstance();
             fileName = sprintf('%s/%s_%s_r%df%d.mat',obj.parameters.source_folder, obj.parameters.source_id, ...
@@ -76,7 +77,7 @@ classdef LoadConfiguration < Wrapper
                 end
             end
             
-            obj.wrappedAlgo = obj.wrappedAlgo.train(Xtr, Ytr);
+            obj.wrappedAlgo = obj.wrappedAlgo.train(d);
         end
         
     end

@@ -19,9 +19,6 @@ N_datasets = length(obj.datasets);
 experiments = combvec(1:obj.nRuns, 1:N_datasets, 1:N_algo);
 N_experiments = size(experiments, 2);
 
-% Get the current performance evaluator object
-p = PerformanceEvaluator.getInstance();
-
 % Results are saved in three linear cell arrays (due to the parfor)
 perfMeasures_linear = cell(N_experiments, 1);
 trainingTime_linear = cell(N_experiments, 1);
@@ -39,67 +36,27 @@ if(~(log.flags.parallelized))
     statusbar(0, 'Processing %d of %d (%.1f%%)...', 0, 0, 0);
 end
 
-% Required for MATLAB newer or equal than R2013b
 if(~(log.flags.parallelized))
-    M = 0;
+
+    for i = 1:N_experiments
+
+        % Train and test
+        log.setAdditionalParameter('current_iteration', i);
+        sb = statusbar(0, 'Processing %d of %d (%.1f%%)...', i, N_experiments, (i)*100/N_experiments);
+        [perfMeasures_linear{i}, trainingTime_linear{i}, trainedAlgo_linear{i}] = ...
+                obj.performSingleExperiment(experiments(:, i));
+
+    end
+    
 else
-    M = Inf;
-end
-
-parfor (i=1:N_experiments, M)
-
-    % Get current configuration
-    currentConfiguration = experiments(:, i);
-    log.setAdditionalParameter('current_iteration', i);
-    r_id = currentConfiguration(1);
-    d_id = currentConfiguration(2);
-    a_id = currentConfiguration(3);
     
-    % Update GUI
-    if(~(log.flags.parallelized))
-        sb = statusbar(0, 'Processing %d of %d (%.1f%%)...', N_experiments - i + 1, N_experiments, (N_experiments - i + 1)*100/N_experiments);
-    end
-    
-    % Get the current dataset
-    currentDataset = obj.datasets.get(d_id);
-    
-    % Set the current partition
-    currentDataset = currentDataset.setCurrentPartition(r_id);
-    
-    % Get the current algorithm
-    currentAlgo = obj.algorithms.get(a_id);
-    
-    % Printing information on screen
-    if(log.flags.parallelized)
-        t = getCurrentTask();
-        fprintf('Evaluating %s on %s (run %d/%d) [Worker %i] ', currentAlgo.name, currentDataset.name, obj.nRuns + 1 - r_id, obj.nRuns, t.ID);
-    else
-        fprintf('Evaluating %s on %s (run %d/%d) ', currentAlgo.name, currentDataset.name,  obj.nRuns + 1 - r_id, obj.nRuns);
-    end
-    
-    % Printing semi-supervised information
-    if(log.flags.semisupervised && currentAlgo.isOfClass('SemiSupervisedLearningAlgorithm'))
-        [~, ~, ~, ~, Xu, ~] = currentDataset.getFold(1);
-    	cprintf('comment', '[Semi-supervised mode, %d unlabeled samples]\n', size(Xu, 1));
-    else
-        fprintf('\n');
-    end
-    
-    % Execute custom features
-    for z = 1:length(obj.additionalFeatures)
-        [currentAlgo, currentDataset] = obj.additionalFeatures{z}.executeBeforeEachExperiment(currentAlgo, currentDataset);
-    end
-    
-    % Train and test
-    [perfMeasures_linear{i}, trainingTime_linear{i}, trainedAlgo_linear{i}] = ...
-            p.computePerformance(currentAlgo, currentDataset, true );
-    if(isempty(trainedAlgo_linear{i}))
-        cprintf('err', '\t\t Not Allowed\n');
-    end
-    
-    % Execute custom features
-    for z = 1:length(obj.additionalFeatures)
-        [currentAlgo, currentDataset] = obj.additionalFeatures{z}.executeAfterEachExperiment(currentAlgo, currentDataset);
+    parfor i=1:N_experiments
+        
+        % Train and test
+        log.setAdditionalParameter('current_iteration', i);
+        [perfMeasures_linear{i}, trainingTime_linear{i}, trainedAlgo_linear{i}] = ...
+                obj.performSingleExperiment(experiments(:, i));
+            
     end
     
 end

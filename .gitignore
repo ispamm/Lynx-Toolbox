@@ -220,6 +220,6 @@ datasets/
 config.xml
 doc/
 lib/
-./models/
+models/
 results/
 tmp/

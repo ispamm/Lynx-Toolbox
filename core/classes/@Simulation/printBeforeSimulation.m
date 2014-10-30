@@ -25,8 +25,9 @@ fprintf('\n');
 cprintf('-text', 'Datasets selected for the simulation (%i total):\n', length(obj.datasets));
 
 for i = 1:length(obj.datasets)
-    t = Tasks.getById(obj.datasets.get(i).task);
-    fprintf('\t * %s (%s)\n', obj.datasets.get(i).name, t.getDescription());
+    d = obj.datasets.get(i);
+    t = Tasks.getById(d.task);
+    fprintf('\t * %s (%s) - %s\n', d.name, t.getDescription(), d.getDescription());
 end
 
 fprintf('\n');

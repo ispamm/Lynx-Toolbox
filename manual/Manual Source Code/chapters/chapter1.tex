@@ -12,9 +12,27 @@ S = \left\{ x_i, y_i \right\}_{i=1}^N
 \label{eq:dataset}
 \end{equation}
 
-\noindent where $x \in \mathcal{X}$ and $y \in \mathcal{Y}$. $\mathcal{X}$ and $\mathcal{Y}$ are called the \textit{input} and \textit{output} spaces, respectively.  We call a particular choice of $\mathcal{X}$ and $\mathcal{Y}$ a \textit{task}. Examples of tasks already implemented in Lynx are shown in Table \ref{tab:basictasks}. Although we have currently focused on real-valued input patterns, nothing prevents the toolbox from being extended to more complex situations, such as graphs, sequences, and so on.
+\noindent where $x \in \mathcal{X}$ and $y \in \mathcal{Y}$. $\mathcal{X}$ and $\mathcal{Y}$ are called the \textit{input} and \textit{output} spaces, respectively.  We call a particular choice of $\mathcal{Y}$ a \textit{task}. Examples of input, tasks and their correspondent data type in Lynx are shown in Table \ref{tab:basicinputs} and \ref{tab:basictasks}. The understanding of data types can be skipped for now, as it will be used more extensively in the later chapters. Although we have currently focused on real-valued input patterns, nothing prevents the toolbox from being extended to more complex situations, such as graphs, sequences, and so on.
 
 \vspace{-2em}
+
+\begin{center}
+\begin{table}[t]
+{\centering\hfill{}
+\begin{tabular}{p{0.3\columnwidth}p{0.5\columnwidth}p{0.2\columnwidth}}
+\toprule
+Name & Input & Data type \\ 
+\midrule
+Real-valued vector & $\vect{x} \in \R^{d}$, each element is a \textit{feature} of the pattern & \verb|RealMatrix|  \\
+Time-series & $\vect{x} \in \R^n$, each element is the sample of a time-series & \verb|TimeSeries| \\
+Kernel vector &  $\vect{x} \in \R^n$, each element is the value of the similarity between two patterns & \verb|KernelMatrix| \\
+\bottomrule
+\end{tabular}}
+\hfill{}
+\caption{Summary of inputs defined in the toolbox, and their associated data types.}
+\label{tab:basicinputs}
+\end{table}
+\end{center}
 
 \begin{center}
 \begin{table}[t]
@@ -23,13 +41,14 @@ S = \left\{ x_i, y_i \right\}_{i=1}^N
 \toprule
 Name & Input & Output \\ 
 \midrule
-Regression & \multirow{3}{*}{$\vect{x} \in \R^{d}$ } & $y \in \R$ \\
-Binary Classification & & $y \in \left\{-1,+1\right\}$\\
-Multiclass Classification & & $y \in \left\{1,\dots,M\right\}$\\
+Regression & $y \in \R$ & \verb|RealVector| \\
+Binary classification & $y \in \left\{-1,+1\right\}$ & \verb|BinaryLabelsVector| \\
+Multiclass classification & $y \in \left\{1,\dots,M\right\}$ & \verb|IntegerLabelsVector| \\
+Multilabel classification & $\vect{y} \in \left\{-1,+1\right\}^M$ & \verb|MultiLabelsMatrix| \\
 \bottomrule
 \end{tabular}}
 \hfill{}
-\caption{Summary of some tasks defined in the toolbox}
+\caption{Summary of tasks defined in the toolbox, and their associated data types.}
 \label{tab:basictasks}
 \end{table}
 \end{center}

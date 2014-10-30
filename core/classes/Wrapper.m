@@ -40,16 +40,16 @@ classdef Wrapper <  LearningAlgorithm
             obj.wrappedAlgo = wrappedAlgo;
         end
         
-        function [labels, scores] = test(obj, Xts)
+        function [labels, scores] = test(obj, d)
             if(obj.hasCustomTesting())
-                [labels, scores] = obj.test_custom(Xts);
+                [labels, scores] = obj.test_custom(d);
             else
-                [labels, scores] = obj.wrappedAlgo.test(Xts);
+                [labels, scores] = obj.wrappedAlgo.test(d);
             end
         end
         
-        function res = isTaskAllowed(obj, task)
-            res = obj.wrappedAlgo.isTaskAllowed(task);
+        function res = isDatasetAllowed(obj, d)
+            res = obj.wrappedAlgo.isDatasetAllowed(d);
         end
         
         function value = getParameter(obj, param)

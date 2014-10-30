@@ -29,12 +29,16 @@ classdef OnlineSequentialELM < LearningAlgorithm
             p.addParamValue('blockSize', 15, @(x) assert(isnatural(x, false), 'Block size of OS-ELM must be a non-zero natural number'));
         end
         
-        function obj = train(obj, Xtr, Ytr)
+        function obj = train(obj, d)
+            
+            % Get training data
+            Xtr = d.X.data;
+            Ytr = d.Y.data;
             
             [N, d] = size(Xtr);
             N_hidden = obj.getParameter('hiddenNodes');
             
-            if(obj.getCurrentTask() == Tasks.MC)
+            if(d.task == Tasks.MC)
                 Ytr = dummyvar(Ytr(:));
             end
             

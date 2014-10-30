@@ -22,7 +22,7 @@
   Additional datasets converted according to the toolbox's conventions can
   be downloaded from the author's website:
 
-	http://ispac.ing.uniroma1.it/scardapane/software/lynx
+  	http://ispac.ing.uniroma1.it/scardapane/software/lynx
 
   Documentation
   -------------
@@ -51,5 +51,4 @@
        the author at simone [dot] scardapane [at] uniroma1 [dot] it.
      o Additional contact information can also be found on the website of
        the toolbox:
-	http://ispac.ing.uniroma1.it/scardapane/software/lynx/
-
+	      http://ispac.ing.uniroma1.it/scardapane/software/lynx/
