@@ -1,4 +1,6 @@
-% DataDistributedRVFL - 
+% DataDistributedRVFL - Parallel version of SerialDataDistributedRVFL
+%   Refer to the following link for more information:
+%   http://ispac.ing.uniroma1.it/scardapane/software/lynx/dist-learning/
 
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is
 % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
@@ -114,7 +116,7 @@ classdef DataDistributedRVFL < DistributedLearningAlgorithm
         end
         
         function b = checkForCompatibility(~, model)
-            b = model.isOfClass('ExtremeLearningMachine');
+            b = model.isOfClass('RandomVectorFunctionalLink') && (model.task == Tasks.R || model.task == Tasks.BC);
         end
     end
     
