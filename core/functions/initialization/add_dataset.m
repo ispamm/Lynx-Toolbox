@@ -28,7 +28,7 @@ function add_dataset(data_id, data_name, file, f)
                 d = d.process();
             end
             for jj = 1:length(d)
-                d{jj} = d{jj}.setIdAndName(data_id, data_name);
+                %d{jj} = d{jj}.setIdAndName(data_id, data_name);
                 s.datasets = s.datasets.addElement(d{jj});
             end
         end
