@@ -14,8 +14,8 @@ function add_model(algo_id, algo_name, algo_func, varargin)
     try
         currentAlgo = algo_func(algo_id, algo_name, varargin{:});
         currentAlgo = currentAlgo.getDefaultTrainingAlgorithm();
-    catch
-        error('Lynx:WrongArgument:AlgorithmNotFound', 'Cannot initialize algorithm %s, please verify the parameters', algo_name);
+    catch e
+        error('Lynx:WrongArgument:AlgorithmNotFound', 'Cannot initialize algorithm %s, please verify the parameters\nError returned: %s', algo_name, e.message);
     end
     
     s.algorithms = s.algorithms.addElement(currentAlgo);

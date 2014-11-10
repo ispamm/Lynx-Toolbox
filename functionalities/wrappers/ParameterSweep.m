@@ -106,7 +106,6 @@ classdef ParameterSweep < Wrapper
                 fprintf('\t\t Final training time is: %.2f secs\n', trainingTime);
             end
             
-            
             obj.statistics.bestPerf = bestPerf;
             obj.statistics.finalTrainingTime = trainingTime;
             

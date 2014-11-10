@@ -42,7 +42,9 @@ for i = algos
            
        end
        
-       if(PRINT_GRAPHS)
+       exist_valErrorGrid = length(params_gs{1}) <= 2;
+       
+       if(PRINT_GRAPHS && exist_valErrorGrid)
            valErrorGrid = algo_stats.valErrorGrid;
            b = s.trainedAlgo{j, i, 1}{1}.getParameter('ranges');
            if(isvector(valErrorGrid))

@@ -9,4 +9,13 @@
 
 preprocessors = class_filter(fullfile(XmlConfiguration.getRoot(), 'functionalities/Preprocessors/'), 'Preprocessor');
 fprintf('Generating report...\n');
-report('templates/Available Preprocessors.rpt', '-quiet');
+
+try
+    report('templates/Available Preprocessors.rpt', '-quiet');
+catch err
+    if(strcmp(err.identifier, 'MATLAB:UndefinedFunction'))
+        error('Lynx:Runtime:ToolboxNotInstalled', 'You need the MATLAB Report Generator to create the HTML report.');
+    else
+        error(err);
+    end
+end
