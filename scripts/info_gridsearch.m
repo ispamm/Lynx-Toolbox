@@ -47,15 +47,36 @@ for i = algos
        if(PRINT_GRAPHS && exist_valErrorGrid)
            valErrorGrid = algo_stats.valErrorGrid;
            b = s.trainedAlgo{j, i, 1}{1}.getParameter('ranges');
+           
+           % HORRIBLE HACK (for exponential plots)
+           if(b{1}{1}(1)*2 == b{1}{1}(2) ||b{1}{1}(1)*10 == b{1}{1}(2))
+               exp_1 = true;
+           else
+               exp_1 = false;
+           end
+           if(~isvector(valErrorGrid))
+               if(b{1}{2}(1)*2 == b{1}{2}(2) ||b{1}{2}(1)*10 == b{1}{2}(2))
+                   exp_2 = true;
+               else
+                   exp_2 = false;
+               end
+           end
+           
            if(isvector(valErrorGrid))
                c = XYPlotContainer();
                c = c.store(XYPlot(b{1}{1}, valErrorGrid, params_gs{1}, 'Validation error')); 
                p = FormatAsMultiplePlots();
                fprintf('\t\tValidation performance: ');
-               p.displayOnConsole({c}, {sprintf('Algorithm %s on dataset %s', s.algorithms.get(i).name, s.datasets.get(j).name)}, {'Performance'});
-           elseif(ismatrix(valErrorGrid))
+               p.displayOnConsole({c}, {sprintf('Algorithm %s on dataset %s', s.algorithms.get(i).name, s.datasets.get(j).name)}, {'Performance'}, true, [exp_1, false]);
+           else
                figure(); hold on; figshift;
                b = s.trainedAlgo{j, i, 1}{1}.getParameter('ranges');
+               if(exp_1)
+                   set(gca,'xscale','log');
+               end
+               if(exp_2)
+                   set(gca,'yscale','log');
+               end
                surf( b{1}{1}, b{1}{2}, valErrorGrid');
                xlabel(params_gs{1}{1});
                ylabel(params_gs{1}{2});

@@ -11,10 +11,14 @@ classdef FormatAsMultiplePlots < OutputFormatter
     
     methods(Static)
         
-        function displayOnConsole(valuesCellArray, row_labels, column_labels, print)
+        function displayOnConsole(valuesCellArray, row_labels, column_labels, print, exp_axes)
             
             if(nargin == 3)
                 print = true;
+            end
+            
+            if(nargin < 5)
+                exp_axes = [false false];
             end
             
             if(nargin < 4 && print)
@@ -47,6 +51,14 @@ classdef FormatAsMultiplePlots < OutputFormatter
                 set(fHandle, 'Color', 'white');
                 set(gca, 'FontSize', 18);
                 grid on;
+                
+                % Set axes
+                if(exp_axes(1))
+                    set(gca,'xscale','log');
+                end
+                if(exp_axes(2))
+                    set(gca,'yscale','log');
+                end
                 
                 % Plot data
                 for jj = 1:N_c
