@@ -34,7 +34,7 @@ classdef ParameterSweep < Wrapper
             p.addRequired('parameterNames');
             p.addRequired('ranges');
             p.addParamValue('partition_strategy', KFoldPartition(3));
-            p.addParamValue('finalTraining', true);
+            p.addParamValue('finalTraining', 1);
         end
         
         function obj = train(obj, d)
@@ -94,10 +94,13 @@ classdef ParameterSweep < Wrapper
             
             t = clock;
             
-            if(obj.parameters.finalTraining)
+            if(obj.parameters.finalTraining == 1)
                 obj.wrappedAlgo = obj.wrappedAlgo.train(d);
-            else
+            elseif(obj.parameters.finalTraining == 2)
                 [d, ~, ~] = d.getFold(1);
+                obj.wrappedAlgo = obj.wrappedAlgo.train(d);
+            elseif(obj.parameters.finalTraining == 3)
+                [~, d, ~] = d.getFold(1);
                 obj.wrappedAlgo = obj.wrappedAlgo.train(d);
             end
             

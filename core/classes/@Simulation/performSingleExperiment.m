@@ -54,7 +54,7 @@ p = PerformanceEvaluator.getInstance();
 
 % Train and test
 [p, t, a] = ...
-    p.computePerformance(currentAlgo, currentDataset, true );
+    p.computePerformance(currentAlgo, currentDataset, true, true );
 if(isempty(a))
     cprintf('err', '\t\t Not Allowed\n');
 else

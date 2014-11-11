@@ -60,7 +60,7 @@ classdef PerformanceEvaluator < SingletonClass
             p = obj.secondaryPerformanceMeasures{uint32(t)};
         end
         
-        function [perf, trainingTime, algo] = computePerformance(obj, algo, dataset, saveFold)
+        function [perf, trainingTime, algo] = computePerformance(obj, algo, dataset, includeSecondary, saveFold)
             % Compute performance of an algorithm on a dataset
             %
             % Input parameters:
@@ -69,6 +69,8 @@ classdef PerformanceEvaluator < SingletonClass
             %   - saveFold is a boolean. If this is set to true, some
             %   informations on the current experiment are stored in the
             %   SimulationLogger
+            %   - includeSecondary is a boolean, if set to true, compute
+            %   also the secondary performance measures
             %
             % Output values:
             %   perf - A cell array, where the first element is the value
@@ -78,6 +80,9 @@ classdef PerformanceEvaluator < SingletonClass
             %   algo - The resulting trained algorithm
             
             if(nargin < 4)
+                includeSecondary = false;
+            end
+            if(nargin < 5)
                 saveFold = false;
             end
             
@@ -132,8 +137,10 @@ classdef PerformanceEvaluator < SingletonClass
                 perf{1} = perf{1}.computeAndStore(dtest.Y.data, labels, scores);
                 
                 % Compute secondary performances
-                for i = 1:length(secPerfs)
-                    perf{i + 1} = perf{i + 1}.computeAndStore(dtest.Y.data, labels, scores);
+                if(includeSecondary)
+                    for i = 1:length(secPerfs)
+                        perf{i + 1} = perf{i + 1}.computeAndStore(dtest.Y.data, labels, scores);
+                    end
                 end
                 
                 % Collect training parameters and statistics
