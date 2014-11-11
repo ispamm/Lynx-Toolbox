@@ -16,8 +16,12 @@ function add_wrapper(algo_id, wrapper, varargin)
     for i=1:length(ids)
         algo = s.algorithms.get(ids(i));
 
-        algoWrapped = ...
-            wrapper(algo, varargin{:});
+        try
+            algoWrapped = ...
+                wrapper(algo, varargin{:});
+        catch err
+            error('Lynx:WrongArgument:Wrapper', 'Cannot initialize wrapper for model %s\nError returned: %s', algo_id, err.message);
+        end
     
         if(~algoWrapped.checkForCompatibility(algo))
             error('Lynx:Runtime:Wrapper', 'The wrapper %s cannot be applied to model %s', class(algoWrapped), algo_id);

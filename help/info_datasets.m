@@ -10,5 +10,15 @@
 tasks = class_filter(fullfile(XmlConfiguration.getRoot(), 'core/classes/Tasks/'), 'BasicTask');
 
 fprintf('Generating report...\n');
-report('templates/Available Datasets.rpt', '-quiet');
+
+try
+    report('templates/Available Datasets.rpt', '-quiet');
+catch err
+    if(strcmp(err.identifier, 'MATLAB:UndefinedFunction'))
+        error('Lynx:Runtime:ToolboxNotInstalled', 'You need the MATLAB Report Generator to create the HTML report.');
+    else
+        error(err);
+    end
+end
+    
 %report('templates/Available Datasets.rpt');

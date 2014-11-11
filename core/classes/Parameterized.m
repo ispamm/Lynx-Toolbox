@@ -67,7 +67,7 @@ classdef Parameterized
             try
                 p.parse(varargin{:});
             catch err
-                error('Lynx:Initialization:Parameters', 'Please ensure that the initialization parameters for object of type %s are valid', class(obj));
+                error('Lynx:Initialization:Parameters', 'Please ensure that the initialization parameters for object of type %s are valid:\n\t%s', class(obj), err.message);
             end
             obj.parameters = p.Results;
             

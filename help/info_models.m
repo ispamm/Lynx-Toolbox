@@ -15,5 +15,13 @@ learningAlgorithms = class_filter(fullfile(XmlConfiguration.getRoot(), 'function
     'LearningAlgorithm');
 
 fprintf('Generating report...\n');
-report('templates/Available Models.rpt', '-quiet');
-%report('templates/Available Models.rpt');
+
+try
+    report('templates/Available Models.rpt', '-quiet');
+catch err
+    if(strcmp(err.identifier, 'MATLAB:UndefinedFunction'))
+        error('Lynx:Runtime:ToolboxNotInstalled', 'You need the MATLAB Report Generator to create the HTML report.');
+    else
+        error(err);
+    end
+end
