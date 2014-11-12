@@ -13,7 +13,7 @@
 %   For information on these two parameters, check the kernel_matrix
 %   function.
 %
-%   The this parameter is 'C', the regularization factor.
+%   The third parameter is 'C', the regularization factor.
 %
 %   Default training algorithm is StandardRLS.
 

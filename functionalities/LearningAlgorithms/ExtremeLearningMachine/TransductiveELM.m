@@ -19,6 +19,7 @@ classdef TransductiveELM < SemiSupervisedLearningAlgorithm
         function p = initParameters(~, p)
             p.addParamValue('C', 1, @(x) assert(x > 0, 'Regularization parameters of SS-ELM must be > 0'));
             p.addParamValue('C_u', 1, @(x) assert(x >= 0, 'Regularization parameters of SS-ELM must be >= 0'));
+            p.addParamValue('solver', 'boxcqp', @(x) assert(isingroup(x, {'boxcqp'}), 'Solver of TransductiveELM not recognized'));
         end
         
         function obj = train_semisupervised(obj, dtrain, du)
@@ -44,15 +45,9 @@ classdef TransductiveELM < SemiSupervisedLearningAlgorithm
             Lambda = diag([ones(N_train, 1).*obj.parameters.C; ones(N_u, 1).*obj.parameters.C_u]);
             
             if((N_train + N_u) >= N_hidden)
-                H_train = H(1:N_train, :);
-                H_u = H(N_train+1:end, :);
-                P = obj.parameters.C*(H_train'*H_train) ;
-                P = (P + obj.parameters.C_u*(H_u'*H_u) + eye(N_hidden));
-                P2 = (H'*Lambda);
-                P = P\P2;
-                %P = (H'*Lambda*H + eye(N_hidden))\(H'*Lambda);
+                P = (H'*Lambda*H + eye(N_hidden))\(H'*Lambda);
             else
-                P = H'*inv(Lambda*(H*H') + eye(N_train + N_u))*Lambda;
+                P = (H'/(Lambda*(H*H') + eye(N_train + N_u)))*Lambda;
             end
             
             if(N_u ~= 0)
@@ -87,12 +82,7 @@ classdef TransductiveELM < SemiSupervisedLearningAlgorithm
         function res = isDatasetAllowed(~, d)
             res = d.task == Tasks.BC;
         end
-        
-        function res = checkForPrerequisites(obj)
-            res = LibraryHandler.checkAndInstallLibrary('lapsvm', 'Primal Laplacian SVM', ...
-                'http://www.dii.unisi.it/~melacci/lapsvmp/lapsvmp_v02.zip', ...
-                'Laplacian computation of LaplacianELM');
-        end
+
     end
     
     methods(Static)
@@ -101,15 +91,15 @@ classdef TransductiveELM < SemiSupervisedLearningAlgorithm
         end
         
         function pNames = getParametersNames()
-            pNames = {'C', 'C_u', 'hiddenNodes', 'print_diagnostic'}; 
+            pNames = {'C', 'C_u', 'solver'}; 
         end
         
         function pInfo = getParametersDescription()
-            pInfo = {'Regularization factor', 'Regularization factor for unsupervised term',};
+            pInfo = {'Regularization factor', 'Regularization factor for unsupervised term', 'Internal solver'};
         end
         
         function pRange = getParametersRange()
-            pRange = {'Positive real number, default is 1', 'Positive real number, default is 1'};
+            pRange = {'Positive real number, default is 1', 'Positive real number, default is 1', 'String in {boxcqp [default]}'};
         end  
     end
     
