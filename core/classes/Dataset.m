@@ -97,6 +97,7 @@ classdef Dataset
             
             obj.id = '';
             obj.name = '';
+            obj.shuffles = [];
      
         end
         
@@ -112,14 +113,16 @@ classdef Dataset
             end
             
             obj.partitions = cell(N, 1);
-            obj.shuffles = cell(N, 1);
             obj.currentPartition = 1;
             obj.ss_partitions = cell(N, 1);
             
             for ii=1:N
-                % Shuffle the dataset
-                obj.shuffles{ii} = randperm(size(obj.Y.data, 1));
-                currentY = obj.Y.data(obj.shuffles{ii});
+                if(~isempty(obj.shuffles))
+                    % Shuffle the dataset
+                    currentY = obj.Y.data(obj.shuffles{ii});
+                else
+                    currentY = obj.Y.data;
+                end
                 
                 if(~isempty(obj.ss_strategy))
                     obj.ss_partitions{ii} = obj.ss_strategy.partition(currentY);
@@ -129,6 +132,15 @@ classdef Dataset
                 end
             end
             
+        end
+        
+        function obj = generateShuffles(obj, N)
+            % Generate random shuffles of the data
+            obj.shuffles = cell(N, 1);
+            for ii=1:N
+                % Shuffle the dataset
+                obj.shuffles{ii} = randperm(size(obj.Y.data, 1));
+            end
         end
         
         function obj = generateSinglePartition(obj, partitionStrategy, ss_partitionStrategy)
@@ -194,9 +206,14 @@ classdef Dataset
             
             assert(~isempty(obj.partitions), 'Lynx:Logical:PartitionsNotInitialized', 'Partitions of dataset %s have not been initialized', obj.name);
             
-            shuff = obj.shuffles{obj.currentPartition};
-            X = obj.X.shuffle(shuff);
-            Y = obj.Y.shuffle(shuff);
+            if(~isempty(obj.shuffles))
+                shuff = obj.shuffles{obj.currentPartition};
+                X = obj.X.shuffle(shuff);
+                Y = obj.Y.shuffle(shuff);
+            else
+                X = obj.X;
+                Y = obj.Y;
+            end
             
             if(~isempty(obj.ss_strategy))
                 ss_p = obj.ss_partitions{obj.currentPartition};

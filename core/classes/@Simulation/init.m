@@ -59,8 +59,9 @@ function obj = init(obj)
     % Check the compatibility of the algorithms with the datasets
     obj = obj.check_compatibility();
     
-    % Compute partitions for each run
+    % Compute shuffles and partitions for each run
     for j=1:length(obj.datasets)
+        obj.datasets = obj.datasets.set(j, obj.datasets.get(j).generateShuffles(obj.nRuns));
         if(log.flags.semisupervised)
             obj.datasets = obj.datasets.set(j, obj.datasets.get(j).generateNPartitions(obj.nRuns, obj.partition_strategy, obj.ss_partition));
         else
