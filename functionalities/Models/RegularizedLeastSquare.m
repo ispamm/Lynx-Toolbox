@@ -61,7 +61,7 @@ classdef RegularizedLeastSquare < Model
             labels = convert_scores(scores, d.task);
         end
         
-        function res = isDatasetAllowed(~, d)
+        function res = isDatasetAllowed(obj, d)
             res = d.task == Tasks.R || d.task == Tasks.BC || d.task == Tasks.MC;
             res = res && (d.X.id == DataTypes.REAL_MATRIX || d.X.id == DataTypes.KERNEL_MATRIX);
         end
