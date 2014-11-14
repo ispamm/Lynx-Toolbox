@@ -34,7 +34,7 @@ add_dataset('Y', 'Yacht', 'uci_yacht');
 \subsection{Adding a multilabel dataset}
 \label{sec:multilabeldataset}
 
-You may have seen during the simulation that the multilabel classification task has no performance measure assigned to it. This is because it is an ``\textit{incomplete}'' data type, i.e., a data type for which no training algorithms is available. A similar thing can be said about time-series inputs, which cannot currently be used directly by any model. Hence, they are handled by transforming them (after loading the datasets) into other, more ``basic'' tasks. In particular:
+You may have seen during the simulation that the multilabel classification task has no performance measure assigned to it. This is because it is an ``\textit{incomplete}'' task, i.e., a task for which no training algorithm is currently implemented. A similar thing can be said about time-series inputs, which cannot currently be used directly by any model. Hence, they are handled by transforming them (after loading the datasets) into other, more ``basic'' tasks. In particular:
 
 \begin{itemize}
 \item Time-series datasets are transformed into regression datasets by embedding the time-series into a phase space.
@@ -234,7 +234,7 @@ A very common need in supervised learning is testing a given set of values of on
 add_wrapper('ELM', @ParameterSweep, {'regularizationFactor', 'hiddenNodes'}, {2.^-5:5, 100:100:1000});
 \end{lstlisting}
 
-\noindent Although this may seem daunting at first, it is actually rather simple. The first parameter is a cell array with the names of the parameters to be tested. The second parameter is a cell array with the values to be tested. By default, this wrapper uses a $3$-fold cross-validation on the training data to test the accuracy. We may change this with any object of class \verb|PartitionStrategy|. For example, to execute an holdout partitioning with $30\%$ of validation data:
+\noindent The first parameter is a cell array with the names of the parameters to be tested. The second parameter is a cell array with the values to be tested. By default, this wrapper uses a $3$-fold cross-validation on the training data to test the accuracy. We may change this with any object of class \verb|PartitionStrategy|. For example, to execute an holdout partitioning with $30\%$ of validation data:
 
 \begin{lstlisting}
 add_wrapper('ELM', @ParameterSweep, {'regularizationFactor', 'hiddenNodes'}, {2.^-5:5, 100:100:1000}, 'partition_strategy', HoldoutPartition(0.3));

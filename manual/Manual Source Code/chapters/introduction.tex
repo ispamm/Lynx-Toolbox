@@ -20,7 +20,7 @@ In the configuration file, you can specify every detail of the simulation, inclu
 \begin{itemize}
 \item the learning algorithms to use in the simulation,
 \item which performance measures to compute (e.g. mean-squared error, ROC curves, etc.),
-\item how to partition the data,
+\item how to partition the data (e.g. 5-fold cross-validation, leave-one-out, holdout, etc.),
 \item additional preprocessing steps for the datasets, or features for the algorithms (e.g. feature selection procedures),
 \item enabling GPU support, saving the results, running a statistical test, and many other functionalities.
 \end{itemize}
@@ -29,6 +29,6 @@ In the configuration file, you can specify every detail of the simulation, inclu
 
 The strengths of Lynx, we hope, are more easily shown than said. Before starting, however, chapter \ref{chap:theoreticalbackground} summarizes briefly the essential concepts of supervised learning. Although most readers will be highly familiar with these, we use the chapter to introduce a small set of definitions around which the toolbox is organized, so we advise even the most experienced reader to a quick glimpse at the chapter.
 
-Following this, chapter \ref{chap:install} details how to install the toolbox, and it contains a step-by-step guide to run two initial simulations. Then, chapter \ref{chap:writingconfig} and chapter \ref{chap:advancedfeatures} detail how to write your own configuration files, starting from the basic instructions (e.g. adding a dataset) up to the most advanced functionalities (e.g. parallelizing the experiments). Finally, it is time to develop your own classes: chapter \ref{chap:programminglynx} and chapter \ref{chap:advancedprogramming} present guided examples for implementing everything, including new learning algorithms, new performance measures, and even new learning tasks.
+Following this, chapter \ref{chap:install} explains how to install the toolbox, and it contains a step-by-step guide to run two initial simulations. Then, chapter \ref{chap:writingconfig} and chapter \ref{chap:advancedfeatures} detail how to write your own configuration files, starting from the basic instructions (e.g. adding a dataset) up to the most advanced functionalities (e.g. parallelizing the experiments). Finally, it is time to develop your own classes: chapter \ref{chap:programminglynx} and chapter \ref{chap:advancedprogramming} present guided examples for implementing everything, including new learning algorithms, new performance measures, and even new learning tasks.
 
 Additionally, we have included two appendices. Appendix \ref{chap:expfeatures} details experimental features we are working on, which have no support yet and that are expected to change rapidly over the course of the next months. Then, appendix \ref{chap:futuredevelopments} concludes by detailing some of other features we plan on implementing. We use this also to mention what we believe are the current ``weak'' points of the toolbox, that will require further development in the future.

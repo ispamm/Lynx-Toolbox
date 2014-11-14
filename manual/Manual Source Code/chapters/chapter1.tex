@@ -12,50 +12,11 @@ S = \left\{ x_i, y_i \right\}_{i=1}^N
 \label{eq:dataset}
 \end{equation}
 
-\noindent where $x \in \mathcal{X}$ and $y \in \mathcal{Y}$. $\mathcal{X}$ and $\mathcal{Y}$ are called the \textit{input} and \textit{output} spaces, respectively.  We call a particular choice of $\mathcal{Y}$ a \textit{task}. Examples of input, tasks and their correspondent data type in Lynx are shown in Table \ref{tab:basicinputs} and \ref{tab:basictasks}. The understanding of data types can be skipped for now, as it will be used more extensively in the later chapters. Although we have currently focused on real-valued input patterns, nothing prevents the toolbox from being extended to more complex situations, such as graphs, sequences, and so on.
-
-\vspace{-2em}
-
-\begin{center}
-\begin{table}[t]
-{\centering\hfill{}
-\begin{tabular}{p{0.3\columnwidth}p{0.5\columnwidth}p{0.2\columnwidth}}
-\toprule
-Name & Input & Data type \\ 
-\midrule
-Real-valued vector & $\vect{x} \in \R^{d}$, each element is a \textit{feature} of the pattern & \verb|RealMatrix|  \\
-Time-series & $\vect{x} \in \R^n$, each element is the sample of a time-series & \verb|TimeSeries| \\
-Kernel vector &  $\vect{x} \in \R^n$, each element is the value of the similarity between two patterns & \verb|KernelMatrix| \\
-\bottomrule
-\end{tabular}}
-\hfill{}
-\caption{Summary of inputs defined in the toolbox, and their associated data types.}
-\label{tab:basicinputs}
-\end{table}
-\end{center}
-
-\begin{center}
-\begin{table}[t]
-{\centering\hfill{}
-\begin{tabular}{lll}
-\toprule
-Name & Input & Output \\ 
-\midrule
-Regression & $y \in \R$ & \verb|RealVector| \\
-Binary classification & $y \in \left\{-1,+1\right\}$ & \verb|BinaryLabelsVector| \\
-Multiclass classification & $y \in \left\{1,\dots,M\right\}$ & \verb|IntegerLabelsVector| \\
-Multilabel classification & $\vect{y} \in \left\{-1,+1\right\}^M$ & \verb|MultiLabelsMatrix| \\
-\bottomrule
-\end{tabular}}
-\hfill{}
-\caption{Summary of tasks defined in the toolbox, and their associated data types.}
-\label{tab:basictasks}
-\end{table}
-\end{center}
+\noindent where $x \in \mathcal{X}$ and $y \in \mathcal{Y}$. $\mathcal{X}$ and $\mathcal{Y}$ are called the \textit{input} and \textit{output} spaces, respectively.  We call a particular choice of $\mathcal{Y}$ a \textit{task}, partly for historical reasons with respect to previous versions of the toolbox. We list the input and output types currently supported by Lynx in Table \ref{tab:basicinputs} and Table \ref{tab:basictasks}, respectively. Although we have currently focused on real-valued input patterns, nothing prevents the toolbox from being extended to more complex situations, such as graphs, sequences, and so on.
 
 We suppose that points in the two spaces are linked by an unknown probabilistic relationship, of which we only know the $N$ samples in $S$. Each sample is also called an \textit{example}, while each element $x \in \mathcal{X}$ is sometimes referred to as a \textit{pattern}.
 
-Informally, the goal of supervised learning is finding a suitable function $f: \mathcal{X} \rightarrow \mathcal{Y}$ such that, given any new sampling $(x, y)$ of the unknown process, the expected error between $f(x)$ and $y$ is minimized. Formally, a \textit{learning algorithm} $\mathcal{A}$ can be defined as a mapping between the space $\mathcal{S}$ of all possible datasets and a given \textit{hypothesis} of the unknown relation:
+Informally, the goal of supervised learning is finding a suitable function $f: \mathcal{X} \rightarrow \mathcal{Y}$ such that, given any new sampling $(x, y)$ of the unknown process, minimizes the expected error between $f(x)$ and $y$. Formally, a \textit{learning algorithm} $\mathcal{A}$ can be defined as a mapping between the space $\mathcal{S}$ of all possible datasets and a given \textit{hypothesis} of the unknown relation:
 
 \begin{equation}
 \mathcal{A}(S) : \mathcal{S} \rightarrow \mathcal{H}
@@ -76,7 +37,47 @@ L(S, f) = \sum_{(x,y) \in S}(f(x) - y)^2
 \]
 
 \noindent In this framework, different learning algorithms differentiate themselves on the choice of the model space, or in the way in which a single hypothesis is extracted from $\mathcal{H}$ given a dataset. It is also possible to compute the performance of an algorithm in term of more complex measures, such as confusion matrices, ROC curves, correlation coefficients, and so on. In this case, we will talk more generally about \textit{performance measures}.
+%
+\ra{1.2}
+\begin{center}
+\begin{table}[t]
+{\centering\hfill{}
+	\begin{tabular}{p{0.25\columnwidth}p{0.6\columnwidth}}
+		\toprule
+		Name & Description \\ 
+		\midrule
+		Real-valued vector & $\vect{x} \in \R^d$, each element is a \textit{feature} of the pattern  \\
+		Kernel vector &  $\vect{x} \in \R^n$, corresponds to a vector of similarities with respect to $n$ other patterns \\
+		Time-series & $\vect{x} \in \R^n$, each element is the sample of a univariate time-series \\
+		\bottomrule
+	\end{tabular}}
+	\hfill{}
+	\caption{Summary of inputs defined in the toolbox.}
+	\label{tab:basicinputs}
+\end{table}
+\end{center}
 
+\ra{1.2}
+\begin{center}
+\begin{table}[t]
+	{\centering\hfill{}
+		\begin{tabular}{p{0.35\columnwidth}p{0.5\columnwidth}}
+			\toprule
+			Name & Description \\ 
+			\midrule
+			Regression & $y \in \R$  \\
+			Binary classification & $y \in \left\{-1,+1\right\}$  \\
+			Multiclass classification & $y \in \left\{1,\dots,M\right\}$, where $M$ is the number of classes  \\
+			Multilabel classification & $\vect{y} \in \left\{-1,+1\right\}^L$, where $L$ is the number of binary labels associated to every pattern \\
+			\bottomrule
+		\end{tabular}}
+		\hfill{}
+		\caption{Summary of outputs (tasks) defined in the toolbox.}
+		\label{tab:basictasks}
+	\end{table}
+\end{center}
+	%
+\vspace{-5em}
 An extension of this basic framework that we have implemented inside Lynx is the \textit{semi-supervised} learning (SSL) framework.\cite{chapelle2006semi} In SSL, we suppose having available an additional unlabeled dataset of $M$ input patterns $U = \left\{ x_i \right\}_{i=1}^M$. An SSL algorithm uses this additional information trying to improve its own accuracy. Formally, if we denote by $\mathcal{U}$ the space of all possible unlabeled datasets, an SSL algorithm $\mathcal{A}_{\mbox{\scriptsize SSL}}$ is a mapping of the form:
 
 \begin{equation}

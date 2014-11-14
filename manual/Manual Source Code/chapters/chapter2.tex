@@ -26,7 +26,7 @@ A few useful commands:
    --> To clean the installation: 'clean_installation'
 \end{console}
 
-\noindent You can also see some of the main commands of the toolbox. We explore them in the rest of the chapter.
+\noindent You can see some of the main commands of the toolbox. We explore them in the rest of the chapter.
 
 \section{Folder Structure}
 \label{sec:folders}
@@ -77,7 +77,7 @@ Please select a configuration file:
 	 * [1] demo_basic - Basic demo of the toolbox 
 	 * [2] demo_extended - Extended demo of the toolbox 
 
-Input your selection: 2
+Input your selection: 1
 \end{console}
 
 \subsection{Initialization phase}
@@ -152,7 +152,7 @@ Let us run a more complex simulation. To this end, execute once again \verb|run_
 
 \begin{itemize}
 \item We have added an additional algorithm to the simulation, a Support Vector Machine (SVM), trained with MATLAB own algorithm. Moreover, you can see that we added a wrapper to the ELM (\textit{ParameterSweep}). This will fine-tune a parameter with a grid search procedure.
-\item We have also added a third and fourth datasets.
+\item We have added a third dataset.
 \item This time, Lynx will compute also the ROC curve for classification tasks, and the mean-absolute error for regression tasks:
 
 \begin{console}
@@ -184,24 +184,24 @@ The following tests are not possible:
 
 MATLAB SVM algorithm does not support regression, but only classification. Hence, Lynx warns the user that it cannot be executed on the two regression datasets. 
 
-After running the simulation, you will see (as expected) the ROC curve for the Gtzan and double moons datasets, and the mean-absolute error for the other two. Moreover, you will see some information about the grid search procedure. Finally, if you go in the \textit{results/demo\_results} folder, you will find a transcript of the simulation, a .mat file with the results, and the corresponding configuration file.
+After running the simulation, you will see (as expected) the ROC curve for the Gtzan dataset, and the mean-absolute error for the other two. Moreover, you will see some information about the grid search procedure, particularly the validation error achieved for every choice of the parameter. Finally, if you go in the \textit{results/demo\_results} folder, you will find a transcript of the simulation, a .mat file with the results, and the corresponding configuration file.
 
-Let us analyze briefly the results. You can see that two of the three algorithms are shown in the plots with a single point: this is due to the fact that they do not output confidence scores in their classification. On the double moons dataset, the SVM has a perfect result, while it is worse on the Gtzan dataset. Finally, the optimal regularization parameter for ELM is around $1$ and $3$ on the different datasets:
+Let us analyze briefly the results. You can see that two of the three algorithms are shown in the ROC curve with a single point (cross): this is due to the fact that they do not output confidence scores in their classification. Additionally, the optimal regularization parameter for ELM is rather different along the datasets:
 
 \begin{console}
 Results of grid search for algorithm ELM: 
-  Dataset Gtzan:
-    Average training time is 0.00 sec
-    C = 3.000977
-  Dataset Double moons:
-    Average training time is 0.00 sec
-    C = 2.667643
-  Dataset Glass (UCI):
-    Average training time is 0.00 sec
-    C = 1.667643
-  Dataset Yacht (UCI):
-    Average training time is 0.00 sec
-    C = 3.334310
+   Dataset Gtzan:
+      Average training time is 0.08 sec
+      C = 667.000000
+      Validation performance: see plot.
+   Dataset Glass (UCI):
+      Average training time is 0.06 sec
+      C = 7.000000
+      Validation performance: see plot.
+   Dataset Yacht (UCI):
+      Average training time is 0.02 sec
+      C = 100000.000000
+      Validation performance: see plot.
 \end{console}
 
 \subsection{Making the simulation more complex}
@@ -244,23 +244,17 @@ add_feature(CheckSignificance(FriedmanTest()));
 --------------------------------------------------
 
 Table of ranks:
-              Baseline  ELM  SVM
-Gtzan                3    2    1
-Double moons         3    2    1
-Glass (UCI)          3    2    1
-Yacht (UCI)          3    2    1
- 
+Baseline  ELM  SVM
+Gtzan               3    2    1
+Glass (UCI)         3    2    1
+Yacht (UCI)         3    1    2
+
 
 Mean ranks:
-  Baseline  ELM  SVM
-         3    2    1
- 
-There is significant difference at alpha = 0.05 using the corrected 
-   Friedman test (Ff = Inf > 5.143253)
+Baseline    ELM    SVM
+3  1.667  1.333
 
-The following pairs have significant differences according to the 
-  Nemenyi test at alpha = 0.05 (CD = 1.656751):
-	Baseline and SVM [rank difference = -2.000000]
+There is significant difference at alpha = 0.05 using the corrected Friedman test (Ff = 7.000000 > 6.944272)
 \end{console}
 
 \section{Additional scripts}

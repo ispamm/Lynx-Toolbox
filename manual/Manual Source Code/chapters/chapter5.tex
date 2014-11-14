@@ -8,12 +8,38 @@ In this chapter, we show how to design new datasets, models, training algorithms
 A dataset is composed of four components:
 
 \begin{itemize}
-\item An \textit{input} \verb|DataType| object, containing all the inputs of the dataset (see Table \ref{tab:basicinputs}).
-\item An \textit{output} \verb|DataType| object, containing all the outputs of the dataset (see Table \ref{tab:basictasks}).
+\item An \textit{input} \verb|DataType| object, containing all the inputs of the dataset.
+\item An \textit{output} \verb|DataType| object, containing all the outputs of the dataset.
 \item A \textit{task} id, detailing the corresponding task (should match with the output type).
 \item A string describing the dataset.
 \end{itemize}
 
+All the input and output types detailed in Table \ref{tab:basicinputs} and Table \ref{tab:basictasks} have a respective \verb|DataType| class for storing a collection of values. These are listed in Table \ref{tab:datatypes}.
+%
+\ra{1.2}
+\begin{center}
+\begin{table}[t]
+	{\centering\hfill{}
+		\begin{tabular}{p{0.4\columnwidth}p{0.4\columnwidth}}
+			\toprule
+			Input & Datatype Class \\ 
+			\midrule
+			Real-valued vector &  \verb|RealMatrix| \\
+			Time-series & \verb|TimeSeries| \\
+			Kernel vector & \verb|KernelMatrix| \\
+			Regression & \verb|RealVector| \\
+			Binary classification & \verb|BinaryLabelsVector| \\
+			Multiclass classification & \verb|IntegerLabelsVector| \\
+			Multilabel classification & \verb|MultiLabelsMatrix| \\
+			\bottomrule
+		\end{tabular}}
+		\hfill{}
+		\caption{Summary of data types associated to every possible input and output.}
+		\label{tab:datatypes}
+	\end{table}
+\end{center}
+%
+\vspace{-2em}
 A new dataset must be stored as a \verb|Dataset| object saved inside the ``\textit{datasets/xxx}'' folder, where \textit{xxx} is the id of the corresponding task. As an example, we create a dataset object from the abalone dataset of MATLAB (a multiclass classification problem):
 
 \begin{lstlisting}
