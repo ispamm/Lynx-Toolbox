@@ -49,13 +49,13 @@ for i = algos
            b = s.trainedAlgo{j, i, 1}{1}.getParameter('ranges');
            
            % HORRIBLE HACK (for exponential plots)
-           if(b{1}{1}(1)*2 == b{1}{1}(2) ||b{1}{1}(1)*10 == b{1}{1}(2))
+           if(abs(b{1}{1}(1)*2 - b{1}{1}(2)) < 10^-10 || abs(b{1}{1}(1)*10 - b{1}{1}(2)) < 10^-10)
                exp_1 = true;
            else
                exp_1 = false;
            end
            if(~isvector(valErrorGrid))
-               if(b{1}{2}(1)*2 == b{1}{2}(2) ||b{1}{2}(1)*10 == b{1}{2}(2))
+               if(abs(b{1}{2}(1)*2 - b{1}{2}(2)) < 10^-10 || abs(b{1}{2}(1)*10 - b{1}{2}(2)) < 10^-10)
                    exp_2 = true;
                else
                    exp_2 = false;
@@ -66,7 +66,7 @@ for i = algos
                c = XYPlotContainer();
                c = c.store(XYPlot(b{1}{1}, valErrorGrid, params_gs{1}, 'Validation error')); 
                p = FormatAsMultiplePlots();
-               fprintf('\t\tValidation performance: ');
+               fprintf('\t\tValidation performance: see plot.\n');
                p.displayOnConsole({c}, {sprintf('Algorithm %s on dataset %s', s.algorithms.get(i).name, s.datasets.get(j).name)}, {'Performance'}, true, [exp_1, false]);
            else
                figure(); hold on; figshift;
