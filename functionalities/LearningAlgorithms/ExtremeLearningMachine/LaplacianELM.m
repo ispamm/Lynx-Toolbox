@@ -9,44 +9,32 @@
 % Programmed and Copyright by Simone Scardapane:
 % simone.scardapane@uniroma1.it
 
-classdef LaplacianELM < SemiSupervisedLearningAlgorithm
+classdef LaplacianELM < ManifoldRegularizedLearningAlgorithm
     
     methods
         
         function obj = LaplacianELM(model, varargin)
-            obj = obj@SemiSupervisedLearningAlgorithm(model, varargin{:});
+            obj = obj@ManifoldRegularizedLearningAlgorithm(model, varargin{:});
         end
         
         function p = initParameters(obj, p)
+            p = initParameters@ManifoldRegularizedLearningAlgorithm(obj, p);
             p.addParamValue('C', 1, @(x) assert(x > 0, 'Regularization parameter of RegularizedELM must be > 0'));
             p.addParamValue('C_lap', 1, @(x) assert(x >= 0, 'Regularization parameters of LaplacianELM must be >= 0'));
-            p.addParamValue('n_neighbors', 10);
-            p.addParamValue('normalize_laplacian', true);
-            p.addParamValue('laplacian_degree', 1, @(x) assert(isnatural(x, false), 'Degree of the Laplacian of LaplacianELM must be a natural number'));
         end
         
-        function obj = train_semisupervised(obj, dtrain, du)
+        function obj = train_manifold_reg(obj, dtrain, du, L)
             
             % Get training data
             Xtr = dtrain.X.data;
             Ytr = dtrain.Y.data;
             Xu = du.X.data;
             
-            % STEP 1: Construct the graph Laplacian
-            
             [N_train, d] = size(Xtr);
             N_u = size(Xu, 1);
             N_hidden = obj.getParameter('hiddenNodes');
             
             Xfull = [Xtr; Xu];
-            
-            % generating default options
-            options = make_options('NN',obj.parameters.n_neighbors);
-            options.Verbose=0;
-            options.LaplacianNormalize = obj.parameters.normalize_laplacian;
-            options.LaplacianDegree = obj.parameters.laplacian_degree;
-            
-            L = laplacian(options,Xfull);
             
             % STEP 2: Initialize H matrix of ELM network
             
@@ -77,12 +65,6 @@ classdef LaplacianELM < SemiSupervisedLearningAlgorithm
             b = model.isOfClass('ExtremeLearningMachine');
         end
         
-        function res = checkForPrerequisites(obj)
-            res = LibraryHandler.checkAndInstallLibrary('lapsvm', 'Primal Laplacian SVM', ...
-                'http://www.dii.unisi.it/~melacci/lapsvmp/lapsvmp_v02.zip', ...
-                'Laplacian computation of LaplacianELM');
-        end
-        
     end
     
     methods(Static)
@@ -91,15 +73,15 @@ classdef LaplacianELM < SemiSupervisedLearningAlgorithm
         end
         
         function pNames = getParametersNames()
-            pNames = {'C', 'C_lap', 'n_neighbors', 'normalize_laplacian','laplacian_degree'};
+            pNames = ['C', 'C_lap', ManifoldRegularizedLearningAlgorithm.getParametersNames()];
         end
         
         function pInfo = getParametersDescription()
-            pInfo = {'Regularization Factor', 'Regularization factor for manifold term', 'Number of neighbors while constructing the graph Laplacian', 'Normalize the Laplacian', 'Degree of the Laplacian'};
+            pInfo = ['Regularization Factor', 'Regularization factor for manifold term', ManifoldRegularizedLearningAlgorithm.getParametersDescription()];
         end
         
         function pRange = getParametersRange()
-            pRange = {'Positive real number, default is 1','Positive real number, default is 1',  'Positive integer, default is 7', 'Boolean, default is true', 'Positive integer, default is 50', 'Positive integer, default is 1'};
+            pRange = ['Positive real number, default is 1', 'Positive real number, default is 1',  ManifoldRegularizedLearningAlgorithm.getParametersRange()];
         end
     end
     
