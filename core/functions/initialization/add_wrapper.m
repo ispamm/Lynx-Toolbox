@@ -13,6 +13,10 @@ function add_wrapper(algo_id, wrapper, varargin)
     
     ids = s.algorithms.findByIdWithRegexp(algo_id);
     
+    if(isempty(ids))
+        error('Lynx:Initialization:AlgorithmNotFound', 'The algorithm %s was not declared', algo_id);
+    end
+    
     for i=1:length(ids)
         algo = s.algorithms.get(ids(i));
 

@@ -28,7 +28,7 @@ classdef TransductiveRLS < SemiSupervisedLearningAlgorithm
             Ytr = dtrain.Y.data;
             Xu = du.X.data;
             
-            [N_train, d] = size(Xtr);
+            N_train = size(Xtr, 1);
             N_u = size(Xu, 1);
     
             Xfull = [Xtr; Xu];
