@@ -116,7 +116,8 @@ classdef PerformanceEvaluator < SingletonClass
                 [dtrain, dtest, du] = dataset.getFold(ii);
                 
                 if(saveFold)
-                    log.setAdditionalParameter('d_unsupervised', du);
+                    % Need this for semi-supervised algorithms
+                    log.setAdditionalParameter('d_unsupervised', du);  
                     log.setAdditionalParameter('fold', ii);
                 end
                 
@@ -132,6 +133,11 @@ classdef PerformanceEvaluator < SingletonClass
                 
                 % Test the algorithm
                 [labels, scores] = algo.test(dtest);
+                
+                % Hack for sequential learning algorithms
+                if(saveFold && algo.isOfClass('SequentialLearningAlgorithm'))
+                    algo.statistics.error_history = algo.compute_error_history(dtest);
+                end
                 
                 % Compute primary performance
                 perf{1} = perf{1}.computeAndStore(dtest.Y.data, labels, scores);

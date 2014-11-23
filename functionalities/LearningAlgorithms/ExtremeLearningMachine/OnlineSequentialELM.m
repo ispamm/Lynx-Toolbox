@@ -16,61 +16,60 @@
 % Programmed and Copyright by Simone Scardapane:
 % simone.scardapane@uniroma1.it
 
-classdef OnlineSequentialELM < LearningAlgorithm
+classdef OnlineSequentialELM < SequentialLearningAlgorithm
+    
+    properties
+        M;  % Internal matrix
+    end
     
     methods
         
         function obj = OnlineSequentialELM(model, varargin)
-            obj = obj@LearningAlgorithm(model, varargin{:});
+            obj = obj@SequentialLearningAlgorithm(model, varargin{:});
         end
         
         function p = initParameters(obj, p)
-            p.addParamValue('N0', 15, @(x) assert(isnatural(x, false), 'Initial block size of OS-ELM must be a non-zero natural number'));
-            p.addParamValue('blockSize', 15, @(x) assert(isnatural(x, false), 'Block size of OS-ELM must be a non-zero natural number'));
+            p = obj.initParameters@SequentialLearningAlgorithm(p);
         end
         
-        function obj = train(obj, dataset)
+        function obj = train_init(obj, dataset_init)
             
             % Get training data
-            Xtr = dataset.X.data;
-            Ytr = dataset.Y.data;
+            P0 = dataset_init.X.data;
+            T0 = dataset_init.Y.data;
             
-            [N, d] = size(Xtr);
+            [~, d] = size(P0);
             N_hidden = obj.getParameter('hiddenNodes');
             
-            if(dataset.task == Tasks.MC)
-                Ytr = dummyvar(Ytr(:));
+            if(dataset_init.task == Tasks.MC)
+                T0 = dummyvar(T0(:));
             end
             
             obj.model.outputWeights = rand(N_hidden, 1);
             obj.model = obj.model.generateWeights(d);
             
-            P0 = Xtr(1:obj.parameters.N0,:);
-            T0 = Ytr(1:obj.parameters.N0,:);
-            
             H0 = obj.model.computeHiddenMatrix(P0);
             
-            M = pinv(H0' * H0);
+            obj.M = pinv(H0' * H0);
             obj.model.outputWeights = pinv(H0) * T0;
-            clear P0 T0 H0;
             
-            for n = obj.parameters.N0 : obj.parameters.blockSize : N
-                if (n+obj.parameters.blockSize-1) > N
-                    Pn = Xtr(n:N,:);
-                    Tn = Ytr(n:N,:);
-                    obj.parameters.blockSize = size(Pn,1);
-                    clear V;
-                else
-                    Pn = Xtr(n:(n+obj.parameters.blockSize-1),:);
-                    Tn = Ytr(n:(n+obj.parameters.blockSize-1),:);
-                end
-                
-                H = obj.model.computeHiddenMatrix(Pn);
-                
-                M = M - M * H' * (eye(obj.parameters.blockSize) + H * M * H')^(-1) * H * M;
-                obj.model.outputWeights = obj.model.outputWeights + M * H' * (Tn - H * obj.model.outputWeights);
-                
+        end
+        
+        function obj = train_step(obj, dataset_batch)
+            
+            % Get training data
+            Pn = dataset_batch.X.data;
+            Tn = dataset_batch.Y.data;
+            
+            if(dataset_batch.task == Tasks.MC)
+                Tn = dummyvar(Tn(:));
             end
+                
+            H = obj.model.computeHiddenMatrix(Pn);
+                
+            obj.M = obj.M - obj.M * H' * (eye(size(Pn, 1)) + H * obj.M * H')^(-1) * H * obj.M;
+            obj.model.outputWeights = obj.model.outputWeights + obj.M * H' * (Tn - H * obj.model.outputWeights);
+            
         end
         
         function b = checkForCompatibility(~, model)
@@ -85,15 +84,15 @@ classdef OnlineSequentialELM < LearningAlgorithm
         end
         
         function pNames = getParametersNames()
-            pNames = {'N0', 'blockSize'};
+            pNames = SequentialLearningAlgorithm.getParametersNames();
         end
         
         function pInfo = getParametersDescription()
-            pInfo = {'Size of initial block', 'Size of batches'};
+            pInfo = SequentialLearningAlgorithm.getParametersDescription();
         end
         
         function pRange = getParametersRange()
-            pRange = {'Positive integer, default is 15', 'Positive integer, default is 15'};
+            pRange = SequentialLearningAlgorithm.getParametersRange();
         end
     end
     
