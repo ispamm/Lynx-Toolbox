@@ -8,7 +8,7 @@
 % Programmed and Copyright by Simone Scardapane:
 % simone.scardapane@uniroma1.it
 
-%clear all; close all; clc;
+clear all; close all; clc;
 
 % Counter for time
 t = clock;
