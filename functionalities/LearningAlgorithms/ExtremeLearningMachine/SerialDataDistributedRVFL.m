@@ -174,7 +174,7 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
                     
                     % Store the old z and update it
                     zold = z;
-                    z = (rho*beta_avg + t_avg)/(obj.getParameter('C') + rho);
+                    z = (rho*beta_avg + t_avg)/(obj.getParameter('C')/N_nodes + rho);
 
                     % Compute the update for the Lagrangian multipliers
                     for jj = 1:N_nodes
