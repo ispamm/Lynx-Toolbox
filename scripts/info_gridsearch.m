@@ -14,35 +14,38 @@ s = Simulation.getInstance();
 algos = find_algorithms('ParameterSweep', s.algorithms);
 
 for i = algos
-   cprintf('*text', 'Results of grid search for algorithm %s: \n', s.algorithms.get(i).name);
+    
+   p_names = s.trainedAlgo{1, i, 1}{1}.getParameter('parameterNames');
+   p_names = p_names{1};
+   n_parameters_sweeped = length(p_names);
    
+   % Last column is for training time
+   params_avg = zeros(length(s.datasets), n_parameters_sweeped + 1);
+   
+   % Recovering the parameters
    for j = 1:length(s.datasets)
        
-       fprintf('\tDataset %s:\n', s.datasets.get(j).name);
        algo_stats = cell(s.nRuns, 1);
-       
        for z = 1:s.nRuns
            algo_stats{z} = s.trainedAlgo{j, i, z}{1}.statistics;
        end
-       
        algo_stats = sum_structs(algo_stats);
-       fprintf('\t\tAverage training time is %.2f sec\n', algo_stats.finalTrainingTime);
        
-       params_gs = s.trainedAlgo{j, i, z}{1}.getParameter('parameterNames');
+       params_avg(j, end) = algo_stats.finalTrainingTime;
        
-       for z = 1:length(params_gs{1})
+       for z = 1:n_parameters_sweeped
           
            tmp = 0;
            for zz = 1:s.nRuns
-                tmp = tmp + s.trainedAlgo{j, i, zz}{1}.getParameter(params_gs{1}{z});
+                tmp = tmp + s.trainedAlgo{j, i, zz}{1}.getParameter(p_names{z});
            end
            tmp = tmp/s.nRuns;
            
-           fprintf('\t\t%s = %f\n', params_gs{1}{z}, tmp);
+           params_avg(j, z) = tmp;
            
        end
        
-       exist_valErrorGrid = length(params_gs{1}) <= 2;
+       exist_valErrorGrid = length(p_names) <= 2;
        
        if(PRINT_GRAPHS && exist_valErrorGrid)
            valErrorGrid = algo_stats.valErrorGrid;
@@ -64,9 +67,8 @@ for i = algos
            
            if(isvector(valErrorGrid))
                c = XYPlotContainer();
-               c = c.store(XYPlot(b{1}{1}, valErrorGrid, params_gs{1}, 'Validation error')); 
+               c = c.store(XYPlot(b{1}{1}, valErrorGrid, p_names, 'Validation error')); 
                p = FormatAsMultiplePlots();
-               fprintf('\t\tValidation performance: see plot.\n');
                p.displayOnConsole({c}, {sprintf('Algorithm %s on dataset %s', s.algorithms.get(i).name, s.datasets.get(j).name)}, {'Performance'}, true, [exp_1, false]);
            else
                figure(); hold on; figshift;
@@ -78,14 +80,17 @@ for i = algos
                    set(gca,'yscale','log');
                end
                surf( b{1}{1}, b{1}{2}, valErrorGrid');
-               xlabel(params_gs{1}{1});
-               ylabel(params_gs{1}{2});
+               xlabel(p_names{1});
+               ylabel(p_names{2});
                zlabel('Validation error');
                title(sprintf('Algorithm %s on dataset %s', s.algorithms.get(i).name, s.datasets.get(j).name));
            end
        end
        
    end
+   
+   cprintf('*text', 'Results of grid search for algorithm %s: \n', s.algorithms.get(i).name);
+   disptable(params_avg, [p_names, {'T. Time'}], s.datasets.getNames());
    
 end
     
