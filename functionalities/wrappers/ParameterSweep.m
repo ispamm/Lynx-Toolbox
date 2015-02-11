@@ -44,12 +44,31 @@ classdef ParameterSweep < Wrapper
             bestPerf = [];
             
             combinations = combvec(obj.parameters.ranges{:});
+            N_combinations = size(combinations, 2);
             
             if(size(combinations, 1) <= 2)
                 obj.statistics.valErrorGrid = zeros(size(combinations, 2), 1);
             end
             
-            for zz=1:size(combinations, 2)
+            % -------------------------------------------------------------
+            % This ensures that textprogress bar does not throw any error
+            global strCR;
+            strCR = '';
+            % -------------------------------------------------------------
+            
+            fprintf('\t\t ParameterSweep: Evaluating %i settings --> ', N_combinations);
+            textprogressbar(' ');
+            
+            % Compute when we should update the screen for the
+            % textprogressbar
+            tpb_update = ceil(N_combinations/100);
+            
+            for zz=1:N_combinations
+                
+                % Update the textprogressbar on screen
+                if(mod(zz, tpb_update) == 0)
+                    textprogressbar(zz*100/N_combinations);
+                end
                 
                 paramsToTest = combinations(:,zz);
                 
@@ -74,6 +93,8 @@ classdef ParameterSweep < Wrapper
                 end
                 
             end
+            
+            textprogressbar('Done');
             
             if(size(combinations, 1) == 2)
                 obj.statistics.valErrorGrid = reshape(obj.statistics.valErrorGrid, length(obj.parameters.ranges{1}), length(obj.parameters.ranges{2}));

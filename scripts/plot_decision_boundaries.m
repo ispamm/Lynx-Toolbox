@@ -57,18 +57,16 @@ for ii = 1:datasets.length
 
             % Plot unlabeled data
             plot(d_u.X.data(:, 1), d_u.X.data(:, 2), 'og', 'MarkerSize', marker_size, 'LineWidth', line_width);
-            
-            % Plot test data
-            plot(d_test.X.data(d_test.Y.data == 1, 1), d_test.X.data(d_test.Y.data == 1, 2), 'xb', 'MarkerSize', marker_size + 1, 'LineWidth', line_width);
-            plot(d_test.X.data(d_test.Y.data == -1, 1), d_test.X.data(d_test.Y.data == -1, 2), 'xr', 'MarkerSize', marker_size + 1, 'LineWidth', line_width);
-            
-                        
+                
             % Plot training data
             plot(d_train.X.data(d_train.Y.data == 1, 1), d_train.X.data(d_train.Y.data == 1, 2), 'sb', 'MarkerSize', marker_size + 1, 'LineWidth', line_width);
             plot(d_train.X.data(d_train.Y.data == -1, 1), d_train.X.data(d_train.Y.data == -1, 2), 'sr', 'MarkerSize', marker_size + 1, 'LineWidth', line_width);
             
-            legend('Train (+1)', 'Train (-1)', 'Unlabeled', 'Test (+1)', 'Test (-1');
-            
+            % Plot test data
+            plot(d_test.X.data(d_test.Y.data == 1, 1), d_test.X.data(d_test.Y.data == 1, 2), 'xb', 'MarkerSize', marker_size + 1, 'LineWidth', line_width);
+            plot(d_test.X.data(d_test.Y.data == -1, 1), d_test.X.data(d_test.Y.data == -1, 2), 'xr', 'MarkerSize', marker_size + 1, 'LineWidth', line_width);
+
+            legend('Unlabeled', 'Train (+1)', 'Train (-1)', 'Test (+1)', 'Test (-1');
             
         end
         
