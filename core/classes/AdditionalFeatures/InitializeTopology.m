@@ -22,7 +22,14 @@
 %   In parallel mode, this is split using codistributed arrays. In
 %   non-parallel mode, this is split using a simpler KFoldPartition.
 %
-%   3) At the end of the simulation, the network topologies are shown on
+%   3) Similarly, to distribute the features, add the flagg
+%   'distribute_features':
+%
+%       add_feature(InitializeTopology(t), 'distribute_features');
+%
+%   Currently, point (2) and (3) are not compatible together.
+%
+%   4) At the end of the simulation, the network topologies are shown on
 %   the screen. To disable this, add the flag disable_plot:
 %
 %       add_feature(InitializeTopology(t), 'disable_plot');
@@ -36,11 +43,12 @@
 classdef InitializeTopology < AdditionalFeature
     
     properties
-        topology;           % Network topology
-        topologies;         % Cell array of topologies for every run
-        disable_parallel;   % Flag for disabling parallel mode
-        disable_plot;       % Flag for disabling plot
-        distribute_data;    % Flag for distributing data
+        topology;               % Network topology
+        topologies;             % Cell array of topologies for every run
+        disable_parallel;       % Flag for disabling parallel mode
+        disable_plot;           % Flag for disabling plot
+        distribute_data;        % Flag for distributing data
+        distribute_features;    % Flag for distributing features
     end
     
     methods
@@ -51,6 +59,10 @@ classdef InitializeTopology < AdditionalFeature
             obj.disable_parallel = any(strcmp(varargin, 'disable_parallel'));
             obj.disable_plot = any(strcmp(varargin, 'disable_plot'));
             obj.distribute_data = any(strcmp(varargin, 'distribute_data'));
+            obj.distribute_features = any(strcmp(varargin, 'distribute_features'));
+            if(obj.distribute_data && obj.distribute_features)
+                error('Lynx:Logical:IncompatibleFeatures', 'InitializeTopology: currently, you cannot distribute both data and features');
+            end
         end
         
         function executeAfterInitialization(obj)
@@ -65,7 +77,7 @@ classdef InitializeTopology < AdditionalFeature
             % Check if we are in parallel mode
             log = SimulationLogger.getInstance();
             if(log.flags.parallelized && ~(obj.disable_parallel))
-                error('Lynx:Runtime:IncompatibleFeatures', 'Cannot distribute data if already running in a cluster configuration');
+                error('Lynx:Runtime:IncompatibleFeatures', 'InitializeTopology: Cannot run in parallel mode if already running in a cluster configuration');
             end
             
             if(~obj.disable_parallel)
@@ -89,6 +101,7 @@ classdef InitializeTopology < AdditionalFeature
                 log = SimulationLogger.getInstance();
                 a.topology = obj.topologies{log.getAdditionalParameter('run')};
                 a.distribute_data = obj.distribute_data;
+                a.distribute_features = obj.distribute_features;
                 a.parallelized = ~(obj.disable_parallel);
             end
         end
