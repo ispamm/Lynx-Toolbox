@@ -40,8 +40,13 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
             if(is_multiclass)
                 nLabels = max(d.Y.data);
                 beta = zeros(N_hidden, nLabels, N_nodes);
+                % Strange cell array to index conditionally either the 
+                % first 2 dimensions or only the first.
+                idx = {':', ':'};
             else
+                nLabels = 1;
                 beta = zeros(N_hidden, N_nodes);
+                idx = {':'};
             end
             
             if(strcmp(obj.getParameter('train_algo'), 'consensus'))
@@ -66,11 +71,7 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
                         out = H'*inv(eye(size(H, 1))*obj.parameters.C + H * H') *  Ytr ;
                     end
                     
-                    if(is_multiclass)
-                        beta(:,:,ii) = out;
-                    else
-                        beta(:,ii) = out;
-                    end
+                    beta(idx{:},ii) = out;
                     
                     clear H
             
@@ -81,11 +82,7 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
                     [obj.model.outputWeights, obj.statistics.consensus_error] = ...
                         obj.run_consensus_serial(beta, obj.getParameter('consensus_max_steps'), obj.getParameter('consensus_thres'));
                 else
-                    if(is_multiclass)
-                        obj.model.outputWeights = beta(:, :, 1);
-                    else
-                        obj.model.outputWeights = beta(:, 1);
-                    end
+                    obj.model.outputWeights = beta(idx{:}, 1);
                 end
                     
             
@@ -95,11 +92,7 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
                 s = SimulationLogger.getInstance();
                 
                 % Global term
-                if(is_multiclass)
-                    z = zeros(N_hidden, nLabels);
-                else
-                    z = zeros(N_hidden, 1);
-                end
+                z = zeros(N_hidden, nLabels);
                 
                 % Lagrange multipliers
                 if(is_multiclass)
@@ -156,12 +149,8 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
                     for jj = 1:N_nodes
                     
                         % Compute current weights
-                        if(is_multiclass)
-                            beta(:, :, jj) = Hinv{jj}*(HY{jj} + rho*z - t(:, :, jj));
-                        else
-                            beta(:, jj) = Hinv{jj}*(HY{jj} + rho*z - t(:, jj));
-                        end
-                    
+                        beta(idx{:}, jj) = Hinv{jj}*(HY{jj} + rho*z - t(idx{:}, jj));
+                        
                     end
                     
                     % Run consensus
@@ -178,22 +167,14 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
 
                     % Compute the update for the Lagrangian multipliers
                     for jj = 1:N_nodes
-                        if(is_multiclass)
-                            t(:, :, jj) = t(:, :, jj) + rho*(beta(:, :, jj) - z);
-                        else
-                            t(:, jj) = t(:, jj) + rho*(beta(:, jj) - z);
-                        end
+                        t(idx{:}, jj) = t(idx{:}, jj) + rho*(beta(idx{:}, jj) - z);
                     end
                     
                     % Compute primal and dual residuals
                     for jj = 1:N_nodes
-                        if(is_multiclass)
-                            newbeta = beta(:, :, jj);
-                            newt = t(:, :, jj);
-                        else
-                            newbeta = beta(:, jj);
-                            newt = t(:, jj);
-                        end
+                        newbeta = beta(idx{:}, jj);
+                        newt = t(idx{:}, jj);
+                        
                         obj.statistics.r_norm(ii) = obj.statistics.r_norm(ii) + ...
                             norm(newbeta - z, 'fro');
                         % Compute epsilon values
@@ -223,19 +204,15 @@ classdef SerialDataDistributedRVFL < DistributedLearningAlgorithm
 
                 end
                 
-                if(is_multiclass)
-                    obj.model.outputWeights = beta(:, :, 1);
-                else
-                    obj.model.outputWeights = beta(:, 1);
-                end
-
+                obj.model.outputWeights = beta(idx{:}, 1);
+                
             end
             
             obj.obj_locals{1} = obj;
         end
 
         function obj = executeBeforeTraining(obj, d)
-            obj.model = obj.model.generateWeights(d);
+            obj.model = obj.model.generateWeights(size(d.X.data, 2));
         end
         
         function b = checkForCompatibility(~, model)

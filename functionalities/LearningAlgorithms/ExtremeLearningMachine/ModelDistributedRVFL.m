@@ -40,38 +40,30 @@ classdef ModelDistributedRVFL < DistributedLearningAlgorithm
             N_hidden = obj.getParameter('hiddenNodes');
             N_nodes = obj.topology.N;
             N_samples = size(d.X.data, 1);
-            is_multiclass = d.task == Tasks.MC;
-            if(is_multiclass)
+
+            if(d.task == Tasks.MC)
                 y = dummyvar(d.Y.data);
+                nLabels = max(d.Y.data);
+                beta = zeros(N_hidden, nLabels, N_nodes);
+                Hbeta_curr = zeros(N_samples, nLabels, N_nodes);
+                % Strange cell array to index conditionally either the 
+                % first 2 dimensions or only the first.
+                idx = {':', ':'};
             else
                 y = d.Y.data;
+                nLabels = 1;
+                beta = zeros(N_hidden, N_nodes);
+                idx = {':'};
             end
 
             % Get the logger
             s = SimulationLogger.getInstance();
-            
-            % Initialize the local weights
-            if(is_multiclass)
-                nLabels = max(d.Y.data);
-                beta = zeros(N_hidden, nLabels, N_nodes);
-            else
-                beta = zeros(N_hidden, N_nodes);
-            end
-            
+
             % Global terms
-            if(is_multiclass)
-                z = zeros(N_samples, nLabels);
-                t = zeros(N_samples, nLabels);
-                Hbeta_avg = zeros(N_samples, nLabels);
-                Hbeta_curr = zeros(N_samples, nLabels, N_nodes);
-                r_tmp = zeros(N_samples, nLabels);
-            else
-                z = zeros(N_samples, 1);
-                t = zeros(N_samples, 1);
-                Hbeta_avg = zeros(N_samples, 1);
-                Hbeta_curr = zeros(N_samples, N_nodes);
-                r_tmp = zeros(N_samples, 1);
-            end
+            z = zeros(N_samples, nLabels);
+            t = zeros(N_samples, nLabels);
+            Hbeta_avg = zeros(N_samples, nLabels);
+            r_tmp = zeros(N_samples, nLabels);
             
             % Parameters
             rho = obj.getParameter('admm_rho');
@@ -109,13 +101,8 @@ classdef ModelDistributedRVFL < DistributedLearningAlgorithm
                 for jj = 1:N_nodes
                     
                     % Compute current weights
-                    if(is_multiclass)
-                        beta(:, :, jj) = Hinv{jj}*(Hi{jj}*beta(:, :, jj) + z - Hbeta_avg - t);
-                        Hbeta_curr(:, :, jj) = Hi{jj}*beta(:, :, jj);
-                    else
-                        beta(:, jj) = Hinv{jj}*(Hi{jj}*beta(:, jj) + z - Hbeta_avg - t);
-                        Hbeta_curr(:, jj) = Hi{jj}*beta(:, jj);
-                    end
+                    beta(idx{:}, jj) = Hinv{jj}*(Hi{jj}*beta(idx{:}, jj) + z - Hbeta_avg - t);
+                    Hbeta_curr(idx{:}, jj) = Hi{jj}*beta(idx{:}, jj);
                     
                 end
                 
@@ -132,11 +119,7 @@ classdef ModelDistributedRVFL < DistributedLearningAlgorithm
 
                 r_tmp(:) = 0;
                 for jj = 1:N_nodes
-                    if(is_multiclass)
-                        r_tmp = r_tmp + Hbeta_curr(:, :, jj) - z;
-                    else
-                        r_tmp = r_tmp + Hbeta_curr(:, jj) - z;
-                    end
+                    r_tmp = r_tmp + Hbeta_curr(idx{:}, jj) - z;
                 end
                 obj.statistics.r_norm(ii) = norm(r_tmp);
                 
@@ -150,11 +133,7 @@ classdef ModelDistributedRVFL < DistributedLearningAlgorithm
             if(steps > 0)
                 % Save the weights
                 for jj = 1:N_nodes
-                    if(is_multiclass)
-                        obj.local_models{jj}.outputWeights = beta(:, :, jj);
-                    else
-                        obj.local_models{jj}.outputWeights = beta(:, jj);
-                    end
+                    obj.local_models{jj}.outputWeights = beta(idx{:}, jj);
                 end
             end
             
