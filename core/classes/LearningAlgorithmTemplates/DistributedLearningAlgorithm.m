@@ -43,11 +43,7 @@ classdef DistributedLearningAlgorithm < LearningAlgorithm & NetworkNode
             if(isempty(obj.topology))
                 error('Lynx:Runtime:MissingFeature', 'To use a distributed learning algorithm, please initialize the topology with the feature InitializeTopology');
             end
-            
-            % Run before actual training (e.g. for initializing some parts
-            % of the models)
-            obj = obj.executeBeforeTraining(size(dataset.X.data, 2));
-            
+
             if(obj.parallelized)
                 % We are running inside an SPMD block (i.e., we use
                 % codistributed arrays).
@@ -79,6 +75,10 @@ classdef DistributedLearningAlgorithm < LearningAlgorithm & NetworkNode
                 obj.partition_features = cvpartition(size(dataset.X.data, 2), 'kfold', obj.topology.N);
             end
             
+            % Run before actual training (e.g. for initializing some parts
+            % of the models)
+            obj = obj.executeBeforeTraining(dataset);
+            
             if(obj.parallelized)
                 % Train in an SPMD block
                 spmd(obj.topology.N)
@@ -99,7 +99,7 @@ classdef DistributedLearningAlgorithm < LearningAlgorithm & NetworkNode
             obj = obj.executeAfterTraining();
         end
         
-        function obj = executeBeforeTraining(obj, ~)
+        function obj = executeBeforeTraining(obj, d)
         end
         
         function obj = executeAfterTraining(obj)

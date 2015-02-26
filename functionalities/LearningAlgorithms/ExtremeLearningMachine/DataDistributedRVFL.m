@@ -112,7 +112,7 @@ classdef DataDistributedRVFL < DistributedLearningAlgorithm
         end
         
         function obj = executeBeforeTraining(obj, d)
-            obj.model = obj.model.generateWeights(d);
+            obj.model = obj.model.generateWeights(size(d.X.data, 2));
         end
         
         function b = checkForCompatibility(~, model)
