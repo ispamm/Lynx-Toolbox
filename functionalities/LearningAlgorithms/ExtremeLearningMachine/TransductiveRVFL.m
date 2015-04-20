@@ -1,5 +1,5 @@
-classdef TransductiveELM < SemiSupervisedLearningAlgorithm
-    % SEMISUPERVISEDELM 
+classdef TransductiveRVFL < SemiSupervisedLearningAlgorithm
+    % SEMISUPERVISEDRVFL
     
     % License to use and modify this code is granted freely without warranty to all, as long as the original author is
     % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
@@ -12,14 +12,14 @@ classdef TransductiveELM < SemiSupervisedLearningAlgorithm
     
     methods
         
-        function obj = TransductiveELM(model, varargin)
+        function obj = TransductiveRVFL(model, varargin)
             obj = obj@SemiSupervisedLearningAlgorithm(model, varargin{:});
         end
         
         function p = initParameters(~, p)
             p.addParamValue('C', 1, @(x) assert(x > 0, 'Regularization parameters of SS-ELM must be > 0'));
             p.addParamValue('C_u', 1, @(x) assert(x >= 0, 'Regularization parameters of SS-ELM must be >= 0'));
-            p.addParamValue('solver', 'boxcqp', @(x) assert(isingroup(x, {'boxcqp'}), 'Solver of TransductiveELM not recognized'));
+            p.addParamValue('solver', 'scip', @(x) assert(isingroup(x, {'scip', 'boxcqp'}), 'Solver of TransductiveELM not recognized'));
         end
         
         function obj = train_semisupervised(obj, dtrain, du)
@@ -34,9 +34,6 @@ classdef TransductiveELM < SemiSupervisedLearningAlgorithm
             N_hidden = obj.getParameter('hiddenNodes');
             
             Xfull = [Xtr; Xu];
-            
-            %obj.trainingParams.C_u = obj.trainingParams.C*(N_train/N_u);
-            %obj.trainingParams.C_u = obj.trainingParams.C;
             
             obj.model = obj.model.generateWeights(d);
             H = obj.model.computeHiddenMatrix(Xfull);
@@ -59,10 +56,31 @@ classdef TransductiveELM < SemiSupervisedLearningAlgorithm
                 M3 = M(N_train+1:end, 1:N_train);
                 M4 = M(N_train+1:end, N_train+1:end);
 
-                t = (M3 + M2')*Ytr;
-
-                Yu = boxcqp(M4, 0.5*t, -ones(N_u, 1), ones(N_u, 1));
-                Zu = sign(Yu);
+                M4_herm_part = 0.5*(M4 + M4');
+                e = eig(M4_herm_part);
+                
+                if(any(e < 0))
+                    error('Matrix is not positive definite');
+                end
+                
+                if(strcmp(obj.getParameter('solver'), 'scip'))
+                    
+                    Ytr_new = Ytr;
+                    Ytr_new(Ytr == -1) = 0;
+                    t = 0.5*(M3 + M2')*Ytr_new;
+                    
+                    opts.maxnodes = 10000;
+                    Zu = scip(sparse(M4), t, [], [], [], [], [], ...
+                        repmat('b', 1, N_u), [], [], [], opts);
+                    Zu = 2*Zu - ones(N_u, 1);
+                   
+                elseif(strcmp(obj.getParameter('solver'), 'boxcqp'))
+                   
+                    t = 0.5*(M3 + M2')*Ytr;
+                    Zu = boxcqp(M4, t, -ones(N_u, 1), ones(N_u, 1));
+                    Zu = sign(Zu);
+                    
+                end
 
             else
                 Zu = [];
@@ -77,6 +95,14 @@ classdef TransductiveELM < SemiSupervisedLearningAlgorithm
 
         function b = checkForCompatibility(~, model)
             b = model.isOfClass('ExtremeLearningMachine');
+        end
+        
+        function res = checkForPrerequisites(obj)
+            % Check for prerequisites
+            if(strcmp(obj.parameters.solver, 'scip') && ~(exist('scip', 'file') == 3))
+                error('Lynx:Library:MissingLibrary', 'TransductiveRVFL: you must install the OPTI Toolbox for the SCIP solver');
+            end
+            res = true;
         end
         
         function res = isDatasetAllowed(~, d)

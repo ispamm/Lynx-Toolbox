@@ -1,4 +1,4 @@
-% LaplacianELM - Laplacian Extreme Learning Machine
+% LaplacianRVFL - Laplacian Random Vector Fucntional-Link Network
 %   This implements the Laplacian Extreme Learning Machine as descrbied
 %   in Huang, Gao, et al. "Semi-supervised and unsupervised extreme
 %   learning machines.", IEEE Transactions on Cybernetics (to appear).
@@ -9,11 +9,11 @@
 % Programmed and Copyright by Simone Scardapane:
 % simone.scardapane@uniroma1.it
 
-classdef LaplacianELM < ManifoldRegularizedLearningAlgorithm
+classdef LaplacianRVFL < ManifoldRegularizedLearningAlgorithm
     
     methods
         
-        function obj = LaplacianELM(model, varargin)
+        function obj = LaplacianRVFL(model, varargin)
             obj = obj@ManifoldRegularizedLearningAlgorithm(model, varargin{:});
         end
         
@@ -69,7 +69,7 @@ classdef LaplacianELM < ManifoldRegularizedLearningAlgorithm
     
     methods(Static)
         function info = getDescription()
-            info = 'Semi-Supervised version of the standard Extreme Learning Machine using a manifold regularization factor extracted from the Laplacian.';
+            info = 'Semi-Supervised version of the standard RVFL Network using a manifold regularization factor extracted from the Laplacian.';
         end
         
         function pNames = getParametersNames()

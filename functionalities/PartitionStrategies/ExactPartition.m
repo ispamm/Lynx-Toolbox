@@ -50,14 +50,28 @@ classdef ExactPartition < PartitionStrategy
             if(obj.training_samples+obj.test_samples == length(Y))
                 obj.partition_struct_full = cvpartition(Y, 'Resubstitution');
             else
-                obj.partition_struct_full = cvpartition(Y, 'holdout', obj.training_samples + obj.test_samples);
+            	obj.partition_struct_full = cvpartition(Y, 'holdout', obj.training_samples + obj.test_samples);
             end
             
             % From the initial partition, we generate the training
             % partition. This ensures a correct proportion of samples in
             % training and test.
             Ytmp = Y(obj.partition_struct_full.test);
-            obj.partition_struct_training = cvpartition(Ytmp, 'holdout', obj.test_samples);
+            if(length(unique(Ytmp)) == 2 && obj.training_samples == 2)
+                    % Horrible hack for binary classification with two
+                    % samples in the training set. Without this, sometimes
+                    % we choose two patterns from the same class.
+                    class1_idx = find(Y == -1);
+                    class2_idx = find(Y == 1);
+                    class1_pattern_idx = randi(length(class1_idx));
+                    class2_pattern_idx = randi(length(class2_idx));
+                    obj.partition_struct_training.training = false(length(Ytmp), 1);
+                    obj.partition_struct_training.training(class1_pattern_idx) = true;
+                    obj.partition_struct_training.training(class2_pattern_idx) = true;
+                    obj.partition_struct_training.test = ~obj.partition_struct_training.training;
+            else
+                obj.partition_struct_training = cvpartition(Ytmp, 'holdout', obj.test_samples);
+            end
             
             warning('on', 'stats:cvpartition:HOTrainingZero');
             warning('on', 'stats:cvpartition:HOTestZero');
