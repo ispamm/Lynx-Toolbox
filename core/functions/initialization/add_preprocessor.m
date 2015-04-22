@@ -12,6 +12,10 @@ function add_preprocessor(data_id, preprocessor, varargin)
     s = Simulation.getInstance();
     ids = s.datasets.findByIdWithRegexp(data_id);
     
+    if(isempty(ids))
+        error('Lynx:Logical:DatasetNotFound', 'add_preprocessor: no dataset found with ids containing %s', data_id);
+    end
+    
     for i=1:length(ids)
     
         o = preprocessor(varargin{:});

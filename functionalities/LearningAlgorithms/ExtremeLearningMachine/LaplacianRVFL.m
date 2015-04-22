@@ -51,11 +51,13 @@ classdef LaplacianRVFL < ManifoldRegularizedLearningAlgorithm
             C = diag([ones(N_train, 1).*obj.getParameter('C'); zeros(N_u, 1)]);
             Ytilde = [Ytr; zeros(N_u, size(Ytr, 2))];
             
+            warning('off', 'MATLAB:nearlySingularMatrix');
             if(N_train >= N_hidden)
                 obj.model.outputWeights = (eye(N_hidden) + H'*C*H + obj.parameters.C_lap.*H'*L*H)\(H'*C*Ytilde);
             else
                 obj.model.outputWeights = H'*inv(eye(N_train+N_u) + C*(H*H') + obj.parameters.C_lap*L*(H*H'))*C*Ytilde;
             end
+            warning('on', 'MATLAB:nearlySingularMatrix');
             
             clear H
             

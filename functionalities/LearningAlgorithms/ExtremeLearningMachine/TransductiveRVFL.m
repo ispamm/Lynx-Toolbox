@@ -19,7 +19,7 @@ classdef TransductiveRVFL < SemiSupervisedLearningAlgorithm
         function p = initParameters(~, p)
             p.addParamValue('C', 1, @(x) assert(x > 0, 'Regularization parameters of SS-ELM must be > 0'));
             p.addParamValue('C_u', 1, @(x) assert(x >= 0, 'Regularization parameters of SS-ELM must be >= 0'));
-            p.addParamValue('solver', 'scip', @(x) assert(isingroup(x, {'scip', 'boxcqp'}), 'Solver of TransductiveELM not recognized'));
+            p.addParamValue('solver', 'scip', @(x) assert(isingroup(x, {'scip', 'boxcqp', 'ga'}), 'Solver of TransductiveELM not recognized'));
         end
         
         function obj = train_semisupervised(obj, dtrain, du)
@@ -55,13 +55,6 @@ classdef TransductiveRVFL < SemiSupervisedLearningAlgorithm
                 M2 = M(1:N_train, N_train + 1:end);
                 M3 = M(N_train+1:end, 1:N_train);
                 M4 = M(N_train+1:end, N_train+1:end);
-
-                M4_herm_part = 0.5*(M4 + M4');
-                e = eig(M4_herm_part);
-                
-                if(any(e < 0))
-                    error('Matrix is not positive definite');
-                end
                 
                 if(strcmp(obj.getParameter('solver'), 'scip'))
                     
@@ -79,6 +72,16 @@ classdef TransductiveRVFL < SemiSupervisedLearningAlgorithm
                     t = 0.5*(M3 + M2')*Ytr;
                     Zu = boxcqp(M4, t, -ones(N_u, 1), ones(N_u, 1));
                     Zu = sign(Zu);
+                    
+                elseif(strcmp(obj.getParameter('solver'), 'ga'))
+                    
+                    Ytr_new = Ytr;
+                    Ytr_new(Ytr == -1) = 0;
+                    t = (M3 + M2')*Ytr_new;
+                    
+                    options = gaoptimset('PopulationType', 'bitstring', 'Display', 'none');
+                    Zu = ga(@(y) 0.5*(y*M4*y' + y*t), N_u, [], [], [], [], [], [], [], options);
+                    Zu = 2*Zu(:) - ones(N_u, 1);
                     
                 end
 
