@@ -155,9 +155,11 @@ classdef PerformanceEvaluator < SingletonClass
                 
             end
             
-            % The overall trainingParams and statistics are averaged over the folds
-            algo.parameters = sum_structs(t_params);
-            algo.statistics = sum_structs(s_params);
+            if(saveFold)
+                % The overall trainingParams and statistics are averaged over the folds
+                algo.parameters = sum_structs(t_params);
+                algo.statistics = sum_structs(s_params);
+            end
             
         end
         

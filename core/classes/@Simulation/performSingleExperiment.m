@@ -7,7 +7,7 @@
 % Programmed and Copyright by Simone Scardapane:
 % simone.scardapane@uniroma1.it
 
-function [p, t, a] = performSingleExperiment(obj, currentConfiguration)
+function [p, t, currentAlgo] = performSingleExperiment(obj, currentConfiguration)
 
 % Get current configuration (run - dataset - algorithm)
 r_id = currentConfiguration(1);

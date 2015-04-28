@@ -76,7 +76,7 @@ classdef ParameterSweep < Wrapper
                     obj.wrappedAlgo = obj.wrappedAlgo.setParameter(obj.parameters.parameterNames{i}, paramsToTest(i));
                 end
                 
-                currentPerf = PerformanceEvaluator.getInstance().computePerformance(obj.wrappedAlgo, d);
+                [currentPerf, ~, obj.wrappedAlgo] = PerformanceEvaluator.getInstance().computePerformance(obj.wrappedAlgo, d);
                 
                 if(isempty(bestPerf))
                     bestPerf = currentPerf{1};
