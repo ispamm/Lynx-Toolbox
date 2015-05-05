@@ -29,7 +29,11 @@ classdef NumericalContainer < ValueContainer
                 s = 'NA';
             else
                 obj = obj.checkForFinalizedValue();
-                s = sprintf('%.2f (+/- %.2f)', obj.getFinalizedValue(), obj.valuesStd);
+                if(obj.valuesStd ~= 0)
+                    s = sprintf('%.2f (+/- %.2f)', obj.getFinalizedValue(), obj.valuesStd);
+                else
+                    s = sprintf('%.2f', obj.getFinalizedValue());
+                end
             end
         end
         
