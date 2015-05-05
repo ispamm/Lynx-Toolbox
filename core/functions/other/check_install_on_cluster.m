@@ -4,7 +4,7 @@ function check_install_on_cluster()
 %   cluster and (ii) that versions are all equal. Otherwise, an error is
 %   thrown. By default, Matlab is installed on the desktop.
 
-poolsize = matlabpool('size');
+poolsize = ParallelHelper.get_pool_size();
 
 % Inspect installation
 fprintf('Checking all workers have Lynx installed...\n');

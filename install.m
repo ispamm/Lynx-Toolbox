@@ -30,7 +30,11 @@ end
 
 % Add the folders of the toolbox to the global path
 fprintf('Adding toolbox to path...\n');
-addpath(genpath(pwd));
+folders = {'configs', 'core', 'functionalities', 'help', 'lib', 'scripts', 'tests', 'tmp'};
+addpath(pwd);
+for n = 1:length(folders)
+    addpath(genpath(fullfile(pwd, folders{n})));
+end
 
 % Generate XML configuration file
 if(~XmlConfiguration.checkForConfigurationFile(pwd))

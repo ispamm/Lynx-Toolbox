@@ -77,7 +77,11 @@ classdef DistributedLearningAlgorithm < LearningAlgorithm & NetworkNode
             
             % Run before actual training (e.g. for initializing some parts
             % of the models)
-            obj = obj.executeBeforeTraining(dataset);
+            if(obj.parallelized)
+                obj = obj.executeBeforeTraining(dataset{1});
+            else
+                obj = obj.executeBeforeTraining(dataset);
+            end
             
             if(obj.parallelized)
                 % Train in an SPMD block

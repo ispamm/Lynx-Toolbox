@@ -32,7 +32,7 @@ classdef DataDistributedRVFL < DistributedLearningAlgorithm
         end
         
         function obj = train_locally(obj, d)
-            
+
             % Get training data
             Xtr = d.X.data;
             Ytr = d.Y.data;
@@ -49,7 +49,7 @@ classdef DataDistributedRVFL < DistributedLearningAlgorithm
                 else
                     obj.model.outputWeights = H'*inv(eye(size(H, 1))./obj.parameters.C + H * H') *  Ytr ;
                 end
-                clear H
+                clear HY
             
                 % Execute consensus algorithm
                 if(obj.getParameter('consensus_max_steps') > 0)
@@ -67,7 +67,7 @@ classdef DataDistributedRVFL < DistributedLearningAlgorithm
                 
                 % Parameters
                 rho = obj.getParameter('admm_rho');
-                N_nodes = matlabpool('size');
+                N_nodes = ParallelHelper.get_pool_size();
                 steps = obj.getParameter('admm_max_steps');
                 
                 % Statistics initialization
@@ -116,7 +116,12 @@ classdef DataDistributedRVFL < DistributedLearningAlgorithm
         end
         
         function b = checkForCompatibility(~, model)
-            b = model.isOfClass('RandomVectorFunctionalLink') && (model.task == Tasks.R || model.task == Tasks.BC);
+            b = model.isOfClass('RandomVectorFunctionalLink');
+        end
+        
+        function res = isDatasetAllowed(obj, d)
+            res = d.task == Tasks.BC || d.task == Tasks.R;
+            res = res && obj.model.isDatasetAllowed(d);
         end
     end
     

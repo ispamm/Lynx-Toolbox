@@ -13,9 +13,7 @@
 function obj = finalizeSimulation( obj )
 
 % Close the MATLAB pool if open
-if(matlabpool('size') > 0)
-    matlabpool('close');
-end
+ParallelHelper.close_pool();
 
 % Delete temporary files
 warning('off', 'MATLAB:DELETE:Permission');

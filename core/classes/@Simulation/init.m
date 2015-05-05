@@ -69,13 +69,11 @@ function obj = init(obj)
         end
     end
 
-    % Open the MATLAB pool if needed
-    if matlabpool('size') > 0 && ~log.flags.parallelized % checking to see if pool is already open
-        matlabpool('close');
-    elseif(matlabpool('size') == 0 && log.flags.parallelized)
-        matlabpool('open', 'AttachedFiles', {});
-        % Check for installation of Lynx
-        check_install_on_cluster();
+    
+    % Reset the MATLAB pool and reopen if needed
+    ParallelHelper.close_pool();
+    if(log.flags.parallelized)
+        ParallelHelper.open_pool();
     end
 
     % In the parallelized mode, output on the console is forbidden
@@ -87,7 +85,7 @@ function obj = init(obj)
         s = SimulationLogger.getInstance();
         sim = Simulation.getInstance();
         p = PerformanceEvaluator.getInstance();
-        parfor i=1:matlabpool('size')  
+        parfor i=1:ParallelHelper.get_pool_size()
             init_worker(s, @()SimulationLogger.getInstance());
             init_worker(sim, @()Simulation.getInstance());
             init_worker(p, @()PerformanceEvaluator.getInstance());

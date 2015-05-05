@@ -83,13 +83,11 @@ classdef InitializeTopology < AdditionalFeature
             if(~obj.disable_parallel)
                 
                 % Open the pool of workers
-                matlabpool('open');
+                ParallelHelper.open_pool();
                 % Check that there are enough labs
-                if(matlabpool('size') < obj.topology.N)
-                    error('Lynx:Runtime:SmallCluster', 'Maximum number of nodes in this cluster is %i', matlabpool('size'));
+                if(ParallelHelper.get_pool_size() < obj.topology.N)
+                    error('Lynx:Runtime:SmallCluster', 'Maximum number of nodes in this cluster is %i', ParallelHelper.get_pool_size());
                 end
-
-                check_install_on_cluster();
                 
             end
             
