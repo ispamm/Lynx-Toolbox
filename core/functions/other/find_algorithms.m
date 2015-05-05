@@ -11,9 +11,10 @@
 % Programmed and Copyright by Simone Scardapane:
 % simone.scardapane@uniroma1.it
 
-function [ algorithmIDs ] = find_algorithms( classString, algorithms )
+function [ algorithmIDs, algorithmNames ] = find_algorithms( classString, algorithms )
 
 algorithmIDs = [];
+algorithmNames = {};
 if(isempty(algorithms))
     return;
 end
@@ -23,6 +24,7 @@ N_algo = length(algorithms);
 for i=1:N_algo
     if(algorithms.get(i).isOfClass(classString))
         algorithmIDs = [algorithmIDs i];
+        algorithmNames{end + 1} = algorithms.get(i).name;
     end
 end
 
