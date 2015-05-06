@@ -1,5 +1,5 @@
 % LaplacianRVFL - Laplacian Random Vector Fucntional-Link Network
-%   This implements the Laplacian Extreme Learning Machine as descrbied
+%   This is similar to the Laplacian Extreme Learning Machine as described
 %   in Huang, Gao, et al. "Semi-supervised and unsupervised extreme
 %   learning machines.", IEEE Transactions on Cybernetics (to appear).
 
