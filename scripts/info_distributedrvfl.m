@@ -1,5 +1,6 @@
 
-% INFO_DISTRIBUTEDRVFL Plot information on consensus
+% INFO_DISTRIBUTEDRVFL Plot information on DataDistributedRVFL and
+% SerialDataDistributedRVFL
 
 % License to use and modify this code is granted freely without warranty to all, as long as the original author is
 % referenced and attributed as such. The original author maintains the right to be solely associated with this work.
@@ -7,116 +8,67 @@
 % Programmed and Copyright by Simone Scardapane:
 % simone.scardapane@uniroma1.it
 
+% Initialize required objects
 s = Simulation.getInstance();
-algos = find_algorithms('DataDistributedRVFL', s.algorithms);
-algos = [algos; find_algorithms('SerialDataDistributedRVFL', s.algorithms)];
-
-cons_error = cell(length(s.datasets), length(algos));
-primal_residual = cell(length(s.datasets), length(algos)*2);
-dual_residual = cell(length(s.datasets), length(algos)*2);
-cons_steps = cell(length(s.datasets), length(algos));
-names_consensus = cell(length(algos), 1);
-names_admm = cell(length(algos), 1);
-consensus = false(length(algos), 1);
-admm = false(length(algos), 1);
-
-fprintf('Information on data-distributed RVFL: see plots.\n');
-
-w = 1;
-zz = 1;
-
-for i = algos
-   
-    algo = s.trainedAlgo{1, i, 1}{1};
-    if(strcmp(algo.parameters.train_algo{1}, 'consensus') && (algo.parameters.consensus_max_steps > 0))
-    
-       consensus(w) = true;
-       names_consensus{w} = s.algorithms.get(i).name;
-       for j = 1:length(s.datasets)
-
-           algo_stats = cell(s.nRuns, 1);
-
-           for z = 1:s.nRuns
-               algo_stats{z} = s.trainedAlgo{j, i, z}{1}.statistics;
-           end
-
-           algo_stats = sum_structs(algo_stats);
-           c = XYPlotContainer();
-           cons_error{j, w} = c.store(XYPlot(1:length(algo_stats.consensus_error), algo_stats.consensus_error, ...
-               'Iteration', 'Disagreement'));
-        
-           fprintf('Average number of consensus iterations on dataset %s: %i\n', s.datasets.get(j).name, sum(algo_stats.consensus_error~=0));
-       end
-      
-    elseif(strcmp(algo.parameters.train_algo{1}, 'admm'))
-        
-       admm(w) = true;
-       names_admm{w} = s.algorithms.get(i).name;
-       for j = 1:length(s.datasets)
-
-           algo_stats = cell(s.nRuns, 1);
-
-           for z = 1:s.nRuns
-               algo_stats{z} = s.trainedAlgo{j, i, z}{1}.statistics;
-           end
-
-           algo_stats = sum_structs(algo_stats);
-           c = XYPlotContainer();
-           primal_residual{j, 2*(zz-1)+1} = c.store(XYPlot(1:length(algo_stats.r_norm), algo_stats.r_norm, ...
-               'Iteration', 'Norm'));
-           primal_residual{j, 2*(zz-1)+2} = c.store(XYPlot(1:length(algo_stats.eps_pri), algo_stats.eps_pri, ...
-               'Iteration', 'Norm'));
-           
-           c = XYPlotContainer();
-           dual_residual{j, 2*(zz-1)+1} = c.store(XYPlot(1:length(algo_stats.s_norm), algo_stats.s_norm, ...
-               'Iteration', 'Norm'));
-           c = XYPlotContainer();
-           dual_residual{j, 2*(zz-1)+2} = c.store(XYPlot(1:length(algo_stats.eps_dual), algo_stats.eps_dual, ...
-               'Iteration', 'Norm'));
-           
-           c = XYPlotContainer();
-           dual_residual{j, 2*(zz-1)+1} = c.store(XYPlot(1:length(algo_stats.s_norm), algo_stats.s_norm, ...
-               'Iteration', 'Norm'));
-           c = XYPlotContainer();
-           dual_residual{j, 2*(zz-1)+2} = c.store(XYPlot(1:length(algo_stats.eps_dual), algo_stats.eps_dual, ...
-               'Iteration', 'Norm'));
- 
-           fprintf('Average number of ADMM iterations on dataset %s: %i\n', s.datasets.get(j).name, sum(algo_stats.r_norm~=0));
-
-           
-       end
-       
-       zz = zz + 2;
-
-    end
-    
-    w = w + 1;
-   
-end
-
-cons_error(:, ~consensus) = [];
-names_consensus(~consensus) = [];
-
-primal_residual(:, zz+1:end) = [];
-dual_residual(:, zz+1:end) = [];
-cons_steps(:, ~admm) = [];
-names_admm(~admm) = [];
-
+xy_container = XYPlotContainer();
 p = FormatAsMultiplePlots();
 
-if(~isempty(names_consensus))
-    p.displayOnConsole(cons_error, s.datasets.getNames(), names_consensus, false);
+fprintf('Information on data-distributed RVFL: see plots.\n\n');
+
+% Filter by algorithms
+sq = StatisticsQuery(s);
+sq = sq.filterByAlgorithmClass({'DataDistributedRVFL', 'SerialDataDistributedRVFL'}).averageByRun();
+
+% Print information on consensus steps
+sq_cons = sq.filterByBooleanCondition(@(x) strcmp(x.parameters.train_algo{1}, 'consensus') && (x.parameters.consensus_max_steps > 0)). ...
+     query({'consensus_error'});
+if(~isempty(sq_cons.query_result))
+    fprintf('Average number of consensus iterations (train_algo = ''consensus''):\n');
+    disptable(sum(sq_cons.convertToMatrix().query_result ~= 0, 3), sq_cons.a_names, sq_cons.d_names);
+    
+    % Plot consensus error
+    cons_plot = cellfun(@(x) xy_container.store(XYPlot(1:length(x), x, 'Iteration', 'Disagreement')), ...
+        sq_cons.query_result, 'UniformOutput', false);
+    p.displayOnConsole(cons_plot, sq_cons.d_names, sq_cons.a_names, false);
+    
 end
-if(~isempty(names_admm))
-    legend1 = cell(length(names_admm)*2, 1);
-    legend2 = cell(length(names_admm)*2, 1);
-    for ii = 1:length(names_admm)
-        legend1{2*(ii-1)+1} = sprintf('%s - Primal Residual', names_admm{ii});
-        legend1{2*(ii-1)+2} = sprintf('%s - Epsilon', names_admm{ii});
-        legend2{2*(ii-1)+1} = sprintf('%s - Dual Residual', names_admm{ii});
-        legend2{2*(ii-1)+2} = sprintf('%s - Epsilon', names_admm{ii});
+
+% Print information on ADMM steps
+sq_admm = sq.filterByBooleanCondition(@(x) strcmp(x.parameters.train_algo{1}, 'admm')).averageByRun();;
+sq_admm_steps = sq_admm.query({'r_norm'}).convertToMatrix();
+if(~isempty(sq_admm.query_result))
+    fprintf('Average number of ADMM iterations (train_algo = ''admm''):\n');
+    disptable(sum(sq_admm.query_result ~= 0, 3), sq_admm.a_names, sq_admm.d_names)
+end
+
+% Plot information on ADMM
+r_norm = sq_admm.query({'r_norm'}).convertToMatrix().query_result;
+s_norm = sq_admm.query({'s_norm'}).convertToMatrix().query_result;
+eps_pri = sq_admm.query({'eps_pri'}).convertToMatrix().query_result;
+eps_dual = sq_admm.query({'eps_dual'}).convertToMatrix().query_result;
+admm_steps = size(r_norm, 3);
+
+prim_plot = cell(length(sq_admm.d_names), length(sq_admm.a_names)*2);
+dual_plot = cell(length(sq_admm.d_names), length(sq_admm.a_names)*2);
+legend_pri = cell(length(sq_admm.a_names)*2, 1);
+legend_dual = cell(length(sq_admm.a_names)*2, 1);
+
+for i = 1:length(sq_admm.a_names)
+    for j = 1:length(sq_admm.d_names)
+        prim_plot{j, 2*(i-1)+1} = xy_container.store(XYPlot(1:admm_steps, squeeze(r_norm(j, i, :)), ...
+            'Iteration', 'Norm'));
+        prim_plot{j, 2*(i-1)+2} = xy_container.store(XYPlot(1:admm_steps, squeeze(eps_pri(j, i, :)), ...
+            'Iteration', 'Norm'));
+        dual_plot{j, 2*(i-1)+1} = xy_container.store(XYPlot(1:admm_steps, squeeze(s_norm(j, i, :)), ...
+            'Iteration', 'Norm'));
+        dual_plot{j, 2*(i-1)+2} = xy_container.store(XYPlot(1:admm_steps, squeeze(eps_dual(j, i, :)), ...
+            'Iteration', 'Norm'));
     end
-    p.displayOnConsole(primal_residual, s.datasets.getNames(), legend1, false);
-    p.displayOnConsole(dual_residual, s.datasets.getNames(), legend2, false);
+    legend_pri{2*(i-1)+1} = sprintf('%s - Primal Residual', sq_admm.a_names{i});
+    legend_pri{2*(i-1)+2} = sprintf('%s - Epsilon', sq_admm.a_names{i});
+    legend_dual{2*(i-1)+1} = sprintf('%s - Dual Residual', sq_admm.a_names{i});
+    legend_dual{2*(i-1)+2} = sprintf('%s - Epsilon', sq_admm.a_names{i});
 end
-       
+
+p.displayOnConsole(prim_plot, sq_admm.d_names, legend_pri, false);
+p.displayOnConsole(dual_plot, sq_admm.d_names, legend_dual, false);

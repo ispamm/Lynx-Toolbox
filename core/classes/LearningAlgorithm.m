@@ -146,6 +146,7 @@ classdef LearningAlgorithm < Parameterized
         function tp = getParameters(obj)
             % Get the training parameters struct
             if(~isempty(obj.model))
+                warning('off', 'catstruct:DuplicatesFound');
                 tp = catstruct(obj.model.getParameters(), obj.parameters);
             else
                 tp = obj.parameters;
