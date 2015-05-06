@@ -30,7 +30,7 @@ end
 
 % Add the folders of the toolbox to the global path
 fprintf('Adding toolbox to path...\n');
-folders = {'configs', 'core', 'functionalities', 'help', 'lib', 'scripts', 'tests', 'tmp'};
+folders = {'configs', 'core', 'functionalities', 'help', 'lib', 'scripts', 'tests', 'tmp', 'datasets'};
 addpath(pwd);
 for n = 1:length(folders)
     addpath(genpath(fullfile(pwd, folders{n})));
