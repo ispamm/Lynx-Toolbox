@@ -24,11 +24,22 @@ classdef LibraryHandler
                 if(strcmpi(result, 'Y'))
                     fprintf('Downloading toolbox... (may take some minutes)');
                     fprintf('\n');
-                    tmpFile = fullfile(XmlConfiguration.readConfigValue('root_folder'), 'tmp/tmp.zip');
+                    [~, ~, ext] = fileparts(lib_url);
+                    if(strcmp(ext, '.zip'))
+                        tmpFile = fullfile(XmlConfiguration.readConfigValue('root_folder'), 'tmp/tmp.zip');
+                    elseif(strcmp(ext, '.gz'))
+                        tmpFile = fullfile(XmlConfiguration.readConfigValue('root_folder'), 'tmp/tmp.tar.gz');
+                    else
+                        error('Lynx:FatalError:ToolboxDownloadError', 'Unrecognized extension');
+                    end
                     [~, status] = urlwrite(lib_url, tmpFile);
                     if(status)
                         libFolder = fullfile(XmlConfiguration.readConfigValue('root_folder'), 'lib');
-                        filenames = unzip(tmpFile, libFolder);
+                        if(strcmp(ext, '.zip'))
+                            filenames = unzip(tmpFile, libFolder);
+                        elseif(strcmp(ext, '.gz'))
+                            filenames = untar(tmpFile, libFolder);
+                        end
                         [fold, ~, ~] = fileparts(filenames{end});
                         fold = fold(length(libFolder)+1:end); % Remove toolbox path
                         fold = regexp(fold, [filesep,filesep,'([^\\]*)','.*'], 'tokens'); % Extract first folder
