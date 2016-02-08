@@ -3,7 +3,7 @@ function download_datasets()
 %   This function downloads additional datasets from the author's webpage.
 %   The process is fully automatic.
 
-url = 'http://ispac.ing.uniroma1.it/scardapane/lynxdatasets/';
+url = 'http://ispac.diet.uniroma1.it/scardapane/lynxdatasets/';
 
 clc;
 
