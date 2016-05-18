@@ -22,7 +22,7 @@
   Additional datasets converted according to the toolbox's conventions can
   be downloaded from the author's website:
 
-  	http://ispac.ing.uniroma1.it/scardapane/software/lynx
+  	http://ispac.diet.uniroma1.it/scardapane/software/lynx
 
   Documentation
   -------------
