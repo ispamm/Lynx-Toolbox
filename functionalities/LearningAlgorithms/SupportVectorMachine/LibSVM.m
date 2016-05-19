@@ -85,7 +85,7 @@ classdef LibSVM < LearningAlgorithm
         end
         
         function res = checkForPrerequisites(obj)
-            res = LibraryHandler.checkAndInstallLibrary('libsvm', 'LibSVM', 'http://www.csie.ntu.edu.tw/~cjlin/cgi-bin/libsvm.cgi?+http://www.csie.ntu.edu.tw/~cjlin/libsvm+zip', ...
+            res = LibraryHandler.checkAndInstallLibrary('libsvm', 'LibSVM', 'https://github.com/cjlin1/libsvm/archive/v321.zip', ...
                 'LibSVM training algorithm');
         end
         
